@@ -2,15 +2,46 @@ import logo from './logo.svg';
 import './App.css';
 import {BrowserRouter as Router,Routes,Route} from 'react-router-dom'
 import Uploadfile from './Uploadfile';
+import Login from './login';
+import Register from './register';
+import ForgotPassword from './resetpassword';
+import Dashboard from './superadmin/dashboard';
+import UserManagement from './superadmin/usermanagement';
+import FileManagement from './superadmin/filemanagement';
+import AdminLayout from './superadmin/layout';
+import SuperAdminLogin from './superadmin/login';
+import SuperAdminRegister from './superadmin/register';
+import SuperAdminReset from './superadmin/reset';
+import FilesPage from './files';
+import Sidebar from './components/sidebar';
 function App() {
   return (
     <Router>
-<Routes>
-<Route path='/' element={<Uploadfile/>}/>
+    <Routes>
+      {/* Public routes */}
+      <Route path='/' element={<Login />} />
+      
+      <Route path='/register' element={<Register />} />
+      <Route path='/resetpassword' element={<ForgotPassword />} />
+      
+   
+   <Route element={<Sidebar/>}>
+   <Route path='/upload' element={<Uploadfile />} />
+   <Route path='/files' element={<FilesPage/>}/>
+   </Route>
 
-</Routes>
-
-    </Router>
+      <Route path='/adminreset' element={<SuperAdminReset/>}/>
+      <Route path='/adminregister' element={<SuperAdminRegister/>}/>
+      <Route path='/adminlogin' element={<SuperAdminLogin/>}/>
+      {/* Admin nested routes */}
+      <Route path='/admin' element={<AdminLayout />}>
+        <Route path='dashboard' element={<Dashboard />} />
+        <Route path='usermanagement' element={<UserManagement />} />
+        <Route path='filemanagement' element={<FileManagement />} />
+     
+      </Route>
+    </Routes>
+  </Router>
   );
 }
 
