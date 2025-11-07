@@ -138,9 +138,13 @@ if(e?.response?.data?.error){
       <div className="relative w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           <div className="bg-gradient-to-r from-purple-600 to-purple-800 px-8 py-10 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full mb-4">
-              <Lock className="w-8 h-8 text-purple-600" />
-            </div>
+          <div className="flex justify-center mb-6">
+      <img
+        src="./logo.jpg"
+        alt="Company Logo"
+        className="w-24 h-24 rounded-full shadow-md object-cover ring-4 ring-white bg-white"
+      />
+    </div>
             <h1 className="text-2xl font-bold text-white mb-2">Reset Password</h1>
             <p className="text-purple-100 text-sm">Enter your details to reset your password</p>
           </div>

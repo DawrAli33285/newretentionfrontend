@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Upload, Download, File, Search, Trash2, Filter, FileText, Image, Video, Music, Loader2, AlertCircle } from 'lucide-react';
+import { Upload, Download, File, Search, Trash2, Filter, FileText, Image, Video, Music, Loader2, AlertCircle, CreditCard } from 'lucide-react';
 import { BASE_URL } from '../baseurl';
+import axios from 'axios'
 
 export default function FileManagement({ users }) {
   const [files, setFiles] = useState([]);
@@ -164,8 +165,32 @@ export default function FileManagement({ users }) {
     await handleUpdateFile(fileId, { paid: !currentStatus });
   };
 
+  const sendPasscode=async(file)=>{
+    try{
+let response=await axios.post(`${BASE_URL}/sendPassCode`,{id:file._id,email:file.user.email})
+setFiles(prev => {
+  return prev.map(f =>
+    f._id === file._id
+      ? { ...f, paid: true }
+      : f
+  );
+});
+alert("Pass code sent sucessfully")
+}catch(e){
+if(e?.response?.data?.error){
+  setError(e?.response?.data?.error)
+}else{
+  setError("Error while trying to send pass code")
+}
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+  <>
+  
+  
+
+  <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">File Management</h1>
@@ -288,6 +313,13 @@ export default function FileManagement({ users }) {
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center justify-end gap-2">
+                             {file?.paid==false? <button
+                                  onClick={()=>sendPasscode(file)}
+                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  title="Delete"
+                                >
+                                  <CreditCard className="w-5 h-5" />
+                                </button>:''}
                                 <button
                                   onClick={() => handleDownload(file.output, file.file)}
                                   disabled={!file.output}
@@ -331,5 +363,6 @@ export default function FileManagement({ users }) {
         </div>
       </div>
     </div>
+  </>
   );
 }

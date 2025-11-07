@@ -26,12 +26,12 @@ function PaymentPopup({ isOpen, onClose, onDownload }) {
           </div>
           
           <div className="flex flex-col gap-3">
-            <button
+            {/* <button
               onClick={onDownload}
               className="w-full px-6 py-3 rounded-full font-semibold text-white bg-blue-500 hover:bg-blue-600 transition-all duration-300"
             >
               Proceed to Payment
-            </button>
+            </button> */}
             <button
               onClick={onClose}
               className="w-full px-6 py-3 rounded-full font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-all duration-300"

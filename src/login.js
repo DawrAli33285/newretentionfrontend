@@ -55,6 +55,13 @@ if(e?.response?.data?.error){
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-8">
       <div className="w-full max-w-md">
+      <div className="flex justify-center mb-6">
+      <img
+        src="./logo.jpg"
+        alt="Company Logo"
+        className="w-24 h-24 rounded-full shadow-md object-cover ring-4 ring-white bg-white"
+      />
+    </div>
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h2>
           <p className="text-gray-600 mb-6">Login to your account</p>
