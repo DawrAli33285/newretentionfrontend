@@ -1,30 +1,65 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, FileText, Download, Upload, TrendingUp, Activity, DollarSign, Clock, ArrowUp, ArrowDown, Database, Zap } from 'lucide-react';
+import { BASE_URL } from '../baseurl';
+import {Link, useNavigate} from 'react-router-dom'
 
-export default function Dashboard({ users, files }) {
-  // Calculate analytics
-  const totalUsers = users?.length || 0;
-  const activeUsers = users?.filter(u => u?.status === 'active')?.length || 0;
-  const totalFiles = files?.length || 0;
-  const totalStorage = files?.reduce((sum, f) => sum + (f.size || 0), 0) || 0;
-  const storageInMB = (totalStorage / (1024 * 1024)).toFixed(2);
+export default function Dashboard() {
+  const [stats, setStats] = useState({
+    totalUsers: { count: 0, growth: 0 },
+    activeUsers: { count: 0, growth: 0 },
+    totalFiles: { count: 0, growth: 0 },
+    storageUsed: { size: '0.00', growth: 0 }
+  });
+  const [monthlyGrowth, setMonthlyGrowth] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data for charts
-  const recentActivity = [
-    { user: 'john@example.com', action: 'Uploaded file', time: '2 hours ago', type: 'upload' },
-    { user: 'sarah@example.com', action: 'Downloaded file', time: '3 hours ago', type: 'download' },
-    { user: 'mike@example.com', action: 'Registered', time: '5 hours ago', type: 'user' },
-    { user: 'emma@example.com', action: 'Updated profile', time: '1 day ago', type: 'user' },
-  ];
+  const navigate=useNavigate()
 
-  const monthlyStats = [
-    { month: 'Jan', users: 45, files: 120 },
-    { month: 'Feb', users: 52, files: 145 },
-    { month: 'Mar', users: 61, files: 168 },
-    { month: 'Apr', users: 73, files: 195 },
-    { month: 'May', users: 89, files: 230 },
-    { month: 'Jun', users: totalUsers, files: totalFiles },
-  ];
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch(`${BASE_URL}/dashboard/stats`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setStats(data.stats);
+        setMonthlyGrowth(data.monthlyGrowth);
+        setRecentActivity(data.recentActivity);
+      } else {
+        setError('Failed to load dashboard data');
+      }
+    } catch (e) {
+      console.error('Error fetching dashboard data:', e);
+      setError('Failed to load dashboard data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getTimeAgo = (dateString) => {
+    const now = new Date();
+    const past = new Date(dateString);
+    const diffInSeconds = Math.floor((now - past) / 1000);
+
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    return `${Math.floor(diffInSeconds / 2592000)} months ago`;
+  };
+
+  const getActivityIcon = (action) => {
+    if (action.includes('Upload')) return { icon: Upload, bg: 'bg-blue-100', color: 'text-blue-600' };
+    if (action.includes('Download')) return { icon: Download, bg: 'bg-green-100', color: 'text-green-600' };
+    return { icon: Users, bg: 'bg-purple-100', color: 'text-purple-600' };
+  };
 
   const StatCard = ({ icon: Icon, title, value, change, trend, gradient, iconBg }) => (
     <div className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
@@ -48,6 +83,36 @@ export default function Dashboard({ users, files }) {
     </div>
   );
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 p-8 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+          <p className="mt-6 text-gray-600 text-lg font-medium">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 p-8 flex items-center justify-center">
+        <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-8 max-w-md">
+          <p className="text-red-600 text-lg mb-4">{error}</p>
+          <button 
+            onClick={fetchDashboardData}
+            className="w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition-colors font-medium"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const maxUsers = Math.max(...monthlyGrowth.map(m => m.users), 1);
+  const maxFiles = Math.max(...monthlyGrowth.map(m => m.files), 1);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 p-8">
       <div className="max-w-7xl mx-auto">
@@ -67,36 +132,36 @@ export default function Dashboard({ users, files }) {
           <StatCard 
             icon={Users}
             title="Total Users"
-            value={totalUsers}
-            change="+12%"
-            trend="up"
+            value={stats.totalUsers.count}
+            change={`${stats.totalUsers.growth >= 0 ? '+' : ''}${stats.totalUsers.growth}%`}
+            trend={stats.totalUsers.growth >= 0 ? 'up' : 'down'}
             gradient="bg-gradient-to-br from-blue-400 to-blue-600"
             iconBg="bg-gradient-to-br from-blue-500 to-blue-600 text-white"
           />
           <StatCard 
             icon={Activity}
             title="Active Users"
-            value={activeUsers}
-            change="+8%"
-            trend="up"
+            value={stats.activeUsers.count}
+            change={`${stats.activeUsers.growth >= 0 ? '+' : ''}${stats.activeUsers.growth}%`}
+            trend={stats.activeUsers.growth >= 0 ? 'up' : 'down'}
             gradient="bg-gradient-to-br from-green-400 to-green-600"
             iconBg="bg-gradient-to-br from-green-500 to-green-600 text-white"
           />
           <StatCard 
             icon={FileText}
             title="Total Files"
-            value={totalFiles}
-            change="+23%"
-            trend="up"
+            value={stats.totalFiles.count}
+            change={`${stats.totalFiles.growth >= 0 ? '+' : ''}${stats.totalFiles.growth}%`}
+            trend={stats.totalFiles.growth >= 0 ? 'up' : 'down'}
             gradient="bg-gradient-to-br from-purple-400 to-purple-600"
             iconBg="bg-gradient-to-br from-purple-500 to-purple-600 text-white"
           />
           <StatCard 
             icon={Database}
             title="Storage Used"
-            value={`${storageInMB}MB`}
-            change={`${((storageInMB / 1000) * 100).toFixed(0)}%`}
-            trend="up"
+            value={`${stats.storageUsed.size}MB`}
+            change={`${stats.storageUsed.growth >= 0 ? '+' : ''}${stats.storageUsed.growth}%`}
+            trend={stats.storageUsed.growth >= 0 ? 'up' : 'down'}
             gradient="bg-gradient-to-br from-orange-400 to-orange-600"
             iconBg="bg-gradient-to-br from-orange-500 to-orange-600 text-white"
           />
@@ -120,33 +185,37 @@ export default function Dashboard({ users, files }) {
               </div>
             </div>
             <div className="space-y-5">
-              {monthlyStats.map((stat, idx) => (
-                <div key={idx} className="group">
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm font-semibold text-gray-700 w-12">{stat.month}</span>
-                    <div className="flex-1 space-y-2">
-                      <div className="relative">
-                        <div className="bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                          <div 
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out group-hover:from-blue-600 group-hover:to-blue-700" 
-                            style={{ width: `${Math.min((stat.users / (totalUsers || 1)) * 100, 100)}%` }}
-                          ></div>
+              {monthlyGrowth.length === 0 ? (
+                <p className="text-center text-gray-500 py-8">No data available</p>
+              ) : (
+                monthlyGrowth.map((stat, idx) => (
+                  <div key={idx} className="group">
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm font-semibold text-gray-700 w-12">{stat.month}</span>
+                      <div className="flex-1 space-y-2">
+                        <div className="relative">
+                          <div className="bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                            <div 
+                              className="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out group-hover:from-blue-600 group-hover:to-blue-700" 
+                              style={{ width: `${Math.min((stat.users / maxUsers) * 100, 100)}%` }}
+                            ></div>
+                          </div>
+                          <span className="absolute -top-6 right-0 text-xs font-medium text-gray-600">{stat.users}</span>
                         </div>
-                        <span className="absolute -top-6 right-0 text-xs font-medium text-gray-600">{stat.users}</span>
-                      </div>
-                      <div className="relative">
-                        <div className="bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                          <div 
-                            className="bg-gradient-to-r from-purple-500 to-purple-600 h-2.5 rounded-full transition-all duration-500 ease-out group-hover:from-purple-600 group-hover:to-purple-700" 
-                            style={{ width: `${Math.min((stat.files / (totalFiles || 1)) * 100, 100)}%` }}
-                          ></div>
+                        <div className="relative">
+                          <div className="bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                            <div 
+                              className="bg-gradient-to-r from-purple-500 to-purple-600 h-2.5 rounded-full transition-all duration-500 ease-out group-hover:from-purple-600 group-hover:to-purple-700" 
+                              style={{ width: `${Math.min((stat.files / maxFiles) * 100, 100)}%` }}
+                            ></div>
+                          </div>
+                          <span className="absolute -top-6 right-0 text-xs font-medium text-gray-600">{stat.files}</span>
                         </div>
-                        <span className="absolute -top-6 right-0 text-xs font-medium text-gray-600">{stat.files}</span>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
@@ -154,61 +223,33 @@ export default function Dashboard({ users, files }) {
           <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 p-8 border border-gray-100">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900">Recent Activity</h3>
-              <button className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors">
-                View All
-              </button>
+              
             </div>
             <div className="space-y-4">
-              {recentActivity.map((activity, idx) => (
-                <div key={idx} className="group flex items-start gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors">
-                  <div className={`p-2.5 rounded-xl ${
-                    activity.type === 'upload' ? 'bg-blue-100' :
-                    activity.type === 'download' ? 'bg-green-100' : 'bg-purple-100'
-                  }`}>
-                    {activity.type === 'upload' ? <Upload className="w-4 h-4 text-blue-600" /> :
-                     activity.type === 'download' ? <Download className="w-4 h-4 text-green-600" /> :
-                     <Users className="w-4 h-4 text-purple-600" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{activity.user}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{activity.action}</p>
-                  </div>
-                  <span className="text-xs text-gray-400 whitespace-nowrap">{activity.time}</span>
-                </div>
-              ))}
+              {recentActivity.length === 0 ? (
+                <p className="text-center text-gray-500 py-8">No recent activity</p>
+              ) : (
+                recentActivity.map((activity, idx) => {
+                  const { icon: Icon, bg, color } = getActivityIcon(activity.action);
+                  return (
+                    <div key={idx} className="group flex items-start gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                      <div className={`p-2.5 rounded-xl ${bg}`}>
+                        <Icon className={`w-4 h-4 ${color}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{activity.email}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{activity.action}</p>
+                      </div>
+                      <span className="text-xs text-gray-400 whitespace-nowrap">{getTimeAgo(activity.time)}</span>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 p-8 border border-gray-100">
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="group relative overflow-hidden flex items-center gap-4 p-5 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl transition-all duration-300 border border-blue-200">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-blue-300 opacity-20 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-500"></div>
-              <div className="bg-blue-500 p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform duration-300">
-                <Users className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm font-semibold text-gray-900">Add New User</span>
-            </button>
-            
-            <button className="group relative overflow-hidden flex items-center gap-4 p-5 bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-xl transition-all duration-300 border border-green-200">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-green-300 opacity-20 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-500"></div>
-              <div className="bg-green-500 p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform duration-300">
-                <Upload className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm font-semibold text-gray-900">Upload Files</span>
-            </button>
-            
-            <button className="group relative overflow-hidden flex items-center gap-4 p-5 bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl transition-all duration-300 border border-purple-200">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-purple-300 opacity-20 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-500"></div>
-              <div className="bg-purple-500 p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform duration-300">
-                <TrendingUp className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm font-semibold text-gray-900">View Reports</span>
-            </button>
-          </div>
-        </div>
+     
       </div>
     </div>
   );
