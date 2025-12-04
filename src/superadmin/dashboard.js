@@ -70,12 +70,9 @@ export default function Dashboard() {
           <div className={`${iconBg} p-3 rounded-xl shadow-sm`}>
             <Icon className="w-6 h-6" />
           </div>
-          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
-            trend === 'up' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-          }`}>
-            {trend === 'up' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
-            {change}
-          </div>
+        
+           
+        
         </div>
         <h3 className="text-gray-500 text-sm font-medium mb-1">{title}</h3>
         <p className="text-3xl font-bold text-gray-900">{value}</p>

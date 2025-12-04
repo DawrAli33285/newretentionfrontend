@@ -256,6 +256,13 @@ function FilesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className='flex justify-center items-center text-center'>
+  <img 
+    src="/logo.jpg" 
+    alt="Company Logo" 
+    className="h-20 sm:h-24 lg:h-32 w-auto object-contain"
+  />
+</div>
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Files</h1>
           <p className="text-gray-600">Manage and download your uploaded files</p>

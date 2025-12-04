@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ConfirmationPopup from './components/ConfirmationPopup';
 import PasscodePopup from './components/PasscodePopup';
 import PaymentPopup from './components/PaymentPopup';
+import StripePaymentPopup from './components/StripePaymentPopup';
+
 import { BASE_URL } from './baseurl';
 function UploadFile() {
   const [file, setFile] = useState(null);
@@ -9,6 +11,7 @@ function UploadFile() {
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [sameFile, setSameFile] = useState(null);
+  const [showSampleFormat, setShowSampleFormat] = useState(false);
   
   // Popup states
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -16,9 +19,14 @@ function UploadFile() {
   const [showPasscodePopup, setShowPasscodePopup] = useState(false);
   const [passcodeError, setPasscodeError] = useState('');
   const [isReportLocked, setIsReportLocked] = useState(false);
-  const [correctPasscode,setCorrectPasscode] = useState('DEMO2024'); // In production, this would come from your backend
+  const [correctPasscode,setCorrectPasscode] = useState('DEMO2024');
+  const [recordCount, setRecordCount] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [showStripePayment, setShowStripePayment] = useState(false);
+  const [credits,setCredits]=useState(0)
+  const [originalAmount, setOriginalAmount] = useState(0);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
     const allowedTypes = [
       'text/csv',
@@ -27,10 +35,17 @@ function UploadFile() {
     
     if (selectedFile && allowedTypes.includes(selectedFile.type)) {
       setFile(selectedFile);
+      
+      // Count records in the file
+      const text = await selectedFile.text();
+      const lines = text.trim().split('\n');
+      const count = lines.length - 1; // Subtract header row
+      setRecordCount(count > 0 ? count : 0);
     } else {
       alert('Please upload a CSV or Excel file');
     }
   };
+
 
   const calculateCategoryAverages = () => {
     if (!result || result.length === 0) return [];
@@ -71,39 +86,155 @@ function UploadFile() {
   
   const categoryAverages = calculateCategoryAverages();
 
-  const handleUploadClick = () => {
-    if (!file) return;
-    setShowConfirmation(true);
-  };
+useEffect(()=>{
+getCredits();
+},[])
+
+const getCredits=async()=>{
+  try{
+    let token = localStorage.getItem('token');
+
+    let response = await fetch(`${BASE_URL}/getCurrentCredits`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+    
+    // Convert the response to JSON
+    let data = await response.json();
+    
+    console.log(data);
+    setCredits(data.user.credits)
+    
+  }catch(e){
+    console.log(e.message)
+  }
+}
+
+const handleUploadClick = async () => {
+  if (!file) return;
+  
+  // Get pricing from backend
+  try {
+    let token = localStorage.getItem('token');
+    const response = await fetch(`${BASE_URL}/calculate-price`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ recordCount })
+    });
+    
+    const { totalAmount } = await response.json();
+    
+    // Store original amount before applying credits
+    setOriginalAmount(totalAmount);
+    
+    // Convert credits from dollars to cents for comparison
+    const creditsInCents = credits * 100;
+    
+    // Calculate final amount after applying credits
+    let finalAmount = totalAmount;
+    let creditsToUse = 0;
+    
+    if (creditsInCents > 0) {
+      if (creditsInCents >= totalAmount) {
+        // User has enough credits to cover entire amount
+        creditsToUse = totalAmount / 100; // Convert back to dollars for backend
+        finalAmount = 0;
+      } else {
+        // Use all available credits, pay the difference
+        creditsToUse = credits;
+        finalAmount = totalAmount - creditsInCents;
+      }
+    }
+    
+    setTotalAmount(finalAmount);
+    
+    // If amount is 0, process directly without payment
+    if (finalAmount === 0) {
+      handleFreeProcessing(creditsToUse);
+    } else {
+      setShowConfirmation(true);
+    }
+  } catch (error) {
+    console.error('Error calculating price:', error);
+    alert('Error calculating price');
+  }
+};
+
+const handleFreeProcessing = async (creditsUsed) => {
+  setIsLoading(true);
+  
+  try {
+    const formData = new FormData();
+    formData.append("employeeFile", file);
+    formData.append("creditsUsed", creditsUsed);
+    setSameFile(file);
+
+    let token = localStorage.getItem('token');
+
+    const res = await fetch(`${BASE_URL}/api/enrich`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData
+    });
+    
+    const data = await res.json();
+    setCorrectPasscode(data.passcode);
+    setResult(data.results);
+    setIsReportLocked(false);
+    
+    // Refresh credits
+    await getCredits();
+    
+    alert('File processed successfully using your credits!');
+  } catch (error) {
+    console.error('Upload error:', error);
+    alert('Error uploading file');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleConfirmUpload = async () => {
     setShowConfirmation(false);
+    setShowStripePayment(true);
+  };
+
+
+  const handlePaymentSuccess = async (paymentIntentId) => {
+    setShowStripePayment(false);
     setIsLoading(true);
     
     try {
       const formData = new FormData();
       formData.append("employeeFile", file);
-      setSameFile(file); 
-
+      formData.append("paymentIntentId", paymentIntentId);
+      setSameFile(file);
+  
       let token = localStorage.getItem('token');
-
+  
       const res = await fetch(`${BASE_URL}/api/enrich`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`, 
-        
+          'Authorization': `Bearer ${token}`,
         },
         body: formData
       });
       
-    
       const data = await res.json();
-      console.log("DATA")
-      console.log(data)
-      setCorrectPasscode(data.passcode)
+      setCorrectPasscode(data.passcode);
       setResult(data.results);
-      setIsReportLocked(true);
-      setShowPaymentPopup(true);
+      setIsReportLocked(false);
+      
+      // Refresh credits after payment
+      await getCredits();
     } catch (error) {
       console.error('Upload error:', error);
       alert('Error uploading file');
@@ -111,6 +242,8 @@ function UploadFile() {
       setIsLoading(false);
     }
   };
+
+
 
   const getTopCategory = (employee) => {
     if (!employee) return null;
@@ -190,6 +323,137 @@ function UploadFile() {
       setPasscodeError('Invalid passcode. Please try again.');
     }
   };
+
+
+  const SampleFormatModal = () => {
+    if (!showSampleFormat) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-fadeIn">
+          <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-900">Sample File Format</h2>
+            <button
+              onClick={() => setShowSampleFormat(false)}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Required Columns:</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Your CSV file should include the following columns (in any order):
+              </p>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4 mb-6 overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-300">
+                    <th className="text-left py-2 px-3 font-semibold text-gray-700">Column Name</th>
+                    <th className="text-left py-2 px-3 font-semibold text-gray-700">Description</th>
+                    <th className="text-left py-2 px-3 font-semibold text-gray-700">Example</th>
+                  </tr>
+                </thead>
+                <tbody>
+  <tr className="border-b border-gray-200">
+    <td className="py-2 px-3 font-mono text-xs bg-white">Employee Name (Last Suffix, First MI)</td>
+    <td className="py-2 px-3">Full name in format: Last, First MI</td>
+    <td className="py-2 px-3 text-gray-600">Abernathy, Rita K.</td>
+  </tr>
+  <tr className="border-b border-gray-200">
+    <td className="py-2 px-3 font-mono text-xs bg-white">E-mail Address</td>
+    <td className="py-2 px-3">Work email</td>
+    <td className="py-2 px-3 text-gray-600">rabernathy@company.org</td>
+  </tr>
+  <tr className="border-b border-gray-200">
+    <td className="py-2 px-3 font-mono text-xs bg-white">Home Phone (Formatted)</td>
+    <td className="py-2 px-3">Contact number with formatting</td>
+    <td className="py-2 px-3 text-gray-600">(317) 752-2091</td>
+  </tr>
+  <tr className="border-b border-gray-200">
+    <td className="py-2 px-3 font-mono text-xs bg-white">Company Name</td>
+    <td className="py-2 px-3">Employer company name</td>
+    <td className="py-2 px-3 text-gray-600">Acme Corporation</td>
+  </tr>
+  <tr className="border-b border-gray-200">
+    <td className="py-2 px-3 font-mono text-xs bg-white">Date of Birth</td>
+    <td className="py-2 px-3">Employee birth date</td>
+    <td className="py-2 px-3 text-gray-600">01/15/1985</td>
+  </tr>
+  <tr className="border-b border-gray-200">
+    <td className="py-2 px-3 font-mono text-xs bg-white">Last Hire Date</td>
+    <td className="py-2 px-3">Most recent hire date</td>
+    <td className="py-2 px-3 text-gray-600">03/20/2020</td>
+  </tr>
+  <tr className="border-b border-gray-200">
+    <td className="py-2 px-3 font-mono text-xs bg-white">Job Title</td>
+    <td className="py-2 px-3">Current position</td>
+    <td className="py-2 px-3 text-gray-600">Marketing Manager</td>
+  </tr>
+  <tr className="border-b border-gray-200">
+    <td className="py-2 px-3 font-mono text-xs bg-white">Department</td>
+    <td className="py-2 px-3">Department name</td>
+    <td className="py-2 px-3 text-gray-600">Marketing</td>
+  </tr>
+  <tr className="border-b border-gray-200">
+    <td className="py-2 px-3 font-mono text-xs bg-white">Employment Status</td>
+    <td className="py-2 px-3">Current status</td>
+    <td className="py-2 px-3 text-gray-600">Active</td>
+  </tr>
+</tbody>
+              </table>
+            </div>
+
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Sample Data Preview:</h3>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 overflow-x-auto">
+                <pre className="text-xs font-mono whitespace-pre">
+{`Employee Number,Employee Name,E-mail Address,Address Line 1,City State Zip,Home Phone
+3321,Abernathy Rita K.,rabernathy@company.org,9790 North 100 West,Fountaintown IN 46130,(317) 752-2091
+7051,Abram Crystal M.,cabram@company.org,4082 Congaree Ln,Indianapolis IN 46235,(317) 640-9743
+8866,Abrams Tina J.,tabrams@company.org,8538 S. Co. Rd. 200 W,Spiceland IN 47385,(765) 524-8688`}
+                </pre>
+              </div>
+            </div>
+
+            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p className="font-semibold text-yellow-900 mb-1">Important Notes:</p>
+                  <ul className="text-sm text-yellow-800 space-y-1 list-disc list-inside">
+                    <li>File must be in CSV or Excel (.xlsx) format</li>
+                    <li>First row should contain column headers</li>
+                    <li>Email addresses are required for analysis</li>
+                    <li>Empty fields are allowed but may affect analysis quality</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 border-t border-gray-200 flex justify-end">
+            <button
+              onClick={() => setShowSampleFormat(false)}
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+
 
   const exportToCSV = () => {
     if (isReportLocked) {
@@ -408,11 +672,40 @@ function UploadFile() {
   return (
     <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 text-center mb-4 sm:mb-6">
-            Employee Engagement Insights
-          </h2>
+      <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6">
+      <div className='flex justify-center items-center text-center mb-4'>
+  <img 
+    src="/logo.jpg" 
+    alt="Company Logo" 
+    className="h-20 sm:h-24 lg:h-32 w-auto object-contain"
+  />
+</div>
+
+{/* Add this credits badge */}
+<div className="flex justify-center mb-4">
+  <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-full px-6 py-2 shadow-lg">
+    <p className="text-white font-semibold text-sm sm:text-base">
+      💰 Available Credits: ${credits.toFixed(2)}
+    </p>
+  </div>
+</div>
+
+  <div className="flex items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+   
+    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 text-center">
+      Employee Engagement Insights
+    </h2>
+  </div>
           
+          <div className="mb-3 flex justify-end">
+            <button
+              onClick={() => setShowSampleFormat(true)}
+              className="text-sm text-blue-600 hover:text-blue-700 underline"
+            >
+              View sample file format
+            </button>
+          </div>
+
           <div 
             className={`border-2 border-dashed rounded-xl p-4 sm:p-6 lg:p-8 text-center mb-4 sm:mb-6 transition-all duration-300 ${
               isDragging 
@@ -479,13 +772,20 @@ function UploadFile() {
       </div>
 
       <ConfirmationPopup
-        isOpen={showConfirmation}
-        onClose={() => setShowConfirmation(false)}
-        onConfirm={handleConfirmUpload}
-        isLoading={isLoading}
-        title="Confirm File Processing"
-        message="Are you sure you want to process this file? The report will be locked until payment is completed."
-      />
+  isOpen={showConfirmation}
+  onClose={() => setShowConfirmation(false)}
+  onConfirm={handleConfirmUpload}
+  isLoading={isLoading}
+  title="Confirm File Processing"
+  message={`
+    Original Amount: $${(originalAmount / 100).toFixed(2)}
+    Available Credits: $${credits.toFixed(2)}
+    ${credits > 0 ? `Credits Applied: $${((originalAmount - totalAmount) / 100).toFixed(2)}` : ''}
+    Amount to Pay: $${(totalAmount / 100).toFixed(2)}
+    
+    Are you sure you want to proceed?
+  `}
+/>
 
       <PaymentPopup
         isOpen={showPaymentPopup}
@@ -502,7 +802,15 @@ function UploadFile() {
         onSubmit={handlePasscodeSubmit}
         error={passcodeError}
       />
+      <StripePaymentPopup
+        isOpen={showStripePayment}
+        onClose={() => setShowStripePayment(false)}
+        onSuccess={handlePaymentSuccess}
+        amount={totalAmount}
+        recordCount={recordCount}
+      />
 
+<SampleFormatModal />
       <style>{`
         @keyframes fadeIn {
           from {

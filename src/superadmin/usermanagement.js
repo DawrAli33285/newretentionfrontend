@@ -5,10 +5,13 @@ export default function UserManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingUser, setEditingUser] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', credits: 0 });
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+const [selectedUserId, setSelectedUserId] = useState(null);
+const [invoiceData, setInvoiceData] = useState({ price: '', description: '' });
 
   useEffect(() => {
     getUsers();
@@ -37,7 +40,7 @@ export default function UserManagement() {
   const handleEdit = (user) => {
     console.log('Editing user:', user);
     setEditingUser(user._id);
-    setFormData({ email: user.email, password: '' });
+    setFormData({ email: user.email, password: '', credits: user.credits || 0 });
   };
 
   const handleSave = async () => {
@@ -46,7 +49,7 @@ export default function UserManagement() {
       console.log(formData);
       
       // Only send password if it's been changed (not empty)
-      const updateData = { email: formData.email };
+      const updateData = { email: formData.email, credits: parseFloat(formData.credits) || 0 };
       if (formData.password) {
         updateData.password = formData.password;
       }
@@ -60,9 +63,9 @@ export default function UserManagement() {
       });
       
       const data = await response.json();
-      setUsers(users.map(u => u._id === editingUser ? { ...u, email: formData.email } : u));
+      setUsers(users.map(u => u._id === editingUser ? { ...u, email: formData.email, credits: formData.credits } : u));
       setEditingUser(null);
-      setFormData({ email: '', password: '' });
+      setFormData({ email: '', password: '', credits: 0 });
       alert('User updated successfully');
     } catch (e) {
       console.error('Error updating user:', e);
@@ -70,6 +73,42 @@ export default function UserManagement() {
     }
   };
 
+
+  const handleSendInvoice = (userId) => {
+    setSelectedUserId(userId);
+    setShowInvoiceModal(true);
+  };
+  
+  const submitInvoice = async () => {
+    try {
+      if (!invoiceData.price || !invoiceData.description) {
+        alert('Please fill in all fields');
+        return;
+      }
+      
+      const response = await fetch(`${BASE_URL}/sendInvoice`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: selectedUserId,
+          price: parseFloat(invoiceData.price),
+          description: invoiceData.description
+        }),
+      });
+      
+      const data = await response.json();
+      setShowInvoiceModal(false);
+      setInvoiceData({ price: '', description: '' });
+      alert('Invoice sent successfully');
+    } catch (e) {
+      console.error('Error sending invoice:', e);
+      alert('Failed to send invoice. Please try again.');
+    }
+  };
+
+  
   const handleAdd = async () => {
     try {
       if (!formData.email || !formData.password) {
@@ -181,6 +220,7 @@ export default function UserManagement() {
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">User</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Email</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Password</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Credits</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Joined</th>
                     <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Actions</th>
                   </tr>
@@ -234,6 +274,19 @@ export default function UserManagement() {
                           )}
                         </td>
                         <td className="px-6 py-4">
+  {editingUser === user._id ? (
+    <input
+      type="number"
+      step="1"
+      value={formData.credits}
+      onChange={(e) => setFormData({...formData, credits: e.target.value})}
+      className="px-3 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
+    />
+  ) : (
+    <span className="text-sm text-gray-600">{user.credits || 0}</span>
+  )}
+</td>
+                        <td className="px-6 py-4">
                           <div className="flex items-center gap-2 text-gray-600">
                             <Calendar className="w-4 h-4" />
                             <span className="text-sm">{formatDate(user.createdAt)}</span>
@@ -263,6 +316,13 @@ export default function UserManagement() {
                               </>
                             ) : (
                               <>
+                              <button
+  onClick={() => handleSendInvoice(user._id)}
+  className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+  title="Send Invoice"
+>
+  <Mail className="w-5 h-5" />
+</button>
                                 <button
                                   onClick={() => handleEdit(user)}
                                   className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -338,6 +398,55 @@ export default function UserManagement() {
           </div>
         </div>
       )}
+
+      {/* Send Invoice Modal */}
+{showInvoiceModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Send Invoice</h2>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Amount ($)</label>
+          <input
+            type="number"
+            step="0.01"
+            value={invoiceData.price}
+            onChange={(e) => setInvoiceData({...invoiceData, price: e.target.value})}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="0.00"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+          <textarea
+            value={invoiceData.description}
+            onChange={(e) => setInvoiceData({...invoiceData, description: e.target.value})}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Invoice description"
+            rows="3"
+          />
+        </div>
+      </div>
+      <div className="flex gap-4 mt-6">
+        <button
+          onClick={submitInvoice}
+          className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Send Invoice
+        </button>
+        <button
+          onClick={() => {
+            setShowInvoiceModal(false);
+            setInvoiceData({ price: '', description: '' });
+          }}
+          className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

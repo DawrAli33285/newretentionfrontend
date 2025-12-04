@@ -14,8 +14,17 @@ import SuperAdminRegister from './superadmin/register';
 import SuperAdminReset from './superadmin/reset';
 import FilesPage from './files';
 import Sidebar from './components/sidebar';
+import {loadStripe} from '@stripe/stripe-js';
+import {Elements} from '@stripe/react-stripe-js';
+import UserInvoiceManagement from './superadmin/invoicemanagement';
+
+
+const stripePromise = loadStripe("pk_test_51OwuO4LcfLzcwwOYdssgGfUSfOgWT1LwO6ewi3CEPewY7WEL9ATqH6WJm3oAcLDA3IgUvVYLVEBMIEu0d8fUwhlw009JwzEYmV");
+
+
 function App() {
   return (
+    <Elements stripe={stripePromise}>
     <Router>
     <Routes>
       {/* Public routes */}
@@ -38,13 +47,13 @@ function App() {
         <Route path='dashboard' element={<Dashboard />} />
         <Route path='usermanagement' element={<UserManagement />} />
         <Route path='filemanagement' element={<FileManagement />} />
+        <Route path='invoicemanagement' element={<UserInvoiceManagement/>}/>
      
       </Route>
     </Routes>
   </Router>
+  </Elements>
   );
 }
 
 export default App;
-
-
