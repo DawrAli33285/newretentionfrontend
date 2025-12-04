@@ -86,14 +86,16 @@ setError("Error occured while trying to register")
       />
     </div>
         <div className="bg-white rounded-2xl shadow-xl p-8">
+        <Link to='/'>
+           
           <button
-            onClick={onSwitchToLogin}
+         
             className="flex items-center text-gray-600 hover:text-gray-800 mb-4"
           >
             <ArrowLeft className="w-5 h-5 mr-1" />
             Back to Login
           </button>
-          
+          </Link>
           <h2 className="text-3xl font-bold text-gray-800 mb-2">Create Account</h2>
           <p className="text-gray-600 mb-6">Sign up to get started</p>
           

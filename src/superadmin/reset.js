@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios'
 import { BASE_URL } from '../baseurl';
+import {Link} from 'react-router-dom'
 import { ToastContainer,toast } from 'react-toastify';
 function SuperAdminReset() {
   const [email, setEmail] = useState('');
@@ -95,12 +96,15 @@ if(e?.response?.data?.error){
               <p className="text-gray-600 mb-6">
                 Your password for <strong>{email}</strong> has been successfully reset. You can now log in with your new password.
               </p>
+              <Link to='/'>
+           
               <button
-                onClick={handleBackToLogin}
+               
                 className="w-full bg-gradient-to-r from-purple-600 to-purple-800 text-white py-3 rounded-lg font-semibold transition-all duration-200 hover:from-purple-700 hover:to-purple-900 transform hover:scale-[1.02]"
               >
                 Back to Login
               </button>
+           </Link>
             </div>
 
             <div className="px-8 pb-10">
@@ -150,14 +154,16 @@ if(e?.response?.data?.error){
           </div>
 
           <div className="px-8 py-10">
+          <Link to='/'>
+           
             <button 
-              onClick={handleBackToLogin}
+             
               className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
             </button>
-
+</Link>
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
