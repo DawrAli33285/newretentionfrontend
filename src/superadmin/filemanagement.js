@@ -260,6 +260,7 @@ if(e?.response?.data?.error){
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">File Name</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">User</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Passcode</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Records</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Upload Date</th>
                         <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Actions</th>
@@ -294,6 +295,11 @@ if(e?.response?.data?.error){
                                 {file.passcode || 'N/A'}
                               </span>
                             </td>
+                            <td className="px-6 py-4">
+  <span className="text-sm text-gray-600 font-medium">
+    {file.recordCount || '0'}
+  </span>
+</td>
                             <td className="px-6 py-4">
                               <button
                                 onClick={() => togglePaidStatus(file._id, file.paid)}

@@ -36,15 +36,53 @@ function UploadFile() {
     if (selectedFile && allowedTypes.includes(selectedFile.type)) {
       setFile(selectedFile);
       
-      // Count records in the file
-      const text = await selectedFile.text();
-      const lines = text.trim().split('\n');
-      const count = lines.length - 1; // Subtract header row
-      setRecordCount(count > 0 ? count : 0);
+      // Count records with Employee Name in the file
+      try {
+        const text = await selectedFile.text();
+        const lines = text.trim().split('\n');
+        
+        if (lines.length <= 1) {
+          setRecordCount(0);
+          return;
+        }
+        
+        // Get header row and find Employee Name column index
+        const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
+        const employeeNameIndex = headers.findIndex(h => 
+          h.toLowerCase().includes('employee name')
+        );
+        
+        if (employeeNameIndex === -1) {
+          alert('Error: Could not find "Employee Name" column in the file');
+          setFile(null);
+          setRecordCount(0);
+          return;
+        }
+        
+        // Count rows that have a non-empty Employee Name
+        let validCount = 0;
+        for (let i = 1; i < lines.length; i++) {
+          const columns = lines[i].split(',');
+          const employeeName = columns[employeeNameIndex]?.trim().replace(/['"]/g, '');
+          
+          if (employeeName && employeeName.length > 0) {
+            validCount++;
+          }
+        }
+        
+        setRecordCount(validCount);
+      } catch (error) {
+        console.error('Error parsing file:', error);
+        alert('Error reading file. Please ensure it is a valid CSV file.');
+        setFile(null);
+        setRecordCount(0);
+      }
     } else {
       alert('Please upload a CSV or Excel file');
     }
   };
+
+  
 
 
   const calculateCategoryAverages = () => {
@@ -99,7 +137,7 @@ const getCredits=async()=>{
       headers: {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
-      }
+      } 
     });
     
     // Convert the response to JSON
@@ -115,8 +153,13 @@ const getCredits=async()=>{
 
 const handleUploadClick = async () => {
   if (!file) return;
-  
-  // Get pricing from backend
+
+  // Add this validation
+  if (recordCount === 0) {
+    alert('No valid employee records found in the file. Please ensure your file contains records with Employee Names.');
+    return;
+  }
+
   try {
     let token = localStorage.getItem('token');
     const response = await fetch(`${BASE_URL}/calculate-price`, {
@@ -130,23 +173,18 @@ const handleUploadClick = async () => {
     
     const { totalAmount } = await response.json();
     
-    // Store original amount before applying credits
     setOriginalAmount(totalAmount);
     
-    // Convert credits from dollars to cents for comparison
     const creditsInCents = credits * 100;
     
-    // Calculate final amount after applying credits
     let finalAmount = totalAmount;
     let creditsToUse = 0;
     
     if (creditsInCents > 0) {
       if (creditsInCents >= totalAmount) {
-        // User has enough credits to cover entire amount
-        creditsToUse = totalAmount / 100; // Convert back to dollars for backend
+        creditsToUse = totalAmount / 100;
         finalAmount = 0;
       } else {
-        // Use all available credits, pay the difference
         creditsToUse = credits;
         finalAmount = totalAmount - creditsInCents;
       }
@@ -154,7 +192,6 @@ const handleUploadClick = async () => {
     
     setTotalAmount(finalAmount);
     
-    // If amount is 0, process directly without payment
     if (finalAmount === 0) {
       handleFreeProcessing(creditsToUse);
     } else {
@@ -166,12 +203,66 @@ const handleUploadClick = async () => {
   }
 };
 
+
+// const handleUploadClick = async () => {
+//   if (!file) return;
+
+//   try {
+//     let token = localStorage.getItem('token');
+//     const response = await fetch(`${BASE_URL}/calculate-price`, {
+//       method: 'POST',
+//       headers: {
+//         'Authorization': `Bearer ${token}`,
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify({ recordCount })
+//     });
+    
+//     const { totalAmount } = await response.json();
+    
+  
+//     setOriginalAmount(totalAmount);
+    
+   
+//     const creditsInCents = credits * 100;
+    
+//     let finalAmount = totalAmount;
+//     let creditsToUse = 0;
+    
+//     if (creditsInCents > 0) {
+//       if (creditsInCents >= totalAmount) {
+      
+//         creditsToUse = totalAmount / 100;
+//         finalAmount = 0;
+//       } else {
+        
+//         creditsToUse = credits;
+//         finalAmount = totalAmount - creditsInCents;
+//       }
+//     }
+    
+//     setTotalAmount(finalAmount);
+    
+  
+//     if (finalAmount === 0) {
+//       handleFreeProcessing(creditsToUse);
+//     } else {
+//       setShowConfirmation(true);
+//     }
+//   } catch (error) {
+//     console.error('Error calculating price:', error);
+//     alert('Error calculating price');
+//   }
+// };
+
 const handleFreeProcessing = async (creditsUsed) => {
   setIsLoading(true);
   
   try {
     const formData = new FormData();
+
     formData.append("employeeFile", file);
+    formData.append("recordCount", recordCount);
     formData.append("creditsUsed", creditsUsed);
     setSameFile(file);
 
@@ -202,10 +293,55 @@ const handleFreeProcessing = async (creditsUsed) => {
   }
 };
 
-  const handleConfirmUpload = async () => {
-    setShowConfirmation(false);
-    setShowStripePayment(true);
-  };
+const handleConfirmUpload = async () => {
+  setShowConfirmation(false);
+  setIsLoading(true);
+  
+  try {
+    const formData = new FormData();
+    formData.append("employeeFile", file);
+    
+    // Calculate how many credits SHOULD be deducted based on the price
+    // This is the cost in credits, regardless of what user has
+    const requiredCredits = originalAmount / 100; // Convert cents to dollars
+    
+    // Always send the required credits amount - backend will validate
+    formData.append("creditsUsed", requiredCredits.toString());
+    formData.append("amountPaid", (totalAmount / 100).toString());
+    
+    setSameFile(file);
+
+    let token = localStorage.getItem('token');
+
+    const res = await fetch(`${BASE_URL}/api/enrich`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to process file');
+    }
+    
+    const data = await res.json();
+    setCorrectPasscode(data.passcode);
+    setResult(data.results);
+    setIsReportLocked(false);
+    
+    // Refresh credits
+    await getCredits();
+    
+    alert('File processed successfully!');
+  } catch (error) {
+    console.error('Upload error:', error);
+    alert(error.message || 'Error uploading file');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
 
   const handlePaymentSuccess = async (paymentIntentId) => {
@@ -778,10 +914,9 @@ const handleFreeProcessing = async (creditsUsed) => {
   isLoading={isLoading}
   title="Confirm File Processing"
   message={`
-    Original Amount: $${(originalAmount / 100).toFixed(2)}
-    Available Credits: $${credits.toFixed(2)}
-    ${credits > 0 ? `Credits Applied: $${((originalAmount - totalAmount) / 100).toFixed(2)}` : ''}
-    Amount to Pay: $${(totalAmount / 100).toFixed(2)}
+    File Count: ${recordCount} contact${recordCount !== 1 ? 's' : ''}
+    Contact Rate: $2.95
+    Amount: $${isNaN(originalAmount) || originalAmount === 0 ? '0.00' : (originalAmount / 100).toFixed(2)}
     
     Are you sure you want to proceed?
   `}

@@ -316,13 +316,7 @@ const [invoiceData, setInvoiceData] = useState({ price: '', description: '' });
                               </>
                             ) : (
                               <>
-                              <button
-  onClick={() => handleSendInvoice(user._id)}
-  className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-  title="Send Invoice"
->
-  <Mail className="w-5 h-5" />
-</button>
+   
                                 <button
                                   onClick={() => handleEdit(user)}
                                   className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"

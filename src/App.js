@@ -18,41 +18,50 @@ import {loadStripe} from '@stripe/stripe-js';
 import {Elements} from '@stripe/react-stripe-js';
 import UserInvoiceManagement from './superadmin/invoicemanagement';
 
+// middleware
+import UserProtectedRoute from "./UserProtectedRoute";
+import AdminProtectedRoute from "./AdminProtectedRoute";
 
 const stripePromise = loadStripe("pk_test_51OwuO4LcfLzcwwOYdssgGfUSfOgWT1LwO6ewi3CEPewY7WEL9ATqH6WJm3oAcLDA3IgUvVYLVEBMIEu0d8fUwhlw009JwzEYmV");
-
 
 function App() {
   return (
     <Elements stripe={stripePromise}>
     <Router>
-    <Routes>
-      {/* Public routes */}
-      <Route path='/' element={<Login />} />
-      
-      <Route path='/register' element={<Register />} />
-      <Route path='/resetpassword' element={<ForgotPassword />} />
-      
-   
-   <Route element={<Sidebar/>}>
-   <Route path='/upload' element={<Uploadfile />} />
-   <Route path='/files' element={<FilesPage/>}/>
-   </Route>
+      <Routes>
 
-      <Route path='/adminreset' element={<SuperAdminReset/>}/>
-      <Route path='/adminregister' element={<SuperAdminRegister/>}/>
-      <Route path='/adminlogin' element={<SuperAdminLogin/>}/>
-      {/* Admin nested routes */}
-      <Route path='/admin' element={<AdminLayout />}>
-        <Route path='dashboard' element={<Dashboard />} />
-        <Route path='usermanagement' element={<UserManagement />} />
-        <Route path='filemanagement' element={<FileManagement />} />
-        <Route path='invoicemanagement' element={<UserInvoiceManagement/>}/>
-     
-      </Route>
-    </Routes>
-  </Router>
-  </Elements>
+        {/* Public routes */}
+        <Route path='/' element={<Login />} />
+        <Route path='/register' element={<Register />} />
+        <Route path='/resetpassword' element={<ForgotPassword />} />
+
+        {/* User Protected Routes */}
+        <Route element={<UserProtectedRoute><Sidebar/></UserProtectedRoute>}>
+          <Route path='/upload' element={<Uploadfile />} />
+          <Route path='/files' element={<FilesPage />} />
+        </Route>
+
+        {/* Admin Public Routes */}
+        <Route path='/adminreset' element={<SuperAdminReset/>}/>
+        <Route path='/adminregister' element={<SuperAdminRegister/>}/>
+        <Route path='/adminlogin' element={<SuperAdminLogin/>}/>
+
+        {/* Admin Protected Routes */}
+        <Route path='/admin' 
+               element={
+                 <AdminProtectedRoute>
+                   <AdminLayout />
+                 </AdminProtectedRoute>
+               }>
+          <Route path='dashboard' element={<Dashboard />} />
+          <Route path='usermanagement' element={<UserManagement />} />
+          <Route path='filemanagement' element={<FileManagement />} />
+          <Route path='invoicemanagement' element={<UserInvoiceManagement/>}/>
+        </Route>
+
+      </Routes>
+    </Router>
+    </Elements>
   );
 }
 
