@@ -1006,130 +1006,182 @@ function UploadFile() {
 
   const HARDCODED_DATA = [
     {
+      employeeNumber: 3321,
       name: 'Abernathy, Rita K.',
+      address: '9790 North 100 West',
+      cityStateZip: 'Fountaintown, IN 46130',
       email: 'rabernathy@hancockregional.org',
+      alternateEmail: '',
       phone: '(317) 752-2091',
       categoryScores: {
-        'family & work-life balance': 7,
-        'communication & leadership': 6,
-        'money & compensation': 3,
-        'schedule & workload': 6
+        'finances': 7,
+        'work life': 6,
+        'schedule': 3,
+        'family': 6
       },
       overallScore: 5.5,
       totalScore: 5.5,
-      improvementArea: 'Financial'
+      improvementArea: 'Financial',
+      jobClass: 'Receptionist',
     },
     {
-      name: 'Abram, Crystal M.',
-      email: 'cabram@hancockregional.org',
-      phone: '(317) 640-9743',
-      categoryScores: {
-        'family & work-life balance': 4,
-        'communication & leadership': 5,
-        'money & compensation': 9,
-        'schedule & workload': 8
-      },
+      employeeNumber: 7051,
+  name: 'Abram, Crystal M.',
+  address: '4082 Congaree Ln',
+  cityStateZip: 'Indianapolis, IN 46235',
+  email: 'cabram@hancockregional.org',
+  alternateEmail: 'crystalabram45@gmail.com',
+  phone: '(317) 640-9743',
+  categoryScores: {
+    'finances': 4,
+    'work life': 5,
+    'schedule': 9,
+    'family': 8
+  },
+
       overallScore: 6.5,
       totalScore: 6.5,
-      improvementArea: 'Money & Compensation' // Changed from 'Work Life Balance'
+      improvementArea: 'Work Life Balance',
+      jobClass: 'Receptionist',
     },
     {
+      employeeNumber: 8866,
       name: 'Abrams, Tina J.',
+      address: '8538 S. Co. Rd. 200 W',
+      cityStateZip: 'Spiceland, IN 47385',
       email: 'tabrams@hancockregional.org',
+      alternateEmail: 'tabrams8688@gmail.com',
       phone: '(765) 524-8688',
       categoryScores: {
-        'family & work-life balance': 8,
-        'communication & leadership': 5,
-        'money & compensation': 8,
-        'schedule & workload': 7
+        'finances': 8,
+        'work life': 5,
+        'schedule': 8,
+        'family': 7
       },
+    
       overallScore: 7,
       totalScore: 7,
-      improvementArea: 'None'
+      improvementArea: 'None',
+      jobClass: 'Therapist',
     },
     {
+      employeeNumber: 8368,
       name: 'Abu Manneh, Rona',
+      address: '10550 Geist View Drive',
+      cityStateZip: 'McCordsville, IN 46055',
       email: 'rabu-manneh@hancockregional.org',
+      alternateEmail: '',
       phone: '',
       categoryScores: {
-        'family & work-life balance': 5,
-        'communication & leadership': 2,
-        'money & compensation': 4,
-        'schedule & workload': 3
+        'finances': 5,
+        'work life': 2,
+        'schedule': 4,
+        'family': 3
       },
       overallScore: 3.5,
       totalScore: 3.5,
-      improvementArea: 'Communication, Money & Compensation, Schedule & Workload' // Changed
+      improvementArea: 'Communication, Financial, Schedule',
+      jobClass: 'Therapist',
     },
     {
-      name: 'Acosta, Caitlin',
-      email: '',
-      phone: '(608) 839-9957',
-      categoryScores: {
-        'family & work-life balance': 7,
-        'communication & leadership': 8,
-        'money & compensation': 1,
-        'schedule & workload': 8
-      },
+      employeeNumber: 6885,
+  name: 'Acosta, Caitlin',
+  address: '2915 Sheffield Dr',
+  cityStateZip: 'Indianapolis, IN 46229',
+  email: '',
+  alternateEmail: '',
+  phone: '(608) 839-9957',
+  categoryScores: {
+    'finances': 7,
+    'work life': 8,
+    'schedule': 1,
+    'family': 8
+  },
+    
       overallScore: 6,
       totalScore: 6,
-      improvementArea: 'Money & Compensation' // Changed from 'Financial'
+    improvementArea: 'Financial',
+    jobClass: 'Therapist',
     },
     {
+      employeeNumber: 900003,
       name: 'Adams, Debra',
+      address: '801 N. State St.',
+      cityStateZip: 'Greenfield, IN 46140',
       email: '',
+      alternateEmail: '',
       phone: '',
       categoryScores: {
-        'family & work-life balance': 10,
-        'communication & leadership': 8,
-        'money & compensation': 1,
-        'schedule & workload': 2
+        'finances': 10,
+        'work life': 8,
+        'schedule': 1,
+        'family': 2
       },
+    
       overallScore: 5.25,
       totalScore: 5.25,
-      improvementArea: 'Money & Compensation, Schedule & Workload' // Changed
+     improvementArea: 'Financial, Schedule',
+     jobClass: 'Nurse',
     },
     {
-      name: 'Adams, Natalie N.',
-      email: 'nadams@hancockhealth.org',
-      phone: '(317) 414-4477',
-      categoryScores: {
-        'family & work-life balance': 3,
-        'communication & leadership': 1,
-        'money & compensation': 1,
-        'schedule & workload': 10
-      },
+      employeeNumber: 7579,
+  name: 'Adams, Natalie N.',
+  address: '1611 Whisler Drive',
+  cityStateZip: 'Greenfield, IN 46140',
+  email: 'nadams@hancockhealth.org',
+  alternateEmail: 'nadams@hancockhealth.org',
+  phone: '(317) 414-4477',
+  categoryScores: {
+    'finances': 3,
+    'work life': 1,
+    'schedule': 1,
+    'family': 10
+  },
+  
       overallScore: 3.75,
       totalScore: 3.75,
-      improvementArea: 'Work-Life Balance, Communication, Money & Compensation' // Changed
+     improvementArea: 'Work Life Balance, Communication, Financial',
+     jobClass: 'Nurse',
     },
     {
+      employeeNumber: 5706,
       name: 'Adolay, Jennifer L.',
+      address: '9917 Wild Turkey Row',
+      cityStateZip: 'McCordsville, IN 46055',
       email: 'jadolay@hancockregional.org',
+      alternateEmail: 'adolayp@comcast.net',
       phone: '',
       categoryScores: {
-        'family & work-life balance': 7,
-        'communication & leadership': 8,
-        'money & compensation': 1,
-        'schedule & workload': 9
+        'finances': 7,
+        'work life': 8,
+        'schedule': 1,
+        'family': 9
       },
+      
       overallScore: 6.25,
       totalScore: 6.25,
-      improvementArea: 'Money & Compensation' // Changed from 'Financial'
+      improvementArea: 'Financial',
+      jobClass: 'Nurse',
     },
     {
-      name: 'Aitken, Madison O.',
-      email: 'MGELLINGER@HANCOCKREGIONAL.ORG',
-      phone: '(317) 617-8903',
-      categoryScores: {
-        'family & work-life balance': 8,
-        'communication & leadership': 5,
-        'money & compensation': 8,
-        'schedule & workload': 4
-      },
+      employeeNumber: 6725,
+  name: 'Aitken, Madison O.',
+  address: '4029 E 1100 N',
+  cityStateZip: 'Pendleton, IN 46064',
+  email: 'MGELLINGER@HANCOCKREGIONAL.ORG',
+  alternateEmail: 'madisongellinger2016@gmail.com',
+  phone: '(317) 617-8903',
+  categoryScores: {
+    'finances': 8,
+    'work life': 5,
+    'schedule': 8,
+    'family': 4
+  },
+     
       overallScore: 6.25,
       totalScore: 6.25,
-      improvementArea: 'Schedule & Workload' // Changed from 'Schedule'
+    improvementArea: 'Schedule',
+    jobClass: 'Nurse',
     }
   ];
   const handleFileChange = async (e) => {
@@ -1192,17 +1244,41 @@ function UploadFile() {
 
   
 
+  const LoadingOverlay = () => {
+    console.log('LoadingOverlay rendered, recordCount:', recordCount); // Add this for debugging
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+          <div className="flex flex-col items-center">
+            <div className="relative w-20 h-20 mb-6">
+              <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Processing Your File</h3>
+            <p className="text-gray-600 text-center mb-4">
+              Analyzing {recordCount} employee record{recordCount !== 1 ? 's' : ''}...
+            </p>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+            </div>
+            <p className="text-sm text-gray-500 mt-4">This may take a few moments</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
 
   const calculateCategoryAverages = () => {
     if (!result || result.length === 0) return [];
     
     const categories = [
-      { apiKey: 'family & work-life balance', displayName: 'Work-Life Balance' },
-      { apiKey: 'communication & leadership', displayName: 'Communication' },
-      { apiKey: 'money & compensation', displayName: 'Money & Compensation' },
-      { apiKey: 'schedule & workload', displayName: 'Schedule & Workload' }
+      { apiKey: 'finances', displayName: 'Finances' },
+      { apiKey: 'work life', displayName: 'Work Life' },
+      { apiKey: 'schedule', displayName: 'Schedule' },
+      { apiKey: 'family', displayName: 'Family' }
     ];
-  
     const categoryTotals = {};
     const categoryCounts = {};
     
@@ -1268,17 +1344,23 @@ const handleUploadClick = async () => {
     alert('No valid employee records found in the file. Please ensure your file contains records with Employee Names.');
     return;
   }
+  setIsLoading(true); // START LOADING
 
   try {
     let token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('recordCount', recordCount);
+    
     const response = await fetch(`${BASE_URL}/calculate-price`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        
       },
-      body: JSON.stringify({ recordCount })
+      body: formData
     });
+
     
     const { totalAmount } = await response.json();
     
@@ -1300,15 +1382,16 @@ const handleUploadClick = async () => {
     }
     
     setTotalAmount(finalAmount);
+    setIsLoading(false);
     
     // CHECK IF USER HAS SUFFICIENT CREDITS OR PAYMENT ABILITY
     if (finalAmount > 0 && creditsInCents === 0) {
       // No credits at all, need full payment
-      alert(`Insufficient credits! You need $${(totalAmount / 100).toFixed(2)} but have $0.00 in credits. Please add credits or proceed to payment.`);
+      alert(`insufficient Credits please contact admin support rsmith@prognosticare.org`);
     
     } else if (finalAmount > 0 && creditsInCents > 0) {
       // Has some credits but not enough
-      alert(`Low credits! You have $${credits.toFixed(2)} in credits. After using your credits, you'll need to pay $${(finalAmount / 100).toFixed(2)}.`);
+      alert(`insufficient Credits please contact admin support rsmith@prognosticare.org`);
 
     } else if (finalAmount === 0) {
       // Has enough credits - SHOW CONFIRMATION FIRST
@@ -1316,6 +1399,7 @@ const handleUploadClick = async () => {
     }
   } catch (error) {
     console.error('Error calculating price:', error);
+    setIsLoading(false);
     alert('Error calculating price');
   }
 };
@@ -1418,7 +1502,8 @@ const handleFreeProcessing = async (creditsUsed) => {
 
 const handleConfirmUpload = async () => {
   setShowConfirmation(false);
-  setIsLoading(true);
+ 
+  console.log('Setting isLoading to TRUE'); // Add this
   
   try {
     let token = localStorage.getItem('token');
@@ -1536,7 +1621,7 @@ const handleConfirmUpload = async () => {
     console.error('Upload error:', error);
     alert(error.message || 'Error uploading file');
   } finally {
-    setIsLoading(false);
+  
   }
 };
 
@@ -1581,10 +1666,10 @@ const handleConfirmUpload = async () => {
     if (!employee || !employee.categoryScores) return 'No categories';
     
     const categories = [
-      { apiKey: 'family & work-life balance', displayName: 'Work-Life Balance' },
-      { apiKey: 'communication & leadership', displayName: 'Communication' },
-      { apiKey: 'money & compensation', displayName: 'Money & Compensation' },
-      { apiKey: 'schedule & workload', displayName: 'Schedule & Workload' }
+      { apiKey: 'finances', displayName: 'Finances' },
+      { apiKey: 'work life', displayName: 'Work Life' },
+      { apiKey: 'schedule', displayName: 'Schedule' },
+      { apiKey: 'family', displayName: 'Family' }
     ];
   
     let minScore = Infinity;
@@ -1602,35 +1687,43 @@ const handleConfirmUpload = async () => {
   };
 
   const getRiskLevel = (score) => {
-    if (score >= 20) return 'High';
-    if (score >= 10) return 'Medium';
-    return 'Low';
+    if (score >= 7) return 'High Risk';
+    if (score >= 4) return 'Medium Risk';
+    return 'Low Risk';
   };
+  
+  const getCategoryRiskLevel = (score) => {
+    if (score >= 7) return 'HIGH RISK';
+    if (score >= 4) return 'MEDIUM RISK';
+    return 'LOW RISK';
+  };
+  
+  const getCategoryRiskColor = (score) => {
+    if (score >= 7) return 'text-[#fb0000]';
+    if (score >= 4) return 'text-[#fdc002]';
+    return 'text-[#41d756]';
+  };
+
 
   const getImprovementArea = (employee) => {
     if (!employee || !employee.categoryScores) return 'N/A';
     
     const categories = [
-      { apiKey: 'family & work-life balance', displayName: 'Work-Life Balance' },
-      { apiKey: 'communication & leadership', displayName: 'Communication' },
-      { apiKey: 'money & compensation', displayName: 'Money & Compensation' },
-      { apiKey: 'schedule & workload', displayName: 'Schedule & Workload' }
+      { apiKey: 'finances', displayName: 'Finances' },
+      { apiKey: 'work life', displayName: 'Work Life' },
+      { apiKey: 'schedule', displayName: 'Schedule' },
+      { apiKey: 'family', displayName: 'Family' }
     ];
-    
-    let maxScore = -1;
-    let improvementArea = 'N/A';
-    let allZeros = true;
+    const improvementAreas = [];
   
     categories.forEach(({ apiKey, displayName }) => {
       const score = employee.categoryScores[apiKey] || 0;
-      if (score > 0) allZeros = false;
-      if (score > maxScore) {
-        maxScore = score;
-        improvementArea = displayName;
+      if (score >= 5) {
+        improvementAreas.push(displayName);
       }
     });
   
-    return allZeros ? 'N/A' : improvementArea;
+    return improvementAreas.length > 0 ? improvementAreas.join(', ') : 'None';
   };
 
   const calculateImprovedScore = (currentScore) => {
@@ -1706,7 +1799,7 @@ const handleConfirmUpload = async () => {
   <tr className="border-b border-gray-200">
     <td className="py-2 px-3 font-mono text-xs bg-white">Home Phone (Formatted)</td>
     <td className="py-2 px-3">Contact number with formatting</td>
-    <td className="py-2 px-3 text-gray-600">(317) 752-2091</td>
+    <td className="py-2 px-3 text-gray-600">000-000-0000</td>
   </tr>
   <tr className="border-b border-gray-200">
     <td className="py-2 px-3 font-mono text-xs bg-white">Company Name</td>
@@ -1738,6 +1831,11 @@ const handleConfirmUpload = async () => {
     <td className="py-2 px-3">Current status</td>
     <td className="py-2 px-3 text-gray-600">Active</td>
   </tr>
+  <tr className="border-b border-gray-200">
+    <td className="py-2 px-3 font-mono text-xs bg-white">Job Class</td>
+    <td className="py-2 px-3">Job Post</td>
+    <td className="py-2 px-3 text-gray-600">Nurse</td>
+  </tr>
 </tbody>
               </table>
             </div>
@@ -1746,22 +1844,22 @@ const handleConfirmUpload = async () => {
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Sample Data Preview:</h3>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 overflow-x-auto">
                 <pre className="text-xs font-mono whitespace-pre">
-{`Employee Number,Employee Name,E-mail Address,Address Line 1,City State Zip,Home Phone
-3321,Abernathy Rita K.,rabernathy@company.org,9790 North 100 West,Fountaintown IN 46130,(317) 752-2091
-7051,Abram Crystal M.,cabram@company.org,4082 Congaree Ln,Indianapolis IN 46235,(317) 640-9743
-8866,Abrams Tina J.,tabrams@company.org,8538 S. Co. Rd. 200 W,Spiceland IN 47385,(765) 524-8688`}
+{`Employee Number,Employee Name,E-mail Address,Address Line 1,City State Zip,Home Phone,Job Class
+3321,Nurse,Abernathy Rita K.,rabernathy@company.org,9790 North 100 West,Fountaintown IN 46130,(317) 752-2091
+7051,Receptionist,Abram Crystal M.,cabram@company.org,4082 Congaree Ln,Indianapolis IN 46235,(317) 640-9743
+8866,Receptionist,Abrams Tina J.,tabrams@company.org,8538 S. Co. Rd. 200 W,Spiceland IN 47385,(765) 524-8688,Receptionist`}
                 </pre>
               </div>
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="rounded-lg p-4" style={{ backgroundColor: '#fef3e2', border: '1px solid #fdc002' }}>
+  <div className="flex items-start gap-3">
+    <svg className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: '#fdc002' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
-                  <p className="font-semibold text-yellow-900 mb-1">Important Notes:</p>
-                  <ul className="text-sm text-yellow-800 space-y-1 list-disc list-inside">
+  <p className="font-semibold mb-1" style={{ color: '#b88a00' }}>Important Notes:</p>
+  <ul className="text-sm space-y-1 list-disc list-inside" style={{ color: '#996f00' }}>
                     <li>File must be in CSV or Excel (.xlsx) format</li>
                     <li>First row should contain column headers</li>
                     <li>Email addresses are required for analysis</li>
@@ -1800,32 +1898,37 @@ const handleConfirmUpload = async () => {
   
     const headers = [
       'Employee Number',
-      'Employee Name',
-      'Email',
-      'Phone',
-      'Work Life Balance',
-      'Communication',
-      'Financial',
+      'Employee Name (Last Suffix, First MI)',
+      'Address Line 1 + Address Line 2',
+      'City, State Zip Code (Formatted)',
+      'E-mail Address',
+      'Alternate Email',
+      'Home Phone (Formatted)',
+      'Finances',
+      'Work Life',
       'Schedule',
+      'Family',
       'Final Score',
-      'Improvement Area'
+      'Improvement Areas'
     ];
   
     const csvRows = result.map((emp, index) => {
       return [
-        index + 1,
+        emp.employeeNumber || (3321 + index),
         emp.name || 'Unknown',
+        emp.address || '',
+        emp.cityStateZip || '',
         emp.email || '',
+        emp.alternateEmail || '',
         emp.phone || '',
-        emp.categoryScores?.['family & work-life balance'] || 0,
-        emp.categoryScores?.['communication & leadership'] || 0,
-        emp.categoryScores?.['money & compensation'] || 0,
-        emp.categoryScores?.['schedule & workload'] || 0,
+        emp.categoryScores?.['finances'] || 0,
+        emp.categoryScores?.['work life'] || 0,
+        emp.categoryScores?.['schedule'] || 0,
+        emp.categoryScores?.['family'] || 0,
         emp.overallScore || emp.totalScore || 0,
         emp.improvementArea || 'N/A'
       ];
     });
-  
     const csvContent = [headers, ...csvRows]
       .map(row => row.map(cell => `"${cell}"`).join(','))
       .join('\n');
@@ -1846,134 +1949,317 @@ const handleConfirmUpload = async () => {
 
   const EmployeeDashboard = () => {
     const getRiskColor = (risk) => {
-      if (risk >= 70) return 'bg-red-500';
-      if (risk >= 50) return 'bg-yellow-500';
+      if (risk >= 7) return 'bg-red-500';
+      if (risk >= 4) return 'bg-yellow-500';
       return 'bg-green-500';
     };
+  
+    const getRetentionPercentage = (score) => {
+      const percentage = Math.round((score - 5) * 10);
+      
+      if (percentage === 0) return 'Neutral';
+      if (percentage > 0) return 'Promoter';
+      return 'Detractor';
+    };
+  
+    const getNPSLabel = (score) => {
+      if (score >= 7) return 'Promoter';
+      if (score >= 4) return 'Neutral';
+      return 'Detractor';
+    };
+  
+    const getNPSColor = (score) => {
+      if (score >= 7) return 'text-white';
+      if (score >= 4) return 'text-white';
+      return 'text-white';
+    };
+ 
 
+    const getDomainColor = (score) => {
+      if (score >= 7) return '';
+      if (score >= 4) return '';
+      return '';
+    };
+
+
+  
     const totalAverage = result.length > 0 
       ? Math.round(result.reduce((sum, employee) => sum + (employee.totalScore || 0), 0) / result.length)
       : 0;
-
+    const [expandedEmployee, setExpandedEmployee] = useState(null);
+    
     return (
       <div className="mt-8">
-        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6">
-       
-          <div className="flex flex-row items-center gap-3 sm:gap-4 lg:gap-6 mb-6 lg:mb-8">
-            <div className="w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 lg:w-24 lg:h-24 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg md:text-xl lg:text-2xl flex-shrink-0">
-              {totalAverage}%
-            </div>
-            <div className="flex-1 min-w-0">
-             
-              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 md:mb-2 leading-tight">
-                Employee Sentiment Dashboard
-              </h1>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 mb-1 leading-tight">
-                Overall Sentiment Risk Score
-              </p>
-              <p className="text-xs sm:text-sm md:text-base text-gray-600 leading-tight">
-                Team: Marketing • Last 30 Days
-              </p>
-            </div>
-          </div>
-
-          {isReportLocked && (
-            <div className="mb-6 bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 flex items-center gap-3">
-              <svg className="w-6 h-6 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              <div className="flex-1">
-                <p className="font-semibold text-yellow-900">Report Locked</p>
-                <p className="text-sm text-yellow-700">Complete payment to unlock and download</p>
-              </div>
-            </div>
-          )}
-
-          <div className="hidden lg:grid lg:grid-cols-12 gap-4 px-4 py-3 border-b border-gray-200 text-gray-600 font-medium text-sm">
-            <div className="col-span-1 text-center">#</div>
-            <div className="col-span-5">Employee</div>
-            <div className="col-span-3 text-center">Risk Score</div>
-            <div className="col-span-3 text-center">Top Category</div>
-          </div>
-
-          <div className="space-y-0">
-            {result?.map((employee, index) => (
-              <div key={index} className="border-b last:border-b-0 border-gray-100 hover:bg-gray-50 transition-colors">
-                <div className="hidden lg:grid lg:grid-cols-12 gap-4 items-center px-4 py-4">
-                  <div className="col-span-1 flex justify-center">
-                    <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white font-medium text-xs">
-                      👤
-                    </div>
-                  </div>
-                  <div className="col-span-5">
-                    <h3 className="font-semibold text-gray-900 text-base">
-                      {employee?.name || 'Unknown'}
-                    </h3>
-                  </div>
-                  <div className="col-span-3 flex justify-center items-center gap-2">
-                    <div className={`w-10 h-10 ${getRiskColor(employee?.totalScore || 0)} rounded-full flex items-center justify-center text-white font-bold text-sm`}>
-                      {employee?.totalScore || 0}
-                    </div>
-                    <span className="font-semibold text-gray-700 text-sm">
-                      {employee?.totalScore || 0}%
-                    </span>
-                  </div>
-                  <div className="col-span-3 text-center">
-                    <span className="font-semibold text-gray-900 text-sm">
-                      {getTopCategory(employee) || "No categories"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
+      <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6">
+        <div className="flex flex-row items-center gap-3 sm:gap-4 lg:gap-6 mb-6 lg:mb-8">
+        <div 
+  className="
+    w-20 h-20
+    sm:w-24 sm:h-24
+    md:w-28 md:h-28
+    lg:w-32 lg:h-32
+    rounded-full
+    flex items-center justify-center
+    text-white
+    font-bold
+    text-[10px] sm:text-sm md:text-base lg:text-lg
+    text-center
+    leading-tight
+    px-2
+    flex-shrink-0
+  "
+  style={{
+    backgroundColor: 
+      totalAverage >= 7 ? '#41d756' : 
+      totalAverage >= 4 ? '#fdc002' : 
+      '#fb0000'
+  }}
+>
+  {getRiskLevel(totalAverage)}
+</div>
+    
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 md:mb-2 leading-tight">
+              Employee Sentiment Dashboard
+            </h1>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 mb-1 leading-tight">
+              Overall Sentiment Risk Score
+            </p>
           </div>
         </div>
-
-        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 text-center lg:text-left">
-            Average Risk Score by Category
-          </h2>
-          
-          <div className="space-y-3 sm:space-y-4">
-            {categoryAverages.map((category, index) => (
-              <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                <div className="w-full sm:w-32 md:w-36 lg:w-40 flex-shrink-0">
-                  <span className="font-medium text-gray-700 text-sm sm:text-base">
-                    {category.name}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <div className="relative">
-                    <div className="w-full bg-gray-200 rounded-full h-6 sm:h-8 lg:h-10">
-                      <div 
-                        className="bg-blue-500 h-6 sm:h-8 lg:h-10 rounded-full flex items-center justify-end pr-2 sm:pr-3 transition-all duration-500 ease-out"
-                        style={{ width: `${Math.max(category.score * 2, 5)}%` }}
-                      >
-                        <span className="text-white font-bold text-xs sm:text-sm">
-                          {category.score}
-                        </span>
+    
+        {isReportLocked && (
+  <div className="mb-6 rounded-lg p-4 flex items-center gap-3" style={{ backgroundColor: '#fef3e2', border: '2px solid #fdc002' }}>
+    <svg className="w-6 h-6 flex-shrink-0" style={{ color: '#fdc002' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <div className="flex-1">
+  <p className="font-semibold" style={{ color: '#b88a00' }}>Report Locked</p>
+  <p className="text-sm" style={{ color: '#996f00' }}>Complete payment to unlock and download</p>
+</div>
+          </div>
+        )}
+    
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-50 border-b-2 border-gray-200">
+                <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Applicant</th>
+                <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Job Class</th>
+                <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Retention Likelihood</th>
+                <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Net Promoter Score</th>
+                <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Domains</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result?.map((employee, index) => (
+                <React.Fragment key={index}>
+                  <tr 
+                    className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => setExpandedEmployee(expandedEmployee === index ? null : index)}
+                  >
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-white font-medium flex-shrink-0">
+                          👤
+                        </div>
+                        <div>
+                          <div className="font-semibold text-gray-900 text-sm">
+                            {employee?.name || 'Unknown'}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            ID: {employee?.employeeNumber || 'N/A'}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-4 sm:mt-6 flex justify-between text-xs sm:text-sm text-gray-500 px-4 sm:px-8 lg:px-32">
-            <span>0</span>
-            <span>25</span>
-            <span>50</span>
-            <span>75</span>
-            <span>100</span>
-          </div>
+                    </td>
+    
+                    <td className="py-4 px-4 text-gray-700 text-sm">
+                      {employee?.jobClass || 'N/A'}
+                    </td>
+    
+                    <td className="py-4 px-4">
+  <div className="flex justify-center">
+    <span 
+      className="inline-block px-5 py-2 rounded-full font-semibold text-sm text-white"
+      style={{
+        backgroundColor: 
+          (employee?.totalScore || 0) >= 7 ? '#41d756' : 
+          (employee?.totalScore || 0) >= 4 ? '#fdc002' : 
+          '#fb0000'
+      }}
+    >
+      {getRetentionPercentage(employee?.totalScore || 0)}
+    </span>
+  </div>
+</td>
+    
+                    <td className="py-4 px-4">
+                      <div className="flex justify-center">
+                      <span 
+  className={`inline-block px-5 py-2 rounded-full font-semibold text-sm ${getNPSColor(employee?.totalScore || 0)}`}
+  style={{
+    backgroundColor: 
+      (employee?.totalScore || 0) >= 7 ? '#41d756' : 
+      (employee?.totalScore || 0) >= 4 ? '#fdc002' : 
+      '#fb0000'
+  }}
+>
+  {getNPSLabel(employee?.totalScore || 0)}
+</span>
+                      </div>
+                    </td>
+    
+                    <td className="py-4 px-4">
+  <div className="flex flex-col gap-2">
+    {Object.entries(employee?.categoryScores || {}).map(([category, score]) => (
+      <span 
+        key={category}
+        className="inline-block px-3 py-1 rounded-full text-white text-xs font-semibold"
+        style={{
+          backgroundColor: 
+            score >= 7 ? '#41d756' : 
+            score >= 4 ? '#fdc002' : 
+            '#fb0000'
+        }}
+      >
+        {category.charAt(0).toUpperCase() + category.slice(1)}
+      </span>
+    ))}
+  </div>
+</td>
+                  </tr>
+    
+                  {expandedEmployee === index && (
+                    <tr className="bg-gray-50">
+                      <td colSpan="5" className="p-6 border-b border-gray-200">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Employee Number</p>
+                            <p className="text-sm font-medium text-gray-900">{employee?.employeeNumber || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Name</p>
+                            <p className="text-sm font-medium text-gray-900">{employee?.name || 'N/A'}</p>
+                          </div>
+                        </div>
+    
+                        <div className="border-t border-gray-200 pt-4 mt-4">
+                          <p className="text-sm font-semibold text-gray-700 mb-3">Category Scores</p>
+                          <div className="space-y-3">
+                            <div>
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-gray-600">Finances</span>
+                                <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['finances'] || 0)}`}>
+                                  {getCategoryRiskLevel(employee?.categoryScores?.['finances'] || 0)}
+                                </span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+  <div 
+    className="h-2 rounded-full transition-all"
+    style={{ 
+      width: `${(employee?.categoryScores?.['finances'] || 0) * 10}%`,
+      backgroundColor: 
+        (employee?.categoryScores?.['finances'] || 0) >= 7 ? '#fb0000' : 
+        (employee?.categoryScores?.['finances'] || 0) >= 4 ? '#fdc002' : 
+        '#41d756'
+    }}
+  />
+</div>
+                            </div>
+                            <div>
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-gray-600">Work Life</span>
+                                <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['work life'] || 0)}`}>
+                                  {getCategoryRiskLevel(employee?.categoryScores?.['work life'] || 0)}
+                                </span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+  <div 
+    className="h-2 rounded-full transition-all"
+    style={{ 
+      width: `${(employee?.categoryScores?.['work life'] || 0) * 10}%`,
+      backgroundColor: 
+        (employee?.categoryScores?.['work life'] || 0) >= 7 ? '#fb0000' : 
+        (employee?.categoryScores?.['work life'] || 0) >= 4 ? '#fdc002' : 
+        '#41d756'
+    }}
+  />
+</div>
+                            </div>
+                            <div>
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-gray-600">Schedule</span>
+                                <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['schedule'] || 0)}`}>
+                                  {getCategoryRiskLevel(employee?.categoryScores?.['schedule'] || 0)}
+                                </span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+  <div 
+    className="h-2 rounded-full transition-all"
+    style={{ 
+      width: `${(employee?.categoryScores?.['schedule'] || 0) * 10}%`,
+      backgroundColor: 
+        (employee?.categoryScores?.['schedule'] || 0) >= 7 ? '#fb0000' : 
+        (employee?.categoryScores?.['schedule'] || 0) >= 4 ? '#fdc002' : 
+        '#41d756'
+    }}
+  />
+</div>
+                            </div>
+                            <div>
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-gray-600">Family</span>
+                                <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['family'] || 0)}`}>
+                                  {getCategoryRiskLevel(employee?.categoryScores?.['family'] || 0)}
+                                </span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+  <div 
+    className="h-2 rounded-full transition-all"
+    style={{ 
+      width: `${(employee?.categoryScores?.['family'] || 0) * 10}%`,
+      backgroundColor: 
+        (employee?.categoryScores?.['family'] || 0) >= 7 ? '#fb0000' : 
+        (employee?.categoryScores?.['family'] || 0) >= 4 ? '#fdc002' : 
+        '#41d756'
+    }}
+  />
+</div>
+                            </div>
+                          </div>
+                        </div>
+    
+                        <div className="border-t border-gray-200 pt-4 mt-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Total Score</p>
+                              <p className={`text-lg font-bold ${getCategoryRiskColor(employee?.totalScore || 0)}`}>
+                                {getCategoryRiskLevel(employee?.totalScore || 0)}
+                              </p>
+                            </div>
+                            <div>
+  <p className="text-xs text-gray-500 mb-1">Improvement Area</p>
+  <p className="text-sm font-semibold" style={{ color: '#fb0000' }}>{getImprovementArea(employee)}</p>
+</div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
+    </div>
     );
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6">
+    {isLoading && <LoadingOverlay />}
       <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6">
       <div className='flex justify-center items-center text-center mb-4'>
@@ -1984,11 +2270,10 @@ const handleConfirmUpload = async () => {
   />
 </div>
 
-{/* Add this credits badge */}
 <div className="flex justify-center mb-4">
-  <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-full px-6 py-2 shadow-lg">
+  <div className="rounded-full px-6 py-2 shadow-lg" style={{ background: 'linear-gradient(to right, #41d756, #2ebd47)' }}>
     <p className="text-white font-semibold text-sm sm:text-base">
-      💰 Available Credits: ${credits.toFixed(2)}
+    Available Credits: {credits.toFixed(2)}
     </p>
   </div>
 </div>
@@ -1996,9 +2281,9 @@ const handleConfirmUpload = async () => {
   <div className="flex items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
    
     <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 text-center">
-      Employee Engagement Insights
+    Staff Retention Application
     </h2>
-  </div>
+  </div>  
           
           <div className="mb-3 flex justify-end">
             <button
@@ -2082,8 +2367,8 @@ const handleConfirmUpload = async () => {
   title="Confirm File Processing"
   message={`
     File Count: ${recordCount} contact${recordCount !== 1 ? 's' : ''}
-    Contact Rate: $2.95
-    Amount: $${isNaN(originalAmount) || originalAmount === 0 ? '0.00' : (originalAmount / 100).toFixed(2)}
+    Contact Rate: 2.95
+    Amount: ${isNaN(originalAmount) || originalAmount === 0 ? '0.00' : (originalAmount / 100).toFixed(2)}
     
     Are you sure you want to proceed?
   `}
@@ -2113,21 +2398,40 @@ const handleConfirmUpload = async () => {
       />
 
 <SampleFormatModal />
-      <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease-out;
-        }
-      `}</style>
+<style>{`
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.2s ease-out;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+`}</style>
     </div>
   );
 }

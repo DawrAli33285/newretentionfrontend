@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Mail, Lock, ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios'
 import { BASE_URL } from './baseurl';
+
 
 export default function ResetPassword({ onSwitchToLogin, users = [], onResetPassword }) {
   const [email, setEmail] = useState('');
@@ -12,11 +13,13 @@ export default function ResetPassword({ onSwitchToLogin, users = [], onResetPass
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
+
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
   };
 
+  
   const validatePassword = (password) => {
     return password.length >= 6;
   };
@@ -48,12 +51,14 @@ export default function ResetPassword({ onSwitchToLogin, users = [], onResetPass
     }
     let response=await axios.post(`${BASE_URL}/userresetPassword`,{email,password:newPassword})
 
-    setLoading(true);
+
     
     setSuccess('Password reset successfully! Redirecting to login...');
+    setLoading(true);
     setEmail('');
     setNewPassword('');
     setConfirmPassword('');
+   window.location.href='/'
    }catch(e){
     console.log(e.message)
 if(e?.response?.data?.error){

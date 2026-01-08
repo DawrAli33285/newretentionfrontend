@@ -3,6 +3,7 @@ import { Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios'
 import { BASE_URL } from '../baseurl';
 import {Link} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 import { ToastContainer,toast } from 'react-toastify';
 function SuperAdminReset() {
   const [email, setEmail] = useState('');
@@ -13,7 +14,7 @@ function SuperAdminReset() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-
+const navigate=useNavigate();
   const validateForm = () => {
     const newErrors = {};
 
@@ -56,6 +57,7 @@ function SuperAdminReset() {
     setIsSuccess(true)
     setIsLoading(false)
     toast.success(response.data.message,{containerId:"adminResetPage"})
+    navigate('/adminLogin')
  }catch(e){
 setIsLoading(false)
 if(e?.response?.data?.error){

@@ -181,16 +181,22 @@ function FilesPage() {
     }
   };
 
-  const handleDownloadClick = (file) => {
-    setSelectedFile(file);
-    if (file.paid) {
-      // If already paid, show passcode popup directly
-      setShowPasscodePopup(true);
-    } else {
-      // If not paid, show payment popup first
-      setShowPaymentPopup(true);
+  const handleDownloadClick = async (file) => {
+    // Download the file directly from the output URL
+    try {
+      const link = document.createElement('a');
+      link.href = file.outputUrl;
+      link.download = `output_${file.id}.csv`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      alert(`Download started for ${file.fileName}`);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Failed to download file. Please try again.');
     }
-    setPasscodeError('');
   };
 
   const handlePaymentComplete = () => {

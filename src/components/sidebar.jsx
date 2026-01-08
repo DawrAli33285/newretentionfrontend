@@ -34,9 +34,12 @@ function Sidebar() {
         <div className="h-full flex flex-col">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                FileHub
-              </h1>
+            <img
+  src="./logo.jpg"
+  alt="Logo"
+  className="w-16 h-16 rounded-full object-cover"
+/>
+
               <button
                 onClick={() => setIsMobileSidebarOpen(false)}
                 className="lg:hidden text-gray-500 hover:text-gray-700"
@@ -73,7 +76,7 @@ function Sidebar() {
           
           <div className="p-4 border-t border-gray-200">
             <div className="text-xs text-gray-500 text-center">
-              © 2024 FileHub
+              © 2024 PrognostiCare
             </div>
           </div>
         </div>
