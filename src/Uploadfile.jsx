@@ -975,7 +975,6 @@
 
 
 
-
 import React, { useEffect, useState } from 'react';
 import ConfirmationPopup from './components/ConfirmationPopup';
 import PasscodePopup from './components/PasscodePopup';
@@ -1003,6 +1002,12 @@ function UploadFile() {
   const [showStripePayment, setShowStripePayment] = useState(false);
   const [credits,setCredits]=useState(0)
   const [originalAmount, setOriginalAmount] = useState(0);
+  const [activeTab, setActiveTab] = useState('prehire');
+
+  // NEW: Filter states
+  const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [selectedJobClass, setSelectedJobClass] = useState('all');
+  const [filteredResult, setFilteredResult] = useState([]);
 
   const HARDCODED_DATA = [
     {
@@ -1023,26 +1028,27 @@ function UploadFile() {
       totalScore: 5.5,
       improvementArea: 'Financial',
       jobClass: 'Receptionist',
+      department: 'Administration'
     },
     {
       employeeNumber: 7051,
-  name: 'Abram, Crystal M.',
-  address: '4082 Congaree Ln',
-  cityStateZip: 'Indianapolis, IN 46235',
-  email: 'cabram@hancockregional.org',
-  alternateEmail: 'crystalabram45@gmail.com',
-  phone: '(317) 640-9743',
-  categoryScores: {
-    'finances': 4,
-    'work life': 5,
-    'schedule': 9,
-    'family': 8
-  },
-
+      name: 'Abram, Crystal M.',
+      address: '4082 Congaree Ln',
+      cityStateZip: 'Indianapolis, IN 46235',
+      email: 'cabram@hancockregional.org',
+      alternateEmail: 'crystalabram45@gmail.com',
+      phone: '(317) 640-9743',
+      categoryScores: {
+        'finances': 4,
+        'work life': 5,
+        'schedule': 9,
+        'family': 8
+      },
       overallScore: 6.5,
       totalScore: 6.5,
       improvementArea: 'Work Life Balance',
       jobClass: 'Receptionist',
+      department: 'Administration'
     },
     {
       employeeNumber: 8866,
@@ -1058,11 +1064,11 @@ function UploadFile() {
         'schedule': 8,
         'family': 7
       },
-    
       overallScore: 7,
       totalScore: 7,
       improvementArea: 'None',
       jobClass: 'Therapist',
+      department: 'Physical Therapy'
     },
     {
       employeeNumber: 8368,
@@ -1082,26 +1088,27 @@ function UploadFile() {
       totalScore: 3.5,
       improvementArea: 'Communication, Financial, Schedule',
       jobClass: 'Therapist',
+      department: 'Physical Therapy'
     },
     {
       employeeNumber: 6885,
-  name: 'Acosta, Caitlin',
-  address: '2915 Sheffield Dr',
-  cityStateZip: 'Indianapolis, IN 46229',
-  email: '',
-  alternateEmail: '',
-  phone: '(608) 839-9957',
-  categoryScores: {
-    'finances': 7,
-    'work life': 8,
-    'schedule': 1,
-    'family': 8
-  },
-    
+      name: 'Acosta, Caitlin',
+      address: '2915 Sheffield Dr',
+      cityStateZip: 'Indianapolis, IN 46229',
+      email: '',
+      alternateEmail: '',
+      phone: '(608) 839-9957',
+      categoryScores: {
+        'finances': 7,
+        'work life': 8,
+        'schedule': 1,
+        'family': 8
+      },
       overallScore: 6,
       totalScore: 6,
-    improvementArea: 'Financial',
-    jobClass: 'Therapist',
+      improvementArea: 'Financial',
+      jobClass: 'Therapist',
+      department: 'Physical Therapy'
     },
     {
       employeeNumber: 900003,
@@ -1117,31 +1124,31 @@ function UploadFile() {
         'schedule': 1,
         'family': 2
       },
-    
       overallScore: 5.25,
       totalScore: 5.25,
-     improvementArea: 'Financial, Schedule',
-     jobClass: 'Nurse',
+      improvementArea: 'Financial, Schedule',
+      jobClass: 'Nurse',
+      department: 'Nursing'
     },
     {
       employeeNumber: 7579,
-  name: 'Adams, Natalie N.',
-  address: '1611 Whisler Drive',
-  cityStateZip: 'Greenfield, IN 46140',
-  email: 'nadams@hancockhealth.org',
-  alternateEmail: 'nadams@hancockhealth.org',
-  phone: '(317) 414-4477',
-  categoryScores: {
-    'finances': 3,
-    'work life': 1,
-    'schedule': 1,
-    'family': 10
-  },
-  
+      name: 'Adams, Natalie N.',
+      address: '1611 Whisler Drive',
+      cityStateZip: 'Greenfield, IN 46140',
+      email: 'nadams@hancockhealth.org',
+      alternateEmail: 'nadams@hancockhealth.org',
+      phone: '(317) 414-4477',
+      categoryScores: {
+        'finances': 3,
+        'work life': 1,
+        'schedule': 1,
+        'family': 10
+      },
       overallScore: 3.75,
       totalScore: 3.75,
-     improvementArea: 'Work Life Balance, Communication, Financial',
-     jobClass: 'Nurse',
+      improvementArea: 'Work Life Balance, Communication, Financial',
+      jobClass: 'Nurse',
+      department: 'Nursing'
     },
     {
       employeeNumber: 5706,
@@ -1157,33 +1164,68 @@ function UploadFile() {
         'schedule': 1,
         'family': 9
       },
-      
       overallScore: 6.25,
       totalScore: 6.25,
       improvementArea: 'Financial',
       jobClass: 'Nurse',
+      department: 'Nursing'
     },
     {
       employeeNumber: 6725,
-  name: 'Aitken, Madison O.',
-  address: '4029 E 1100 N',
-  cityStateZip: 'Pendleton, IN 46064',
-  email: 'MGELLINGER@HANCOCKREGIONAL.ORG',
-  alternateEmail: 'madisongellinger2016@gmail.com',
-  phone: '(317) 617-8903',
-  categoryScores: {
-    'finances': 8,
-    'work life': 5,
-    'schedule': 8,
-    'family': 4
-  },
-     
+      name: 'Aitken, Madison O.',
+      address: '4029 E 1100 N',
+      cityStateZip: 'Pendleton, IN 46064',
+      email: 'MGELLINGER@HANCOCKREGIONAL.ORG',
+      alternateEmail: 'madisongellinger2016@gmail.com',
+      phone: '(317) 617-8903',
+      categoryScores: {
+        'finances': 8,
+        'work life': 5,
+        'schedule': 8,
+        'family': 4
+      },
       overallScore: 6.25,
       totalScore: 6.25,
-    improvementArea: 'Schedule',
-    jobClass: 'Nurse',
+      improvementArea: 'Schedule',
+      jobClass: 'Nurse',
+      department: 'Nursing'
     }
   ];
+
+  // NEW: Apply filters whenever result, selectedDepartment, or selectedJobClass changes
+  useEffect(() => {
+    applyFilters();
+  }, [result, selectedDepartment, selectedJobClass]);
+
+  // NEW: Function to apply filters
+  const applyFilters = () => {
+    let filtered = [...result];
+
+    // Filter by department
+    if (selectedDepartment !== 'all') {
+      filtered = filtered.filter(emp => emp.department === selectedDepartment);
+    }
+
+    // Filter by job class
+    if (selectedJobClass !== 'all') {
+      filtered = filtered.filter(emp => emp.jobClass === selectedJobClass);
+    }
+
+    setFilteredResult(filtered);
+  };
+
+  // NEW: Get unique departments from result
+  const getUniqueDepartments = () => {
+    const departments = [...new Set(result.map(emp => emp.department).filter(Boolean))];
+    return departments.sort();
+  };
+
+  // NEW: Get unique job classes from result
+  const getUniqueJobClasses = () => {
+    const jobClasses = [...new Set(result.map(emp => emp.jobClass).filter(Boolean))];
+    return jobClasses.sort();
+  };
+
   const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
     const allowedTypes = [
@@ -1245,7 +1287,7 @@ function UploadFile() {
   
 
   const LoadingOverlay = () => {
-    console.log('LoadingOverlay rendered, recordCount:', recordCount); // Add this for debugging
+    console.log('LoadingOverlay rendered, recordCount:', recordCount);
     
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -1271,7 +1313,7 @@ function UploadFile() {
 
 
   const calculateCategoryAverages = () => {
-    if (!result || result.length === 0) return [];
+    if (!filteredResult || filteredResult.length === 0) return [];
     
     const categories = [
       { apiKey: 'finances', displayName: 'Finances' },
@@ -1287,7 +1329,7 @@ function UploadFile() {
       categoryCounts[displayName] = 0;
     });
     
-    result.forEach(employee => {
+    filteredResult.forEach(employee => {
       if (employee.categoryScores) {
         categories.forEach(({ apiKey, displayName }) => {
           const score = employee.categoryScores[apiKey] || 0;
@@ -1344,7 +1386,7 @@ const handleUploadClick = async () => {
     alert('No valid employee records found in the file. Please ensure your file contains records with Employee Names.');
     return;
   }
-  setIsLoading(true); // START LOADING
+  setIsLoading(true);
 
   try {
     let token = localStorage.getItem('token');
@@ -1384,17 +1426,13 @@ const handleUploadClick = async () => {
     setTotalAmount(finalAmount);
     setIsLoading(false);
     
-    // CHECK IF USER HAS SUFFICIENT CREDITS OR PAYMENT ABILITY
     if (finalAmount > 0 && creditsInCents === 0) {
-      // No credits at all, need full payment
       alert(`insufficient Credits please contact admin support rsmith@prognosticare.org`);
     
     } else if (finalAmount > 0 && creditsInCents > 0) {
-      // Has some credits but not enough
       alert(`insufficient Credits please contact admin support rsmith@prognosticare.org`);
 
     } else if (finalAmount === 0) {
-      // Has enough credits - SHOW CONFIRMATION FIRST
       setShowConfirmation(true);
     }
   } catch (error) {
@@ -1404,85 +1442,10 @@ const handleUploadClick = async () => {
   }
 };
 
-// const handleUploadClick = async () => {
-//   if (!file) return;
-
-//   try {
-//     let token = localStorage.getItem('token');
-//     const response = await fetch(`${BASE_URL}/calculate-price`, {
-//       method: 'POST',
-//       headers: {
-//         'Authorization': `Bearer ${token}`,
-//         'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify({ recordCount })
-//     });
-    
-//     const { totalAmount } = await response.json();
-    
-  
-//     setOriginalAmount(totalAmount);
-    
-   
-//     const creditsInCents = credits * 100;
-    
-//     let finalAmount = totalAmount;
-//     let creditsToUse = 0;
-    
-//     if (creditsInCents > 0) {
-//       if (creditsInCents >= totalAmount) {
-      
-//         creditsToUse = totalAmount / 100;
-//         finalAmount = 0;
-//       } else {
-        
-//         creditsToUse = credits;
-//         finalAmount = totalAmount - creditsInCents;
-//       }
-//     }
-    
-//     setTotalAmount(finalAmount);
-    
-  
-//     if (finalAmount === 0) {
-//       handleFreeProcessing(creditsToUse);
-//     } else {
-//       setShowConfirmation(true);
-//     }
-//   } catch (error) {
-//     console.error('Error calculating price:', error);
-//     alert('Error calculating price');
-//   }
-// };
-
 const handleFreeProcessing = async (creditsUsed) => {
   setIsLoading(true);
   
   try {
-    // COMMENT OUT API CALL - Using hardcoded data instead
-    /*
-    const formData = new FormData();
-    formData.append("employeeFile", file);
-    formData.append("recordCount", recordCount);
-    formData.append("creditsUsed", creditsUsed);
-    setSameFile(file);
-
-    let token = localStorage.getItem('token');
-
-    const res = await fetch(`${BASE_URL}/api/enrich`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      body: formData
-    });
-    
-    const data = await res.json();
-    setCorrectPasscode(data.passcode);
-    setResult(data.results);
-    */
-    
-    // HARDCODED DATA - Comment out and uncomment above when ready to use API
     setSameFile(file);
     setCorrectPasscode('DEMO2024');
     setResult(HARDCODED_DATA);
@@ -1499,21 +1462,44 @@ const handleFreeProcessing = async (creditsUsed) => {
   }
 };
 
-
 const handleConfirmUpload = async () => {
   setShowConfirmation(false);
- 
-  console.log('Setting isLoading to TRUE'); // Add this
+  setIsLoading(true);
   
   try {
     let token = localStorage.getItem('token');
     
-    // Check if this is a free processing (user has enough credits)
+    const formData = new FormData();
+    formData.append('employeeFile', file);
+    setSameFile(file);
+
+    console.log('Calling bulk upload API...');
+
+    // const uploadResponse = await fetch(`${BASE_URL}/bulk-upload`, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Authorization': `Bearer ${token}`,
+    //   },
+    //   body: formData
+    // });
+
+    // const uploadData = await uploadResponse.json();
+
+    // if (!uploadResponse.ok || !uploadData.success) {
+    //   throw new Error(uploadData.error || 'Failed to upload file');
+    // }
+
+    // console.log('Upload summary:', uploadData);
+
+    // if (uploadData.duplicates && uploadData.duplicates.length > 0) {
+    //   throw new Error(`Some employees have already been processed:\n${uploadData.duplicates.map(d => d.name).join(', ')}`);
+    // }
+
     if (totalAmount === 0) {
-      // Free processing with credits
       const creditsToUse = originalAmount / 100;
       
-      // DEDUCT CREDITS VIA API
+      console.log('Deducting credits:', creditsToUse);
+      
       const deductResponse = await fetch(`${BASE_URL}/deductCredits`, {
         method: 'POST',
         headers: {
@@ -1524,46 +1510,16 @@ const handleConfirmUpload = async () => {
       });
 
       if (!deductResponse.ok) {
-        throw new Error('Failed to deduct credits');
+        throw new Error('Failed to deduct credits. Please contact support.');
       }
 
-      // COMMENT OUT API CALL - Using hardcoded data instead
-      /*
-      const formData = new FormData();
-      formData.append("employeeFile", file);
-      formData.append("recordCount", recordCount);
-      formData.append("creditsUsed", creditsToUse);
-      setSameFile(file);
-
-      const res = await fetch(`${BASE_URL}/api/enrich`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData
-      });
-      
-      const data = await res.json();
-      setCorrectPasscode(data.passcode);
-      setResult(data.results);
-      */
-      
-      // HARDCODED DATA - Comment out and uncomment above when ready to use API
-      setSameFile(file);
-      setCorrectPasscode('DEMO2024');
-      setResult(HARDCODED_DATA);
-      setIsReportLocked(false);
-      
-      // Refresh credits to show updated balance
-      await getCredits();
-      
-      alert('File processed successfully using your credits!');
+      console.log('Credits deducted successfully');
     } else {
-      // Paid processing (partial credits + payment)
       
-      // If user has some credits, deduct them first
       if (credits > 0) {
-        const creditsToUse = credits; // Use all available credits
+        const creditsToUse = credits;
+        
+        console.log('Deducting partial credits:', creditsToUse);
         
         const deductResponse = await fetch(`${BASE_URL}/deductCredits`, {
           method: 'POST',
@@ -1575,55 +1531,29 @@ const handleConfirmUpload = async () => {
         });
 
         if (!deductResponse.ok) {
-          throw new Error('Failed to deduct credits');
+          throw new Error('Failed to deduct credits. Please contact support.');
         }
-      }
-      
-      // COMMENT OUT API CALL - Using hardcoded data instead
-      /*
-      const formData = new FormData();
-      formData.append("employeeFile", file);
-      const requiredCredits = originalAmount / 100;
-      formData.append("creditsUsed", requiredCredits.toString());
-      formData.append("amountPaid", (totalAmount / 100).toString());
-      setSameFile(file);
 
-      const res = await fetch(`${BASE_URL}/api/enrich`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData
-      });
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to process file');
+        console.log('Partial credits deducted successfully');
       }
-      
-      const data = await res.json();
-      setCorrectPasscode(data.passcode);
-      setResult(data.results);
-      */
-      
-      // HARDCODED DATA - Comment out and uncomment above when ready to use API
-      setSameFile(file);
-      setCorrectPasscode('DEMO2024');
-      setResult(HARDCODED_DATA);
-      setIsReportLocked(false);
-      
-      // Refresh credits to show updated balance
-      await getCredits();
-      
-      alert('File processed successfully!');
     }
+
+    setCorrectPasscode('DEMO2024');
+    setResult(HARDCODED_DATA);
+    setIsReportLocked(false);
+    
+    await getCredits();
+    
+
   } catch (error) {
-    console.error('Upload error:', error);
+    console.error('Upload error:', error.message);
     alert(error.message || 'Error uploading file');
   } finally {
-  
+    setIsLoading(false); 
   }
 };
+
+
 
   const handlePaymentSuccess = async (paymentIntentId) => {
     setShowStripePayment(false);
@@ -1650,7 +1580,6 @@ const handleConfirmUpload = async () => {
       setResult(data.results);
       setIsReportLocked(false);
       
-      // Refresh credits after payment
       await getCredits();
     } catch (error) {
       console.error('Upload error:', error);
@@ -1891,7 +1820,7 @@ const handleConfirmUpload = async () => {
       return;
     }
   
-    if (!result || result.length === 0) {
+    if (!filteredResult || filteredResult.length === 0) {
       alert('No data to export');
       return;
     }
@@ -1904,6 +1833,8 @@ const handleConfirmUpload = async () => {
       'E-mail Address',
       'Alternate Email',
       'Home Phone (Formatted)',
+      'Department',
+      'Job Class',
       'Finances',
       'Work Life',
       'Schedule',
@@ -1912,7 +1843,7 @@ const handleConfirmUpload = async () => {
       'Improvement Areas'
     ];
   
-    const csvRows = result.map((emp, index) => {
+    const csvRows = filteredResult.map((emp, index) => {
       return [
         emp.employeeNumber || (3321 + index),
         emp.name || 'Unknown',
@@ -1921,6 +1852,8 @@ const handleConfirmUpload = async () => {
         emp.email || '',
         emp.alternateEmail || '',
         emp.phone || '',
+        emp.department || '',
+        emp.jobClass || '',
         emp.categoryScores?.['finances'] || 0,
         emp.categoryScores?.['work life'] || 0,
         emp.categoryScores?.['schedule'] || 0,
@@ -1983,8 +1916,8 @@ const handleConfirmUpload = async () => {
 
 
   
-    const totalAverage = result.length > 0 
-      ? Math.round(result.reduce((sum, employee) => sum + (employee.totalScore || 0), 0) / result.length)
+    const totalAverage = filteredResult.length > 0 
+      ? Math.round(filteredResult.reduce((sum, employee) => sum + (employee.totalScore || 0), 0) / filteredResult.length)
       : 0;
     const [expandedEmployee, setExpandedEmployee] = useState(null);
     
@@ -2025,7 +1958,67 @@ const handleConfirmUpload = async () => {
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 mb-1 leading-tight">
               Overall Sentiment Risk Score
             </p>
+            <p className="text-xs sm:text-sm text-gray-500">
+              Showing {filteredResult.length} of {result.length} employees
+            </p>
           </div>
+        </div>
+
+        {/* NEW: Filter Section */}
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">Filter Results</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Department Filter */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Department
+              </label>
+              <select
+                value={selectedDepartment}
+                onChange={(e) => setSelectedDepartment(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              >
+                <option value="all">All Departments</option>
+                {getUniqueDepartments().map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Job Class Filter */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Job Class
+              </label>
+              <select
+                value={selectedJobClass}
+                onChange={(e) => setSelectedJobClass(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              >
+                <option value="all">All Job Classes</option>
+                {getUniqueJobClasses().map((jobClass) => (
+                  <option key={jobClass} value={jobClass}>
+                    {jobClass}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Clear Filters Button */}
+          {(selectedDepartment !== 'all' || selectedJobClass !== 'all') && (
+            <button
+              onClick={() => {
+                setSelectedDepartment('all');
+                setSelectedJobClass('all');
+              }}
+              className="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Clear all filters
+            </button>
+          )}
         </div>
     
         {isReportLocked && (
@@ -2045,6 +2038,7 @@ const handleConfirmUpload = async () => {
             <thead>
               <tr className="bg-gray-50 border-b-2 border-gray-200">
                 <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Applicant</th>
+                <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Department</th>
                 <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Job Class</th>
                 <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Retention Likelihood</th>
                 <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Net Promoter Score</th>
@@ -2052,7 +2046,7 @@ const handleConfirmUpload = async () => {
               </tr>
             </thead>
             <tbody>
-              {result?.map((employee, index) => (
+              {filteredResult?.map((employee, index) => (
                 <React.Fragment key={index}>
                   <tr 
                     className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
@@ -2072,6 +2066,10 @@ const handleConfirmUpload = async () => {
                           </div>
                         </div>
                       </div>
+                    </td>
+
+                    <td className="py-4 px-4 text-gray-700 text-sm">
+                      {employee?.department || 'N/A'}
                     </td>
     
                     <td className="py-4 px-4 text-gray-700 text-sm">
@@ -2132,7 +2130,7 @@ const handleConfirmUpload = async () => {
     
                   {expandedEmployee === index && (
                     <tr className="bg-gray-50">
-                      <td colSpan="5" className="p-6 border-b border-gray-200">
+                      <td colSpan="6" className="p-6 border-b border-gray-200">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                           <div>
                             <p className="text-xs text-gray-500 mb-1">Employee Number</p>
@@ -2141,6 +2139,14 @@ const handleConfirmUpload = async () => {
                           <div>
                             <p className="text-xs text-gray-500 mb-1">Name</p>
                             <p className="text-sm font-medium text-gray-900">{employee?.name || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Department</p>
+                            <p className="text-sm font-medium text-gray-900">{employee?.department || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Job Class</p>
+                            <p className="text-sm font-medium text-gray-900">{employee?.jobClass || 'N/A'}</p>
                           </div>
                         </div>
     
@@ -2278,69 +2284,111 @@ const handleConfirmUpload = async () => {
   </div>
 </div>
 
-  <div className="flex items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-   
-    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 text-center">
-    Staff Retention Application
-    </h2>
-  </div>  
-          
-          <div className="mb-3 flex justify-end">
-            <button
-              onClick={() => setShowSampleFormat(true)}
-              className="text-sm text-blue-600 hover:text-blue-700 underline"
-            >
-              View sample file format
-            </button>
-          </div>
+<div className="flex items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+ 
 
-          <div 
-            className={`border-2 border-dashed rounded-xl p-4 sm:p-6 lg:p-8 text-center mb-4 sm:mb-6 transition-all duration-300 ${
-              isDragging 
-                ? 'border-blue-500 bg-blue-50' 
-                : 'border-blue-300 bg-white hover:border-blue-400 hover:bg-blue-50'
-            }`}
-          >
-            <input 
-              type="file" 
-              id="fileInput" 
-              onChange={handleFileChange} 
-              accept=".csv, .xlsx"
-              className="hidden"
-            />
-            <label htmlFor="fileInput" className="cursor-pointer">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="40" 
-                height="40" 
-                viewBox="0 0 24 24"
-                fill="#3B82F6"
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16"
-              >
-                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
-              </svg>
-              <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-2">
-                Drag and drop your CSV/Excel file here or click to browse
-              </p>
-              {file && (
-                <p className="text-blue-600 font-medium text-sm sm:text-base mt-2">
-                  Selected file: {file.name}
-                </p>
-              )}
-            </label>
-          </div>
+<div className="flex gap-2">
+  <button 
+    onClick={() => setActiveTab('prehire')}
+    className={`px-4 py-2 text-sm sm:text-base font-medium text-white rounded ${
+      activeTab === 'prehire' ? 'bg-blue-600' : 'bg-blue-400'
+    } hover:bg-blue-700`}
+  >
+    Prehire
+  </button>
+  
+</div>
 
-          <button 
-            onClick={handleUploadClick} 
-            disabled={!file || isLoading}
-            className={`w-full sm:w-auto mx-auto block px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${
-              !file || isLoading
-                ? 'bg-gray-400 text-white cursor-not-allowed' 
-                : 'bg-blue-500 text-white hover:bg-blue-600 hover:transform hover:scale-105 active:scale-95'
-            }`}
-          >
-            {isLoading ? 'Processing...' : 'Upload & Analyze'}
-          </button>
+<h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 text-center">
+  Staff Retention Application
+</h2>
+<button 
+  onClick={() => setActiveTab('current')}
+  className={`px-4 py-2 text-sm sm:text-base font-medium text-white rounded ${
+    activeTab === 'current' ? 'bg-green-600' : 'bg-green-400'
+  } hover:bg-green-700`}
+>
+  Current Staff
+</button>
+
+</div>
+ 
+{activeTab === 'current' && (
+  <>
+    <div className="mb-3 flex justify-end">
+      <button
+        onClick={() => setShowSampleFormat(true)}
+        className="text-sm text-blue-600 hover:text-blue-700 underline"
+      >
+        View sample file format
+      </button>
+    </div>
+
+    <div 
+      className={`border-2 border-dashed rounded-xl p-4 sm:p-6 lg:p-8 text-center mb-4 sm:mb-6 transition-all duration-300 ${
+        isDragging 
+          ? 'border-blue-500 bg-blue-50' 
+          : 'border-blue-300 bg-white hover:border-blue-400 hover:bg-blue-50'
+      }`}
+    >
+      <input 
+        type="file" 
+        id="fileInput" 
+        onChange={handleFileChange} 
+        accept=".csv, .xlsx"
+        className="hidden"
+      />
+      <label htmlFor="fileInput" className="cursor-pointer">
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="40" 
+          height="40" 
+          viewBox="0 0 24 24"
+          fill="#3B82F6"
+          className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16"
+        >
+          <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+        </svg>
+        <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-2">
+          Drag and drop your CSV/Excel file here or click to browse
+        </p>
+        {file && (
+          <p className="text-blue-600 font-medium text-sm sm:text-base mt-2">
+            Selected file: {file.name}
+          </p>
+        )}
+      </label>
+    </div>
+
+    <button 
+      onClick={handleUploadClick} 
+      disabled={!file || isLoading}
+      className={`w-full sm:w-auto mx-auto block px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${
+        !file || isLoading
+          ? 'bg-gray-400 text-white cursor-not-allowed' 
+          : 'bg-blue-500 text-white hover:bg-blue-600 hover:transform hover:scale-105 active:scale-95'
+      }`}
+    >
+      {isLoading ? 'Processing...' : 'Upload & Analyze'}
+    </button>
+
+    {result.length > 0 && (
+      <button 
+        onClick={exportToCSV}
+        className={`w-full sm:w-auto mx-auto block mt-3 px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${
+          isReportLocked 
+            ? 'bg-gray-400 text-white cursor-not-allowed' 
+            : 'bg-purple-500 text-white hover:bg-purple-600 hover:transform hover:scale-105 active:scale-95'
+        }`}
+      >
+        {isReportLocked ? '🔒 Export Locked' : 'Export CSV'}
+      </button>
+    )}
+  </>
+)}
+      
+
+       
 
           {result.length > 0 && (
             <button 
