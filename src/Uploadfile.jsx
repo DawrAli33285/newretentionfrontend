@@ -1027,224 +1027,389 @@
   const [filteredResult, setFilteredResult] = useState([]);
   const [filteredEmployeesData, setFilteredEmployeesData] = useState(null);
 
-    const HARDCODED_DATA = [
-      {
-        employeeNumber: 3321,
-        name: 'Abernathy, Rita K.',
-        address: '9790 North 100 West',
-        salaryRange: '40k-50k',
-        cityStateZip: 'Fountaintown, IN 46130',
-        email: 'rabernathy@hancockregional.org',
-        alternateEmail: '',
-        phone: '(317) 752-2091',
-        organization: 'Healthcare Services',
-        division: 'Clinical Operations',
-        hireDate: '03/20/2025',
-        categoryScores: {
-          'finances': 7,
-          'work life': 6,
-          'schedule': 3,
-          'family': 6
-        },
-        overallScore: 5.5,
-        totalScore: 5.5,
-        improvementArea: 'Financial',
-        jobClass: 'Receptionist',
-        department: 'Administration'
+  const HARDCODED_DATA = [
+    {
+      employeeNumber: 3321,
+      name: 'Abernathy, Rita K.',
+      address: '9790 North 100 West',
+      cityStateZip: 'Fountaintown, IN 46130',
+      email: 'rabernathy@hancockregional.org',
+      alternateEmail: '',
+      phone: '(317) 752-2091',
+      organization: 'Healthcare Services',
+      division: 'Clinical Operations',
+      department: 'Administration',
+      jobClass: 'Receptionist',
+      hireDate: '03/20/2025',
+      termDate: '',
+      salaryRange: '40k-50k',
+      dateOfBirth: '04/15/1983',  // age: 41
+      distanceMiles: 12,
+      tenureMonths: 22,
+      rightFitCandidate: true,
+      // Raw social scores (1-10 from CSV)
+      financeScore: 6,
+      scheduleScore: 8,
+      wlbScore: 6,
+      familyScore: 9,
+      // Sub-scores from scoring engine
+      agePoints: 7,
+      distancePoints: 10,
+      tenurePoints: 5,
+      turnoverPoints: 6,
+      financePoints: 0,
+      schedulePoints: -3,
+      wlbPoints: 0,
+      familyPoints: -5,
+      // Total retention score (sum of all 8)
+      retentionScore: 20,   // displayed as +20%
+      categoryScores: {
+        'finances': 6,
+        'work life': 6,
+        'schedule': 8,
+        'family': 9
       },
-      {
-        employeeNumber: 7051,
-        name: 'Abram, Crystal M.',
-        address: '4082 Congaree Ln',
-        organization: 'Healthcare Services',
-        division: 'Clinical Operations',
-        hireDate: '03/20/2023',
-        salaryRange: '70k-90k',
-        cityStateZip: 'Indianapolis, IN 46235',
-        email: 'cabram@hancockregional.org',
-        alternateEmail: 'crystalabram45@gmail.com',
-        phone: '(317) 640-9743',
-        categoryScores: {
-          'finances': 4,
-          'work life': 5,
-          'schedule': 9,
-          'family': 8
-        },
-        overallScore: 6.5,
-        totalScore: 6.5,
-        improvementArea: 'Work Life Balance',
-        jobClass: 'Receptionist',
-        department: 'Administration'
+      overallScore: 5.5,
+      totalScore: 5.5,
+      improvementArea: 'Financial'
+    },
+    {
+      employeeNumber: 7051,
+      name: 'Abram, Crystal M.',
+      address: '4082 Congaree Ln',
+      cityStateZip: 'Indianapolis, IN 46235',
+      email: 'cabram@hancockregional.org',
+      alternateEmail: 'crystalabram45@gmail.com',
+      phone: '(317) 640-9743',
+      organization: 'Healthcare Services',
+      division: 'Clinical Operations',
+      department: 'Administration',
+      jobClass: 'Receptionist',
+      hireDate: '03/20/2023',
+      termDate: '',
+      salaryRange: '70k-90k',
+      dateOfBirth: '07/22/1990',  // age: 34
+      distanceMiles: 8,
+      tenureMonths: 14,
+      rightFitCandidate: true,
+      financeScore: 4,
+      scheduleScore: 9,
+      wlbScore: 5,
+      familyScore: 8,
+      agePoints: 10,
+      distancePoints: 10,
+      tenurePoints: 7,
+      turnoverPoints: 6,
+      financePoints: 2,
+      schedulePoints: -5,
+      wlbPoints: 1,
+      familyPoints: -3,
+      retentionScore: 28,
+      categoryScores: {
+        'finances': 4,
+        'work life': 5,
+        'schedule': 9,
+        'family': 8
       },
-      {
-        employeeNumber: 8866,
-        name: 'Abrams, Tina J.',
-        address: '8538 S. Co. Rd. 200 W',
-        cityStateZip: 'Spiceland, IN 47385',
-        salaryRange: '70k-90k',
-        organization: 'Healthcare Services',
-        division: 'Clinical Operations',
-        email: 'tabrams@hancockregional.org',
-        termDate: '01/10/2025',
-        hireDate: '03/20/2021',
-        alternateEmail: 'tabrams8688@gmail.com',
-        phone: '(765) 524-8688',
-        categoryScores: {
-          'finances': 8,
-          'work life': 5,
-          'schedule': 8,
-          'family': 7
-        },
-        overallScore: 7,
-        totalScore: 7,
-        improvementArea: 'None',
-        jobClass: 'Therapist',
-        department: 'Physical Therapy'
+      overallScore: 6.5,
+      totalScore: 6.5,
+      improvementArea: 'Work Life Balance'
+    },
+    {
+      employeeNumber: 8866,
+      name: 'Abrams, Tina J.',
+      address: '8538 S. Co. Rd. 200 W',
+      cityStateZip: 'Spiceland, IN 47385',
+      email: 'tabrams@hancockregional.org',
+      alternateEmail: 'tabrams8688@gmail.com',
+      phone: '(765) 524-8688',
+      organization: 'Healthcare Services',
+      division: 'Clinical Operations',
+      department: 'Physical Therapy',
+      jobClass: 'Therapist',
+      hireDate: '03/20/2021',
+      termDate: '01/10/2025',
+      salaryRange: '70k-90k',
+      dateOfBirth: '11/03/1978',  // age: 46
+      distanceMiles: 45,
+      tenureMonths: 36,
+      rightFitCandidate: false,
+      financeScore: 8,
+      scheduleScore: 8,
+      wlbScore: 5,
+      familyScore: 7,
+      agePoints: 5,
+      distancePoints: 3,
+      tenurePoints: 3,
+      turnoverPoints: 9,
+      financePoints: -3,
+      schedulePoints: -3,
+      wlbPoints: 1,
+      familyPoints: -1,
+      retentionScore: 14,
+      categoryScores: {
+        'finances': 8,
+        'work life': 5,
+        'schedule': 8,
+        'family': 7
       },
-      {
-        employeeNumber: 8368,
-        name: 'Abu Manneh, Rona',
-        address: '10550 Geist View Drive',
-        cityStateZip: 'McCordsville, IN 46055',
-        organization: 'Healthcare Services',
-        termDate: '01/10/2025',
-        salaryRange: '60k-80k',
-        division: 'Clinical Operations',
-        hireDate: '03/20/2022',
-        email: 'rabu-manneh@hancockregional.org',
-        alternateEmail: '',
-        phone: '',
-        categoryScores: {
-          'finances': 5,
-          'work life': 2,
-          'schedule': 4,
-          'family': 3
-        },
-        overallScore: 3.5,
-        totalScore: 3.5,
-        improvementArea: 'Communication, Financial, Schedule',
-        jobClass: 'Therapist',
-        department: 'Physical Therapy'
+      overallScore: 7,
+      totalScore: 7,
+      improvementArea: 'None'
+    },
+    {
+      employeeNumber: 8368,
+      name: 'Abu Manneh, Rona',
+      address: '10550 Geist View Drive',
+      cityStateZip: 'McCordsville, IN 46055',
+      email: 'rabu-manneh@hancockregional.org',
+      alternateEmail: '',
+      phone: '',
+      organization: 'Healthcare Services',
+      division: 'Clinical Operations',
+      department: 'Physical Therapy',
+      jobClass: 'Therapist',
+      hireDate: '03/20/2022',
+      termDate: '01/10/2025',
+      salaryRange: '60k-80k',
+      dateOfBirth: '02/14/1995',  // age: 29
+      distanceMiles: 6,
+      tenureMonths: 10,
+      rightFitCandidate: false,
+      financeScore: 5,
+      scheduleScore: 4,
+      wlbScore: 2,
+      familyScore: 3,
+      agePoints: 10,
+      distancePoints: 10,
+      tenurePoints: 7,
+      turnoverPoints: 9,
+      financePoints: 1,
+      schedulePoints: 2,
+      wlbPoints: 5,
+      familyPoints: 3,
+      retentionScore: 47,
+      categoryScores: {
+        'finances': 5,
+        'work life': 2,
+        'schedule': 4,
+        'family': 3
       },
-      {
-        employeeNumber: 6885,
-        name: 'Acosta, Caitlin',
-        address: '2915 Sheffield Dr',
-        organization: 'Healthcare Services',
-        division: 'Clinical Operations',
-        salaryRange: '60k-80k',
-        cityStateZip: 'Indianapolis, IN 46229',
-        hireDate: '03/20/2020',
-        email: '',
-        termDate: '01/10/2025',
-        alternateEmail: '',
-        phone: '(608) 839-9957',
-        categoryScores: {
-          'finances': 7,
-          'work life': 8,
-          'schedule': 1,
-          'family': 8
-        },
-        overallScore: 6,
-        totalScore: 6,
-        improvementArea: 'Financial',
-        jobClass: 'Therapist',
-        department: 'Physical Therapy'
+      overallScore: 3.5,
+      totalScore: 3.5,
+      improvementArea: 'Communication, Financial, Schedule'
+    },
+    {
+      employeeNumber: 6885,
+      name: 'Acosta, Caitlin',
+      address: '2915 Sheffield Dr',
+      cityStateZip: 'Indianapolis, IN 46229',
+      email: '',
+      alternateEmail: '',
+      phone: '(608) 839-9957',
+      organization: 'Healthcare Services',
+      division: 'Clinical Operations',
+      department: 'Physical Therapy',
+      jobClass: 'Therapist',
+      hireDate: '03/20/2020',
+      termDate: '01/10/2025',
+      salaryRange: '60k-80k',
+      dateOfBirth: '09/30/1987',  // age: 37
+      distanceMiles: 20,
+      tenureMonths: 48,
+      rightFitCandidate: true,
+      financeScore: 7,
+      scheduleScore: 1,
+      wlbScore: 8,
+      familyScore: 8,
+      agePoints: 7,
+      distancePoints: 7,
+      tenurePoints: 1,
+      turnoverPoints: 9,
+      financePoints: -1,
+      schedulePoints: 7,
+      wlbPoints: -3,
+      familyPoints: -3,
+      retentionScore: 24,
+      categoryScores: {
+        'finances': 7,
+        'work life': 8,
+        'schedule': 1,
+        'family': 8
       },
-      {
-        employeeNumber: 900003,
-        name: 'Adams, Debra',
-        address: '801 N. State St.',
-        cityStateZip: 'Greenfield, IN 46140',
-        hireDate: '03/20/2020',
-        email: '',
-        salaryRange: '40k-50k',
-        organization: 'Healthcare Services',
-        division: 'Clinical Operations',
-        alternateEmail: '',
-        phone: '',
-        categoryScores: {
-          'finances': 10,
-          'work life': 8,
-          'schedule': 1,
-          'family': 2
-        },
-        overallScore: 5.25,
-        totalScore: 5.25,
-        improvementArea: 'Financial, Schedule',
-        jobClass: 'Nurse',
-        department: 'Nursing'
+      overallScore: 6,
+      totalScore: 6,
+      improvementArea: 'Financial'
+    },
+    {
+      employeeNumber: 900003,
+      name: 'Adams, Debra',
+      address: '801 N. State St.',
+      cityStateZip: 'Greenfield, IN 46140',
+      email: '',
+      alternateEmail: '',
+      phone: '',
+      organization: 'Healthcare Services',
+      division: 'Clinical Operations',
+      department: 'Nursing',
+      jobClass: 'Nurse',
+      hireDate: '03/20/2020',
+      termDate: '',
+      salaryRange: '40k-50k',
+      dateOfBirth: '06/12/1970',  // age: 54
+      distanceMiles: 3,
+      tenureMonths: 60,
+      rightFitCandidate: false,
+      financeScore: 10,
+      scheduleScore: 1,
+      wlbScore: 8,
+      familyScore: 2,
+      agePoints: 3,
+      distancePoints: 15,
+      tenurePoints: -1,
+      turnoverPoints: 12,
+      financePoints: -7,
+      schedulePoints: 7,
+      wlbPoints: -3,
+      familyPoints: 5,
+      retentionScore: 31,
+      categoryScores: {
+        'finances': 10,
+        'work life': 8,
+        'schedule': 1,
+        'family': 2
       },
-      {
-        employeeNumber: 7579,
-        name: 'Adams, Natalie N.',
-        address: '1611 Whisler Drive',
-        cityStateZip: 'Greenfield, IN 46140',
-        email: 'nadams@hancockhealth.org',
-        hireDate: '03/20/2020',
-        alternateEmail: 'nadams@hancockhealth.org',
-        phone: '(317) 414-4477',
-        organization: 'Healthcare Services',
-        division: 'Clinical Operations',
-        categoryScores: {
-          'finances': 3,
-          'work life': 1,
-          'schedule': 1,
-          'family': 10
-        },
-        overallScore: 3.75,
-        totalScore: 3.75,
-        improvementArea: 'Work Life Balance, Communication, Financial',
-        jobClass: 'Nurse',
-        department: 'Nursing'
+      overallScore: 5.25,
+      totalScore: 5.25,
+      improvementArea: 'Financial, Schedule'
+    },
+    {
+      employeeNumber: 7579,
+      name: 'Adams, Natalie N.',
+      address: '1611 Whisler Drive',
+      cityStateZip: 'Greenfield, IN 46140',
+      email: 'nadams@hancockhealth.org',
+      alternateEmail: 'nadams@hancockhealth.org',
+      phone: '(317) 414-4477',
+      organization: 'Healthcare Services',
+      division: 'Clinical Operations',
+      department: 'Nursing',
+      jobClass: 'Nurse',
+      hireDate: '03/20/2020',
+      termDate: '',
+      salaryRange: '40k-50k',
+      dateOfBirth: '03/08/1992',  // age: 32
+      distanceMiles: 2,
+      tenureMonths: 60,
+      rightFitCandidate: true,
+      financeScore: 3,
+      scheduleScore: 1,
+      wlbScore: 1,
+      familyScore: 10,
+      agePoints: 10,
+      distancePoints: 15,
+      tenurePoints: -1,
+      turnoverPoints: 12,
+      financePoints: 3,
+      schedulePoints: 7,
+      wlbPoints: 7,
+      familyPoints: -7,
+      retentionScore: 46,
+      categoryScores: {
+        'finances': 3,
+        'work life': 1,
+        'schedule': 1,
+        'family': 10
       },
-      {
-        employeeNumber: 5706,
-        name: 'Adolay, Jennifer L.',
-        address: '9917 Wild Turkey Row',
-        cityStateZip: 'McCordsville, IN 46055',
-        hireDate: '03/20/2020',
-        email: 'jadolay@hancockregional.org',
-        organization: 'Healthcare Services',
-        division: 'Clinical Operations',
-        alternateEmail: 'adolayp@comcast.net',
-        phone: '',
-        categoryScores: {
-          'finances': 7,
-          'work life': 8,
-          'schedule': 1,
-          'family': 9
-        },
-        overallScore: 6.25,
-        totalScore: 6.25,
-        improvementArea: 'Financial',
-        jobClass: 'Nurse',
-        department: 'Nursing'
+      overallScore: 3.75,
+      totalScore: 3.75,
+      improvementArea: 'Work Life Balance, Communication, Financial'
+    },
+    {
+      employeeNumber: 5706,
+      name: 'Adolay, Jennifer L.',
+      address: '9917 Wild Turkey Row',
+      cityStateZip: 'McCordsville, IN 46055',
+      email: 'jadolay@hancockregional.org',
+      alternateEmail: 'adolayp@comcast.net',
+      phone: '',
+      organization: 'Healthcare Services',
+      division: 'Clinical Operations',
+      department: 'Nursing',
+      jobClass: 'Nurse',
+      hireDate: '03/20/2020',
+      termDate: '',
+      salaryRange: '60k-80k',
+      dateOfBirth: '12/25/1985',  // age: 39
+      distanceMiles: 15,
+      tenureMonths: 60,
+      rightFitCandidate: true,
+      financeScore: 7,
+      scheduleScore: 1,
+      wlbScore: 8,
+      familyScore: 9,
+      agePoints: 7,
+      distancePoints: 7,
+      tenurePoints: -1,
+      turnoverPoints: 12,
+      financePoints: -1,
+      schedulePoints: 7,
+      wlbPoints: -3,
+      familyPoints: -5,
+      retentionScore: 23,
+      categoryScores: {
+        'finances': 7,
+        'work life': 8,
+        'schedule': 1,
+        'family': 9
       },
-      {
-        employeeNumber: 6725,
-        name: 'Aitken, Madison O.',
-        address: '4029 E 1100 N',
-        cityStateZip: 'Pendleton, IN 46064',
-        email: 'MGELLINGER@HANCOCKREGIONAL.ORG',
-        organization: 'Healthcare Services',
-        division: 'Clinical Operations',
-        hireDate: '03/20/2020',
-        alternateEmail: 'madisongellinger2016@gmail.com',
-        phone: '(317) 617-8903',
-        categoryScores: {
-          'finances': 8,
-          'work life': 5,
-          'schedule': 8,
-          'family': 4
-        },
-        overallScore: 6.25,
-        totalScore: 6.25,
-        improvementArea: 'Schedule',
-        jobClass: 'Nurse',
-        department: 'Nursing'
-      }
-    ];
+      overallScore: 6.25,
+      totalScore: 6.25,
+      improvementArea: 'Financial'
+    },
+    {
+      employeeNumber: 6725,
+      name: 'Aitken, Madison O.',
+      address: '4029 E 1100 N',
+      cityStateZip: 'Pendleton, IN 46064',
+      email: 'MGELLINGER@HANCOCKREGIONAL.ORG',
+      alternateEmail: 'madisongellinger2016@gmail.com',
+      phone: '(317) 617-8903',
+      organization: 'Healthcare Services',
+      division: 'Clinical Operations',
+      department: 'Nursing',
+      jobClass: 'Nurse',
+      hireDate: '03/20/2020',
+      termDate: '',
+      salaryRange: '60k-80k',
+      dateOfBirth: '08/19/1998',  // age: 26
+      distanceMiles: 18,
+      tenureMonths: 60,
+      rightFitCandidate: true,
+      financeScore: 8,
+      scheduleScore: 8,
+      wlbScore: 5,
+      familyScore: 4,
+      agePoints: 10,
+      distancePoints: 7,
+      tenurePoints: -1,
+      turnoverPoints: 12,
+      financePoints: -3,
+      schedulePoints: -3,
+      wlbPoints: 1,
+      familyPoints: 2,
+      retentionScore: 25,
+      categoryScores: {
+        'finances': 8,
+        'work life': 5,
+        'schedule': 8,
+        'family': 4
+      },
+      overallScore: 6.25,
+      totalScore: 6.25,
+      improvementArea: 'Schedule'
+    }
+  ];  
 
     // NEW: Apply filters whenever result, selectedDepartment, or selectedJobClass changes
     useEffect(() => {
@@ -1379,9 +1544,56 @@ const getFilteredRecordCount = () => {
           // Get header row and find Employee Name column index
         // Get header row and find Employee Name column index
 const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
-const employeeNameIndex = headers.findIndex(h => 
-  h.toLowerCase().includes('employee name')
+const REQUIRED_COLUMNS = [
+  'employee name',
+  'address line 1',
+  'city',
+  'e-mail address',
+  'date of birth',
+  'hire date',
+  'term date',
+  'organization',
+  'division',
+  'department',
+  'job class',
+  'finance score',
+  'schedule score',
+  'work life balance score',
+  'family score'
+];
+
+const missingColumns = REQUIRED_COLUMNS.filter(required => 
+  !headers.some(h => h.toLowerCase().includes(required.toLowerCase()))
 );
+
+if (missingColumns.length > 0) {
+  alert(`❌ Invalid file format. Missing required columns:\n\n${missingColumns.join('\n')}\n\nPlease check the sample file format and try again.`);
+  setFile(null);
+  setRecordCount(0);
+  // Reset file input
+  e.target.value = '';
+  return;
+}
+
+// All required columns present, count valid rows
+const employeeNameIndex = headers.findIndex(h => 
+  h.toLowerCase() === 'employee name (last suffix, first mi)'
+);
+
+let validCount = 0;
+for (let i = 1; i < lines.length; i++) {
+  const columns = lines[i].split(',');
+  const employeeName = columns[employeeNameIndex]?.trim().replace(/['"]/g, '');
+  if (employeeName && employeeName.length > 0) {
+    validCount++;
+  }
+}
+
+console.log('Valid employee count:', validCount);
+setRecordCount(validCount);
+
+  
+
 
 console.log('Headers:', headers);
 console.log('Employee Name Index:', employeeNameIndex);
@@ -1858,7 +2070,7 @@ if (finalAmount > 0 && creditsInCents === 0) {
       }
 
       console.log('Upload summary:', uploadData);
-
+      console.log('First record from backend:', JSON.stringify(uploadData.successfulRecords[0], null, 2));
  
       if (uploadData.duplicates && uploadData.duplicates.length > 0) {
         throw new Error(`Some employees have already been processed within the last month:\n${uploadData.duplicates.map(d => d.name).join(', ')}`);
@@ -1909,15 +2121,41 @@ if (finalAmount > 0 && creditsInCents === 0) {
           console.log('Partial credits deducted successfully');
         }
       }
-
       setCorrectPasscode('DEMO2024');
-      setResult(HARDCODED_DATA);
+      
+      // Map backend scores onto hardcoded data by matching name
+      console.log('=== MATCHING DEBUG ===');
+      console.log('Backend names:', uploadData.successfulRecords.map(r => r.name));
+      console.log('Hardcoded names:', HARDCODED_DATA.map(e => e.name));
+
+      const scoredData = HARDCODED_DATA.map((hardcodedEmp, index) => {
+        const liveEmp = uploadData.successfulRecords[index];
+        
+        console.log(`Index ${index}: hardcoded="${hardcodedEmp.name}" | live agePoints=${liveEmp?.agePoints}`); // ADD THIS
+        
+        if (liveEmp) {
+          return {
+            ...hardcodedEmp,
+            agePoints:      liveEmp.agePoints      ?? hardcodedEmp.agePoints,
+            distancePoints: liveEmp.distancePoints ?? hardcodedEmp.distancePoints,
+            tenurePoints:   liveEmp.tenurePoints   ?? hardcodedEmp.tenurePoints,
+            turnoverPoints: liveEmp.turnoverPoints ?? hardcodedEmp.turnoverPoints,
+            financePoints:  liveEmp.financePoints  ?? hardcodedEmp.financePoints,
+            schedulePoints: liveEmp.schedulePoints ?? hardcodedEmp.schedulePoints,
+            wlbPoints:      liveEmp.wlbPoints      ?? hardcodedEmp.wlbPoints,
+            familyPoints:   liveEmp.familyPoints   ?? hardcodedEmp.familyPoints,
+            retentionScore: liveEmp.retentionScore ?? hardcodedEmp.retentionScore,
+            age:            liveEmp.age            ?? hardcodedEmp.age,
+            tenureMonths:   liveEmp.tenureMonths   ?? hardcodedEmp.tenureMonths,
+            distanceMiles:  liveEmp.distanceMiles  ?? hardcodedEmp.distanceMiles,
+          };
+        }
+        return hardcodedEmp;
+      });
+
+      setResult(scoredData);
       setIsReportLocked(false);
-      
-     
       await getCredits();
-      
-     
     } catch (error) {
       console.error('Upload error:', error.message);
       alert(error.message || 'Error uploading file');
@@ -2139,10 +2377,35 @@ if (finalAmount > 0 && creditsInCents === 0) {
                       <td className="py-2 px-3 text-gray-600">Emergency Services</td>
                     </tr>
                     <tr className="border-b border-red-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">Job Class</td>
-                      <td className="py-2 px-3">Job classification</td>
-                      <td className="py-2 px-3 text-gray-600">Registered Nurse</td>
-                    </tr>
+  <td className="py-2 px-3 font-mono text-xs bg-white">Job Class</td>
+  <td className="py-2 px-3">Job classification</td>
+  <td className="py-2 px-3 text-gray-600">Registered Nurse</td>
+</tr>
+<tr className="border-b border-red-200">
+  <td className="py-2 px-3 font-mono text-xs bg-white">Date of Birth</td>
+  <td className="py-2 px-3">Used to calculate age score</td>
+  <td className="py-2 px-3 text-gray-600">01/15/1985</td>
+</tr>
+<tr className="border-b border-red-200">
+  <td className="py-2 px-3 font-mono text-xs bg-white">Finance Score (1-10)</td>
+  <td className="py-2 px-3">Social listening score for finances</td>
+  <td className="py-2 px-3 text-gray-600">6</td>
+</tr>
+<tr className="border-b border-red-200">
+  <td className="py-2 px-3 font-mono text-xs bg-white">Schedule Score (1-10)</td>
+  <td className="py-2 px-3">Social listening score for schedule</td>
+  <td className="py-2 px-3 text-gray-600">8</td>
+</tr>
+<tr className="border-b border-red-200">
+  <td className="py-2 px-3 font-mono text-xs bg-white">Work Life Balance Score (1-10)</td>
+  <td className="py-2 px-3">Social listening score for work life balance</td>
+  <td className="py-2 px-3 text-gray-600">6</td>
+</tr>
+<tr className="border-b border-red-200">
+  <td className="py-2 px-3 font-mono text-xs bg-white">Family Score (1-10)</td>
+  <td className="py-2 px-3">Social listening score for family</td>
+  <td className="py-2 px-3 text-gray-600">9</td>
+</tr>
                   </tbody>
                 </table>
               </div>
@@ -2179,11 +2442,7 @@ if (finalAmount > 0 && creditsInCents === 0) {
                       <td className="py-2 px-3">Unique employee identifier</td>
                       <td className="py-2 px-3 text-gray-600">3321</td>
                     </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">Date of Birth</td>
-                      <td className="py-2 px-3">Employee birth date</td>
-                      <td className="py-2 px-3 text-gray-600">01/15/1985</td>
-                    </tr>
+                   
                     <tr className="border-b border-gray-200">
                       <td className="py-2 px-3 font-mono text-xs bg-white">Employment Status</td>
                       <td className="py-2 px-3">Current status</td>
@@ -2197,11 +2456,10 @@ if (finalAmount > 0 && creditsInCents === 0) {
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Sample Data Preview:</h3>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 overflow-x-auto">
                   <pre className="text-xs font-mono whitespace-pre">
-  {`Employee Name (Last Suffix, First MI),E-mail Address,Address Line 1 + Address Line 2,City, State Zip Code (Formatted),Hire Date,Term Date,Organization,Division,Department,Job Class,Home Phone (Formatted)
-  Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,Fountaintown IN 46130,03/20/2020,,Healthcare Services,Clinical Ops,Emergency,Registered Nurse,(317) 752-2091
-  Abram, Crystal M.,cabram@company.org,4082 Congaree Ln,Indianapolis IN 46235,01/15/2019,,Healthcare Services,Admin,Reception,Receptionist,(317) 640-9743
-  Abrams, Tina J.,tabrams@company.org,8538 S. Co. Rd. 200 W,Spiceland IN 47385,05/10/2021,,Healthcare Services,Admin,Reception,Receptionist,(765) 524-8688`}
-                  </pre>
+                  {`Employee Name (Last Suffix, First MI),E-mail Address,Address Line 1 + Address Line 2,City State Zip Code (Formatted),Date of Birth,Hire Date,Term Date,Organization,Division,Department,Job Class,Finance Score,Schedule Score,Work Life Balance Score,Family Score
+Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,Fountaintown IN 46130,01/15/1985,03/20/2020,,Healthcare Services,Clinical Ops,Emergency,Registered Nurse,6,8,6,9
+Abram, Crystal M.,cabram@company.org,4082 Congaree Ln,Indianapolis IN 46235,03/22/1990,01/15/2019,,Healthcare Services,Admin,Reception,Receptionist,4,9,5,8
+Abrams, Tina J.,tabrams@company.org,8538 S. Co. Rd. 200 W,Spiceland IN 47385,07/11/1988,05/10/2021,,Healthcare Services,Admin,Reception,Receptionist,8,8,5,7`} </pre>
                 </div>
               </div>
 
@@ -2575,14 +2833,15 @@ if (finalAmount > 0 && creditsInCents === 0) {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-gray-50 border-b-2 border-gray-200">
-                  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Applicant</th>
-                  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Department</th>
-                  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Job Class</th>
-                  <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Retention Likelihood</th>
-                  <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Net Promoter Score</th>
-                  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Domains</th>
-                </tr>
+              <tr className="bg-gray-50 border-b-2 border-gray-200">
+  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Applicant</th>
+  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Department</th>
+  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Job Class</th>
+  <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Retention Likelihood</th>
+  <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Retention Delta</th>
+  <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Right Fit</th>
+  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Domains</th>
+</tr>
               </thead>
               <tbody>
                 {filteredResult?.map((employee, index) => (
@@ -2631,21 +2890,53 @@ if (finalAmount > 0 && creditsInCents === 0) {
     </div>
   </td>
       
-                      <td className="py-4 px-4">
+  <td className="py-4 px-4">
                         <div className="flex justify-center">
-                        <span 
-    className={`inline-block px-5 py-2 rounded-full font-semibold text-sm ${getNPSColor(employee?.totalScore || 0)}`}
-    style={{
-      backgroundColor: 
-        (employee?.totalScore || 0) >= 7 ? '#41d756' : 
-        (employee?.totalScore || 0) >= 4 ? '#fdc002' : 
-        '#fb0000'
-    }}
-  >
-    {getNPSLabel(employee?.totalScore || 0)}
-  </span>
+                          <span
+                            className={`inline-block px-5 py-2 rounded-full font-semibold text-sm ${getNPSColor(employee?.totalScore || 0)}`}
+                            style={{
+                              backgroundColor:
+                                (employee?.totalScore || 0) >= 7 ? '#41d756' :
+                                (employee?.totalScore || 0) >= 4 ? '#fdc002' :
+                                '#fb0000'
+                            }}
+                          >
+                            {getNPSLabel(employee?.totalScore || 0)}
+                          </span>
                         </div>
                       </td>
+
+                      {/* Retention Delta */}
+                    {/* Retention Delta */}
+                    <td className="py-4 px-4">
+                        <div className="flex justify-center">
+                          <span
+                            className="inline-block px-4 py-2 rounded-full text-white font-bold text-sm"
+                            style={{
+                              backgroundColor:
+                                (employee?.retentionScore || 0) >= 20 ? '#41d756' :
+                                (employee?.retentionScore || 0) >= 0 ? '#fdc002' :
+                                '#fb0000'
+                            }}
+                          >
+                            {(employee?.retentionScore || 0) >= 0 ? `+${employee?.retentionScore}%` : `${employee?.retentionScore}%`}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Right Fit */}
+                      <td className="py-4 px-4">
+                        <div className="flex justify-center">
+                          <span
+                            className="inline-block px-3 py-1 rounded-full text-white text-xs font-semibold"
+                            style={{ backgroundColor: employee?.rightFitCandidate ? '#41d756' : '#fb0000' }}
+                          >
+                            {employee?.rightFitCandidate ? '✓ Yes' : '✗ No'}
+                          </span>
+                        </div>
+                      </td>
+
+                  
       
                       <td className="py-4 px-4">
     <div className="flex flex-col gap-2">
@@ -2669,127 +2960,239 @@ if (finalAmount > 0 && creditsInCents === 0) {
       
                     {expandedEmployee === index && (
                       <tr className="bg-gray-50">
-                        <td colSpan="6" className="p-6 border-b border-gray-200">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Employee Number</p>
-                              <p className="text-sm font-medium text-gray-900">{employee?.employeeNumber || 'N/A'}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Name</p>
-                              <p className="text-sm font-medium text-gray-900">{employee?.name || 'N/A'}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Department</p>
-                              <p className="text-sm font-medium text-gray-900">{employee?.department || 'N/A'}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Job Class</p>
-                              <p className="text-sm font-medium text-gray-900">{employee?.jobClass || 'N/A'}</p>
-                            </div>
-                          </div>
-      
-                          <div className="border-t border-gray-200 pt-4 mt-4">
-                            <p className="text-sm font-semibold text-gray-700 mb-3">Category Scores</p>
-                            <div className="space-y-3">
-                              <div>
-                                <div className="flex justify-between text-xs mb-1">
-                                  <span className="text-gray-600">Finances</span>
-                                  <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['finances'] || 0)}`}>
-                                    {getCategoryRiskLevel(employee?.categoryScores?.['finances'] || 0)}
-                                  </span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-    <div 
-      className="h-2 rounded-full transition-all"
-      style={{ 
-        width: `${(employee?.categoryScores?.['finances'] || 0) * 10}%`,
-        backgroundColor: 
-          (employee?.categoryScores?.['finances'] || 0) >= 7 ? '#fb0000' : 
-          (employee?.categoryScores?.['finances'] || 0) >= 4 ? '#fdc002' : 
-          '#41d756'
-      }}
-    />
+             <td colSpan="8" className="p-6 border-b border-gray-200">
+
+<div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+  <div>
+    <p className="text-xs text-gray-500 mb-1">Name</p>
+    <p className="text-sm font-medium text-gray-900">{employee?.name || 'N/A'}</p>
   </div>
-                              </div>
-                              <div>
-                                <div className="flex justify-between text-xs mb-1">
-                                  <span className="text-gray-600">Work Life</span>
-                                  <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['work life'] || 0)}`}>
-                                    {getCategoryRiskLevel(employee?.categoryScores?.['work life'] || 0)}
-                                  </span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-    <div 
-      className="h-2 rounded-full transition-all"
-      style={{ 
-        width: `${(employee?.categoryScores?.['work life'] || 0) * 10}%`,
-        backgroundColor: 
-          (employee?.categoryScores?.['work life'] || 0) >= 7 ? '#fb0000' : 
-          (employee?.categoryScores?.['work life'] || 0) >= 4 ? '#fdc002' : 
-          '#41d756'
-      }}
-    />
+  <div>
+    <p className="text-xs text-gray-500 mb-1">Department</p>
+    <p className="text-sm font-medium text-gray-900">{employee?.department || 'N/A'}</p>
   </div>
-                              </div>
-                              <div>
-                                <div className="flex justify-between text-xs mb-1">
-                                  <span className="text-gray-600">Schedule</span>
-                                  <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['schedule'] || 0)}`}>
-                                    {getCategoryRiskLevel(employee?.categoryScores?.['schedule'] || 0)}
-                                  </span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-    <div 
-      className="h-2 rounded-full transition-all"
-      style={{ 
-        width: `${(employee?.categoryScores?.['schedule'] || 0) * 10}%`,
-        backgroundColor: 
-          (employee?.categoryScores?.['schedule'] || 0) >= 7 ? '#fb0000' : 
-          (employee?.categoryScores?.['schedule'] || 0) >= 4 ? '#fdc002' : 
-          '#41d756'
-      }}
-    />
+  <div>
+    <p className="text-xs text-gray-500 mb-1">Job Class</p>
+    <p className="text-sm font-medium text-gray-900">{employee?.jobClass || 'N/A'}</p>
   </div>
-                              </div>
-                              <div>
-                                <div className="flex justify-between text-xs mb-1">
-                                  <span className="text-gray-600">Family</span>
-                                  <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['family'] || 0)}`}>
-                                    {getCategoryRiskLevel(employee?.categoryScores?.['family'] || 0)}
-                                  </span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-    <div 
-      className="h-2 rounded-full transition-all"
-      style={{ 
-        width: `${(employee?.categoryScores?.['family'] || 0) * 10}%`,
-        backgroundColor: 
-          (employee?.categoryScores?.['family'] || 0) >= 7 ? '#fb0000' : 
-          (employee?.categoryScores?.['family'] || 0) >= 4 ? '#fdc002' : 
-          '#41d756'
-      }}
-    />
+  <div>
+    <p className="text-xs text-gray-500 mb-1">Age</p>
+    <p className="text-sm font-medium text-gray-900">
+      {(() => {
+        if (employee?.age) return `${employee.age} years`;
+        if (employee?.dateOfBirth) {
+          const dob = new Date(employee.dateOfBirth);
+          const today = new Date();
+          let age = today.getFullYear() - dob.getFullYear();
+          const m = today.getMonth() - dob.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+          return isNaN(age) ? 'N/A' : `${age} years`;
+        }
+        return 'N/A';
+      })()}
+    </p>
   </div>
-                              </div>
-                            </div>
-                          </div>
-      
-                          <div className="border-t border-gray-200 pt-4 mt-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                              <div>
-                                <p className="text-xs text-gray-500 mb-1">Total Score</p>
-                                <p className={`text-lg font-bold ${getCategoryRiskColor(employee?.totalScore || 0)}`}>
-                                  {getCategoryRiskLevel(employee?.totalScore || 0)}
-                                </p>
-                              </div>
-                              <div>
-    <p className="text-xs text-gray-500 mb-1">Improvement Area</p>
-    <p className="text-sm font-semibold" style={{ color: '#fb0000' }}>{getImprovementArea(employee)}</p>
+  <div>
+  <p className="text-xs text-gray-500 mb-1">Age Band</p>
+  <p className="text-sm font-medium text-gray-900">
+    {employee?.agePoints != null ? (
+      <span className={`font-bold ${
+        employee.agePoints >= 10 ? 'text-green-600' : 
+        employee.agePoints >= 5 ? 'text-yellow-600' : 
+        'text-red-500'
+      }`}>
+        {employee.agePoints >= 15 ? '15–19' :
+         employee.agePoints >= 10 ? '20–24 (Optimal)' :
+         employee.agePoints >= 7  ? '25–34' :
+         employee.agePoints >= 5  ? '35–44' :
+         employee.agePoints >= 3  ? '45–54' :
+         employee.agePoints >= 1  ? '55–64' :
+                                    '65+'}
+      </span>
+    ) : 'N/A'}
+  </p>
+</div>
+
+<div>
+  <p className="text-xs text-gray-500 mb-1">Tenure Band</p>
+  <p className="text-sm font-medium text-gray-900">
+    {employee?.tenurePoints != null ? (
+      <span className={`font-bold ${
+        employee.tenurePoints >= 10 ? 'text-green-600' : 
+        employee.tenurePoints >= 5  ? 'text-yellow-600' : 
+        'text-red-500'
+      }`}>
+        {employee.tenurePoints >= 15 ? '0–3 mo (High Risk)' :
+         employee.tenurePoints >= 10 ? '4–6 mo' :
+         employee.tenurePoints >= 7  ? '7–12 mo' :
+         employee.tenurePoints >= 5  ? '13–24 mo' :
+         employee.tenurePoints >= 3  ? '25–36 mo' :
+         employee.tenurePoints >= -1 ? '37–60 mo' :
+                                       '5+ yr'}
+      </span>
+    ) : 'N/A'}
+  </p>
+</div>
+
+<div>
+  <p className="text-xs text-gray-500 mb-1">Distance Band</p>
+  <p className="text-sm font-medium text-gray-900">
+    {employee?.distancePoints != null ? (
+      <span className={`font-bold ${
+        employee.distancePoints >= 10 ? 'text-green-600' : 
+        employee.distancePoints >= 5  ? 'text-yellow-600' : 
+        'text-red-500'
+      }`}>
+        {employee.distancePoints >= 15 ? '0–5 mi' :
+         employee.distancePoints >= 10 ? '6–10 mi' :
+         employee.distancePoints >= 7  ? '11–20 mi' :
+         employee.distancePoints >= 5  ? '21–30 mi' :
+         employee.distancePoints >= 3  ? '31–50 mi' :
+         employee.distancePoints >= -5 ? '51–100 mi' :
+                                         '100+ mi'}
+      </span>
+    ) : 'N/A'}
+  </p>
   </div>
-                            </div>
-                          </div>
-                        </td>
+  <div>
+    <p className="text-xs text-gray-500 mb-1">Hire Date</p>
+    <p className="text-sm font-medium text-gray-900">{employee?.hireDate || 'N/A'}</p>
+  </div>
+  <div>
+    <p className="text-xs text-gray-500 mb-1">Salary Range</p>
+    <p className="text-sm font-medium text-gray-900">{employee?.salaryRange || 'N/A'}</p>
+  </div>
+</div>
+
+<div className="border-t border-gray-200 pt-4 mt-4">
+  <p className="text-sm font-semibold text-gray-700 mb-3">Category Scores</p>
+  <div className="space-y-3">
+    <div>
+      <div className="flex justify-between text-xs mb-1">
+        <span className="text-gray-600">Finances</span>
+        <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['finances'] || 0)}`}>
+          {getCategoryRiskLevel(employee?.categoryScores?.['finances'] || 0)}
+        </span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-2">
+        <div
+          className="h-2 rounded-full transition-all"
+          style={{
+            width: `${(employee?.categoryScores?.['finances'] || 0) * 10}%`,
+            backgroundColor:
+              (employee?.categoryScores?.['finances'] || 0) >= 7 ? '#fb0000' :
+              (employee?.categoryScores?.['finances'] || 0) >= 4 ? '#fdc002' :
+              '#41d756'
+          }}
+        />
+      </div>
+    </div>
+    <div>
+      <div className="flex justify-between text-xs mb-1">
+        <span className="text-gray-600">Work Life</span>
+        <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['work life'] || 0)}`}>
+          {getCategoryRiskLevel(employee?.categoryScores?.['work life'] || 0)}
+        </span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-2">
+        <div
+          className="h-2 rounded-full transition-all"
+          style={{
+            width: `${(employee?.categoryScores?.['work life'] || 0) * 10}%`,
+            backgroundColor:
+              (employee?.categoryScores?.['work life'] || 0) >= 7 ? '#fb0000' :
+              (employee?.categoryScores?.['work life'] || 0) >= 4 ? '#fdc002' :
+              '#41d756'
+          }}
+        />
+      </div>
+    </div>
+    <div>
+      <div className="flex justify-between text-xs mb-1">
+        <span className="text-gray-600">Schedule</span>
+        <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['schedule'] || 0)}`}>
+          {getCategoryRiskLevel(employee?.categoryScores?.['schedule'] || 0)}
+        </span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-2">
+        <div
+          className="h-2 rounded-full transition-all"
+          style={{
+            width: `${(employee?.categoryScores?.['schedule'] || 0) * 10}%`,
+            backgroundColor:
+              (employee?.categoryScores?.['schedule'] || 0) >= 7 ? '#fb0000' :
+              (employee?.categoryScores?.['schedule'] || 0) >= 4 ? '#fdc002' :
+              '#41d756'
+          }}
+        />
+      </div>
+    </div>
+    <div>
+      <div className="flex justify-between text-xs mb-1">
+        <span className="text-gray-600">Family</span>
+        <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['family'] || 0)}`}>
+          {getCategoryRiskLevel(employee?.categoryScores?.['family'] || 0)}
+        </span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-2">
+        <div
+          className="h-2 rounded-full transition-all"
+          style={{
+            width: `${(employee?.categoryScores?.['family'] || 0) * 10}%`,
+            backgroundColor:
+              (employee?.categoryScores?.['family'] || 0) >= 7 ? '#fb0000' :
+              (employee?.categoryScores?.['family'] || 0) >= 4 ? '#fdc002' :
+              '#41d756'
+          }}
+        />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div className="border-t border-gray-200 pt-4 mt-4">
+  <p className="text-sm font-semibold text-gray-700 mb-3">Scoring Breakdown</p>
+  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+    {[
+      { label: 'Age', value: employee?.agePoints },
+      { label: 'Distance', value: employee?.distancePoints },
+      { label: 'Tenure', value: employee?.tenurePoints },
+      { label: 'Turnover Risk', value: employee?.turnoverPoints },
+      { label: 'Finance', value: employee?.financePoints },
+      { label: 'Schedule', value: employee?.schedulePoints },
+      { label: 'Work Life', value: employee?.wlbPoints },
+      { label: 'Family', value: employee?.familyPoints },
+    ].map(({ label, value }) => (
+      <div key={label} className="bg-white border border-gray-200 rounded-lg p-2 text-center">
+        <p className="text-xs text-gray-500 mb-1">{label}</p>
+        <p className={`text-sm font-bold ${value >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+          {value >= 0 ? `+${value}` : value}
+        </p>
+      </div>
+    ))}
+  </div>
+
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div>
+      <p className="text-xs text-gray-500 mb-1">Total Score</p>
+      <p className={`text-lg font-bold ${getCategoryRiskColor(employee?.totalScore || 0)}`}>
+        {getCategoryRiskLevel(employee?.totalScore || 0)}
+      </p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500 mb-1">Retention Likelihood Delta</p>
+      <p className={`text-lg font-bold ${(employee?.retentionScore || 0) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+        {(employee?.retentionScore || 0) >= 0 ? `+${employee?.retentionScore}%` : `${employee?.retentionScore}%`}
+      </p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500 mb-1">Improvement Area</p>
+      <p className="text-sm font-semibold" style={{ color: '#fb0000' }}>{getImprovementArea(employee)}</p>
+    </div>
+  </div>
+</div>
+
+</td>
                       </tr>
                     )}
                   </React.Fragment>
