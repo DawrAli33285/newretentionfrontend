@@ -1519,114 +1519,121 @@ const getFilteredRecordCount = () => {
   return count;
 };
 
-    const handleFileChange = async (e) => {
-      const selectedFile = e.target.files[0];
-      const allowedTypes = [
-        'text/csv',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      ];
+const handleFileChange = async (e) => {
+  const selectedFile = e.target.files[0];
+  const allowedTypes = [
+    'text/csv',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  ];
 
-      
-      
-      if (selectedFile && allowedTypes.includes(selectedFile.type)) {
-        setFile(selectedFile);
-        
-        // Count records with Employee Name in the file
-        try {
-          const text = await selectedFile.text();
-          const lines = text.trim().split('\n');
-          
-          if (lines.length <= 1) {
-            setRecordCount(0);
-            return;
-          }
-          
-          // Get header row and find Employee Name column index
-        // Get header row and find Employee Name column index
-const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
-const REQUIRED_COLUMNS = [
-  'employee name',
-  'address line 1',
-  'city',
-  'e-mail address',
-  'date of birth',
-  'hire date',
-  'term date',
-  'organization',
-  'division',
-  'department',
-  'job class',
-  'finance score',
-  'schedule score',
-  'work life balance score',
-  'family score'
-];
-
-const missingColumns = REQUIRED_COLUMNS.filter(required => 
-  !headers.some(h => h.toLowerCase().includes(required.toLowerCase()))
-);
-
-if (missingColumns.length > 0) {
-  alert(`❌ Invalid file format. Missing required columns:\n\n${missingColumns.join('\n')}\n\nPlease check the sample file format and try again.`);
-  setFile(null);
-  setRecordCount(0);
-  // Reset file input
-  e.target.value = '';
-  return;
-}
-
-// All required columns present, count valid rows
-const employeeNameIndex = headers.findIndex(h => 
-  h.toLowerCase() === 'employee name (last suffix, first mi)'
-);
-
-let validCount = 0;
-for (let i = 1; i < lines.length; i++) {
-  const columns = lines[i].split(',');
-  const employeeName = columns[employeeNameIndex]?.trim().replace(/['"]/g, '');
-  if (employeeName && employeeName.length > 0) {
-    validCount++;
+  if (!selectedFile || !allowedTypes.includes(selectedFile.type)) {
+    alert('Please upload a CSV or Excel file');
+    return;
   }
-}
 
-console.log('Valid employee count:', validCount);
-setRecordCount(validCount);
+  setFile(selectedFile);
 
-  
+  const REQUIRED_COLUMNS = [
+    { key: 'employee name', label: 'Employee Name' },
+    { key: 'address line 1', label: 'Address Line 1' },
+    { key: 'e-mail address', label: 'E-mail Address' },
+    { key: 'date of birth', label: 'Date of Birth' },
+    { key: 'hire date', label: 'Hire Date' },
+    { key: 'organization', label: 'Organization' },
+    { key: 'division', label: 'Division' },
+    { key: 'department', label: 'Department' },
+    { key: 'job class', label: 'Job Class' },
+    { key: 'finance score', label: 'Finance Score (1-10)' },
+    { key: 'schedule score', label: 'Schedule Score (1-10)' },
+    { key: 'work life balance', label: 'Work Life Balance Score (1-10)' },
+    { key: 'family score', label: 'Family Score (1-10)' }
+  ];
 
+  try {
+    const isXlsx = selectedFile.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-console.log('Headers:', headers);
-console.log('Employee Name Index:', employeeNameIndex);
+    if (isXlsx) {
+      // Use SheetJS to read Excel files
+      const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs');
+      const arrayBuffer = await selectedFile.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-// If Employee Name column not found, count all non-empty rows
-if (employeeNameIndex === -1) {
-  console.warn('Employee Name column not found, counting all rows');
-  setRecordCount(lines.length - 1); // All rows except header
-} else {
-  // Count rows that have a non-empty Employee Name
-  let validCount = 0;
-  for (let i = 1; i < lines.length; i++) {
-    const columns = lines[i].split(',');
-    const employeeName = columns[employeeNameIndex]?.trim().replace(/['"]/g, '');
-    
-    if (employeeName && employeeName.length > 0) {
-      validCount++;
-    }
-  }
-  
-  console.log('Valid employee count:', validCount);
-  setRecordCount(validCount);
-}
-        } catch (error) {
-          console.error('Error parsing file:', error);
-          alert('Error reading file. Please ensure it is a valid CSV file.');
-          setFile(null);
-          setRecordCount(0);
-        }
-      } else {
-        alert('Please upload a CSV or Excel file');
+      if (rows.length <= 1) {
+        setRecordCount(0);
+        return;
       }
-    };
+
+      const headers = rows[0].map(h => String(h || '').trim());
+      const headersJoined = headers.join('|').toLowerCase();
+
+      const missingColumns = REQUIRED_COLUMNS.filter(({ key }) =>
+        !headersJoined.includes(key.toLowerCase())
+      );
+
+      if (missingColumns.length > 0) {
+        alert(`❌ Invalid file format. Missing required columns:\n\n${missingColumns.map(c => c.label).join('\n')}\n\nPlease check the sample file format and try again.`);
+        setFile(null);
+        setRecordCount(0);
+        e.target.value = '';
+        return;
+      }
+
+      const empNameIdx = headers.findIndex(h => h.toLowerCase().includes('employee name'));
+      const validCount = rows.slice(1).filter(row => {
+        const name = String(row[empNameIdx] || '').trim();
+        return name.length > 0;
+      }).length;
+
+      setRecordCount(validCount);
+
+    } else {
+      // CSV handling
+      const text = await selectedFile.text();
+      const lines = text.trim().split('\n');
+
+      if (lines.length <= 1) {
+        setRecordCount(0);
+        return;
+      }
+
+      const delimiter = lines[0].includes('\t') ? '\t' : ',';
+      const headers = lines[0].split(delimiter).map(h => h.trim().replace(/['"]/g, ''));
+      const headersJoined = headers.join('|').toLowerCase();
+
+      const missingColumns = REQUIRED_COLUMNS.filter(({ key }) =>
+        !headersJoined.includes(key.toLowerCase())
+      );
+
+      if (missingColumns.length > 0) {
+        alert(`❌ Invalid file format. Missing required columns:\n\n${missingColumns.map(c => c.label).join('\n')}\n\nPlease check the sample file format and try again.`);
+        setFile(null);
+        setRecordCount(0);
+        e.target.value = '';
+        return;
+      }
+
+      const empNameIdx = headers.findIndex(h => h.toLowerCase().includes('employee name'));
+      let validCount = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const columns = lines[i].split(delimiter);
+        const name = columns[empNameIdx]?.trim().replace(/['"]/g, '') || '';
+        if (name.length > 0) validCount++;
+      }
+
+      setRecordCount(validCount);
+    }
+
+  } catch (error) {
+    console.error('Error parsing file:', error);
+    alert('Error reading file. Please ensure it is a valid CSV or Excel file.');
+    setFile(null);
+    setRecordCount(0);
+  }
+};
+
 
     
 
@@ -1820,14 +1827,28 @@ if (finalAmount > 0 && creditsInCents === 0) {
     setIsLoading(true);
     
     try {
+      const formData = new FormData();
+      formData.append("employeeFile", file);
+      formData.append("recordCount", recordCount);
+      formData.append("creditsUsed", creditsUsed);
       setSameFile(file);
-      setCorrectPasscode('DEMO2024');
-      setResult(HARDCODED_DATA);
+  
+      let token = localStorage.getItem('token');
+  
+      const res = await fetch(`${BASE_URL}/enrich`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData
+      });
+  
+      const data = await res.json();
+      setCorrectPasscode(data.passcode);
+      setResult(data.results);
       setIsReportLocked(false);
       
       await getCredits();
-      
-    
     } catch (error) {
       console.error('Upload error:', error);
       alert('Error uploading file');
@@ -1835,7 +1856,6 @@ if (finalAmount > 0 && creditsInCents === 0) {
       setIsLoading(false);
     }
   };
-
 
 
   const FilterPopup = () => {
@@ -2044,125 +2064,57 @@ if (finalAmount > 0 && creditsInCents === 0) {
   const handleConfirmUpload = async () => {
     setShowConfirmation(false);
     setIsLoading(true);
-    
+  
     try {
       let token = localStorage.getItem('token');
-      
-      console.log('Calling bulk upload API...');
-      console.log('Filtered employees to upload:', filteredEmployeesData?.length);
-     
-      const uploadResponse = await fetch(`${BASE_URL}/bulk-upload`, {
+  
+      // Deduct credits first
+      const creditsToUse = originalAmount / 100;
+      const deductResponse = await fetch(`${BASE_URL}/deductCredits`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          employees: filteredEmployeesData,
-          recordCount: recordCount
-        })
+        body: JSON.stringify({ creditsToDeduct: creditsToUse })
       });
-      const uploadData = await uploadResponse.json();
-
-   
-      if (!uploadResponse.ok || !uploadData.success) {
-        throw new Error(uploadData.error || 'Failed to upload file');
+  
+      if (!deductResponse.ok) {
+        throw new Error('Failed to deduct credits. Please contact support.');
       }
-
-      console.log('Upload summary:', uploadData);
-      console.log('First record from backend:', JSON.stringify(uploadData.successfulRecords[0], null, 2));
- 
-      if (uploadData.duplicates && uploadData.duplicates.length > 0) {
-        throw new Error(`Some employees have already been processed within the last month:\n${uploadData.duplicates.map(d => d.name).join(', ')}`);
-      }
-
-     
-      if (totalAmount === 0) {
-       
-        const creditsToUse = originalAmount / 100;
-        
-        console.log('Deducting credits:', creditsToUse);
-        
-        const deductResponse = await fetch(`${BASE_URL}/deductCredits`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ creditsToDeduct: creditsToUse })
-        });
-
-        if (!deductResponse.ok) {
-       
-          throw new Error('Upload successful but failed to deduct credits. Please contact support with this error.');
-        }
-
-        console.log('Credits deducted successfully');
-      } else {
-       
-        if (credits > 0) {
-          const creditsToUse = credits;
-          
-          console.log('Deducting partial credits:', creditsToUse);
-          
-          const deductResponse = await fetch(`${BASE_URL}/deductCredits`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ creditsToDeduct: creditsToUse })
-          });
-
-          if (!deductResponse.ok) {
-            throw new Error('Upload successful but failed to deduct credits. Please contact support with this error.');
-          }
-
-          console.log('Partial credits deducted successfully');
-        }
-      }
-      setCorrectPasscode('DEMO2024');
-      
-      // Map backend scores onto hardcoded data by matching name
-      console.log('=== MATCHING DEBUG ===');
-      console.log('Backend names:', uploadData.successfulRecords.map(r => r.name));
-      console.log('Hardcoded names:', HARDCODED_DATA.map(e => e.name));
-
-      const scoredData = HARDCODED_DATA.map((hardcodedEmp, index) => {
-        const liveEmp = uploadData.successfulRecords[index];
-        
-        console.log(`Index ${index}: hardcoded="${hardcodedEmp.name}" | live agePoints=${liveEmp?.agePoints}`); // ADD THIS
-        
-        if (liveEmp) {
-          return {
-            ...hardcodedEmp,
-            agePoints:      liveEmp.agePoints      ?? hardcodedEmp.agePoints,
-            distancePoints: liveEmp.distancePoints ?? hardcodedEmp.distancePoints,
-            tenurePoints:   liveEmp.tenurePoints   ?? hardcodedEmp.tenurePoints,
-            turnoverPoints: liveEmp.turnoverPoints ?? hardcodedEmp.turnoverPoints,
-            financePoints:  liveEmp.financePoints  ?? hardcodedEmp.financePoints,
-            schedulePoints: liveEmp.schedulePoints ?? hardcodedEmp.schedulePoints,
-            wlbPoints:      liveEmp.wlbPoints      ?? hardcodedEmp.wlbPoints,
-            familyPoints:   liveEmp.familyPoints   ?? hardcodedEmp.familyPoints,
-            retentionScore: liveEmp.retentionScore ?? hardcodedEmp.retentionScore,
-            age:            liveEmp.age            ?? hardcodedEmp.age,
-            tenureMonths:   liveEmp.tenureMonths   ?? hardcodedEmp.tenureMonths,
-            distanceMiles:  liveEmp.distanceMiles  ?? hardcodedEmp.distanceMiles,
-          };
-        }
-        return hardcodedEmp;
+  
+      // Call /api/enrich with the file — this triggers PDL + social scoring
+      const formData = new FormData();
+      formData.append('employeeFile', file);
+      formData.append('recordCount', recordCount);
+      formData.append('creditsUsed', '0'); // already deducted above
+  
+      const res = await fetch(`${BASE_URL}/enrich`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
       });
-
-      setResult(scoredData);
+  
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to process file');
+      }
+  
+      const data = await res.json();
+      setCorrectPasscode(data.passcode);
+      setResult(data.results);
       setIsReportLocked(false);
       await getCredits();
+  
     } catch (error) {
       console.error('Upload error:', error.message);
       alert(error.message || 'Error uploading file');
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   };
+  
+
 
 
 
@@ -2178,7 +2130,7 @@ if (finalAmount > 0 && creditsInCents === 0) {
     
         let token = localStorage.getItem('token');
     
-        const res = await fetch(`${BASE_URL}/api/enrich`, {
+        const res = await fetch(`${BASE_URL}/enrich`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
