@@ -2480,7 +2480,7 @@ Abrams, Tina J.,tabrams@company.org,8538 S. Co. Rd. 200 W,Spiceland IN 47385,07/
         'Schedule',
         'Family',
         'Final Score',
-        'Improvement Areas'
+        'Improvement Areas',
       ];
     
       const csvRows = filteredResult.map((emp, index) => {
@@ -2504,7 +2504,12 @@ Abrams, Tina J.,tabrams@company.org,8538 S. Co. Rd. 200 W,Spiceland IN 47385,07/
           emp.categoryScores?.['schedule'] || 0,
           emp.categoryScores?.['family'] || 0,
           emp.overallScore || emp.totalScore || 0,
-          emp.improvementArea || 'N/A'
+          emp.improvementArea || getImprovementArea(emp) || 'N/A',
+          emp.categoryScores?.['finances'] || 0,
+emp.categoryScores?.['work life'] || 0,
+emp.categoryScores?.['schedule'] || 0,
+emp.categoryScores?.['family'] || 0,
+
         ];
       });
       const csvContent = [headers, ...csvRows]
