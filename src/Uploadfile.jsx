@@ -1,1011 +1,34 @@
-// import React, { useEffect, useState } from 'react';
-// import ConfirmationPopup from './components/ConfirmationPopup';
-// import PasscodePopup from './components/PasscodePopup';
-// import PaymentPopup from './components/PaymentPopup';
-// import StripePaymentPopup from './components/StripePaymentPopup';
-
-// import { BASE_URL } from './baseurl';
-// function UploadFile() {
-//   const [file, setFile] = useState(null);
-//   const [result, setResult] = useState([]);
-//   const [isDragging, setIsDragging] = useState(false);
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [sameFile, setSameFile] = useState(null);
-//   const [showSampleFormat, setShowSampleFormat] = useState(false);
-  
-//   // Popup states
-//   const [showConfirmation, setShowConfirmation] = useState(false);
-//   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
-//   const [showPasscodePopup, setShowPasscodePopup] = useState(false);
-//   const [passcodeError, setPasscodeError] = useState('');
-//   const [isReportLocked, setIsReportLocked] = useState(false);
-//   const [correctPasscode,setCorrectPasscode] = useState('DEMO2024');
-//   const [recordCount, setRecordCount] = useState(0);
-//   const [totalAmount, setTotalAmount] = useState(0);
-//   const [showStripePayment, setShowStripePayment] = useState(false);
-//   const [credits,setCredits]=useState(0)
-//   const [originalAmount, setOriginalAmount] = useState(0);
-
-//   const handleFileChange = async (e) => {
-//     const selectedFile = e.target.files[0];
-//     const allowedTypes = [
-//       'text/csv',
-//       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-//     ];
-    
-//     if (selectedFile && allowedTypes.includes(selectedFile.type)) {
-//       setFile(selectedFile);
-      
-//       // Count records with Employee Name in the file
-//       try {
-//         const text = await selectedFile.text();
-//         const lines = text.trim().split('\n');
-        
-//         if (lines.length <= 1) {
-//           setRecordCount(0);
-//           return;
-//         }
-        
-//         // Get header row and find Employee Name column index
-//         const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
-//         const employeeNameIndex = headers.findIndex(h => 
-//           h.toLowerCase().includes('employee name')
-//         );
-        
-//         if (employeeNameIndex === -1) {
-//           alert('Error: Could not find "Employee Name" column in the file');
-//           setFile(null);
-//           setRecordCount(0);
-//           return;
-//         }
-        
-//         // Count rows that have a non-empty Employee Name
-//         let validCount = 0;
-//         for (let i = 1; i < lines.length; i++) {
-//           const columns = lines[i].split(',');
-//           const employeeName = columns[employeeNameIndex]?.trim().replace(/['"]/g, '');
-          
-//           if (employeeName && employeeName.length > 0) {
-//             validCount++;
-//           }
-//         }
-        
-//         setRecordCount(validCount);
-//       } catch (error) {
-//         console.error('Error parsing file:', error);
-//         alert('Error reading file. Please ensure it is a valid CSV file.');
-//         setFile(null);
-//         setRecordCount(0);
-//       }
-//     } else {
-//       alert('Please upload a CSV or Excel file');
-//     }
-//   };
-
-  
-
-
-//   const calculateCategoryAverages = () => {
-//     if (!result || result.length === 0) return [];
-    
-//     const categories = [
-//       { apiKey: 'WorkLifeBalance', displayName: 'Work-Life Balance' },
-//       { apiKey: 'Communication', displayName: 'Communication' },
-//       { apiKey: 'Financial', displayName: 'Money & Compensation' },
-//       { apiKey: 'Schedule', displayName: 'Schedule & Workload' }
-//     ];
-
-//     const categoryTotals = {};
-//     const categoryCounts = {};
-    
-//     categories.forEach(({ apiKey, displayName }) => {
-//       categoryTotals[displayName] = 0;
-//       categoryCounts[displayName] = 0;
-//     });
-    
-//     result.forEach(employee => {
-//       categories.forEach(({ apiKey, displayName }) => {
-//         const score = employee[apiKey] || 0;
-//         categoryTotals[displayName] += score;
-//         categoryCounts[displayName] += 1;
-//       });
-//     });
-    
-//     return categories.map(({ displayName }) => {
-//       const average = categoryCounts[displayName] > 0 
-//         ? categoryTotals[displayName] / categoryCounts[displayName]
-//         : 0;
-//       return {
-//         name: displayName,
-//         score: parseFloat(average.toFixed(1))
-//       };
-//     });
-//   };
-  
-//   const categoryAverages = calculateCategoryAverages();
-
-// useEffect(()=>{
-// getCredits();
-// },[])
-
-// const getCredits=async()=>{
-//   try{
-//     let token = localStorage.getItem('token');
-
-//     let response = await fetch(`${BASE_URL}/getCurrentCredits`, {
-//       method: "GET",
-//       headers: {
-//         "Authorization": `Bearer ${token}`,
-//         "Content-Type": "application/json"
-//       } 
-//     });
-    
-//     // Convert the response to JSON
-//     let data = await response.json();
-    
-//     console.log(data);
-//     setCredits(data.user.credits)
-    
-//   }catch(e){
-//     console.log(e.message)
-//   }
-// }
-
-// const handleUploadClick = async () => {
-//   if (!file) return;
-
-//   // Add this validation
-//   if (recordCount === 0) {
-//     alert('No valid employee records found in the file. Please ensure your file contains records with Employee Names.');
-//     return;
-//   }
-
-//   try {
-//     let token = localStorage.getItem('token');
-//     const response = await fetch(`${BASE_URL}/calculate-price`, {
-//       method: 'POST',
-//       headers: {
-//         'Authorization': `Bearer ${token}`,
-//         'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify({ recordCount })
-//     });
-    
-//     const { totalAmount } = await response.json();
-    
-//     setOriginalAmount(totalAmount);
-    
-//     const creditsInCents = credits * 100;
-    
-//     let finalAmount = totalAmount;
-//     let creditsToUse = 0;
-    
-//     if (creditsInCents > 0) {
-//       if (creditsInCents >= totalAmount) {
-//         creditsToUse = totalAmount / 100;
-//         finalAmount = 0;
-//       } else {
-//         creditsToUse = credits;
-//         finalAmount = totalAmount - creditsInCents;
-//       }
-//     }
-    
-//     setTotalAmount(finalAmount);
-    
-//     if (finalAmount === 0) {
-//       handleFreeProcessing(creditsToUse);
-//     } else {
-//       setShowConfirmation(true);
-//     }
-//   } catch (error) {
-//     console.error('Error calculating price:', error);
-//     alert('Error calculating price');
-//   }
-// };
-
-
-// // const handleUploadClick = async () => {
-// //   if (!file) return;
-
-// //   try {
-// //     let token = localStorage.getItem('token');
-// //     const response = await fetch(`${BASE_URL}/calculate-price`, {
-// //       method: 'POST',
-// //       headers: {
-// //         'Authorization': `Bearer ${token}`,
-// //         'Content-Type': 'application/json'
-// //       },
-// //       body: JSON.stringify({ recordCount })
-// //     });
-    
-// //     const { totalAmount } = await response.json();
-    
-  
-// //     setOriginalAmount(totalAmount);
-    
-   
-// //     const creditsInCents = credits * 100;
-    
-// //     let finalAmount = totalAmount;
-// //     let creditsToUse = 0;
-    
-// //     if (creditsInCents > 0) {
-// //       if (creditsInCents >= totalAmount) {
-      
-// //         creditsToUse = totalAmount / 100;
-// //         finalAmount = 0;
-// //       } else {
-        
-// //         creditsToUse = credits;
-// //         finalAmount = totalAmount - creditsInCents;
-// //       }
-// //     }
-    
-// //     setTotalAmount(finalAmount);
-    
-  
-// //     if (finalAmount === 0) {
-// //       handleFreeProcessing(creditsToUse);
-// //     } else {
-// //       setShowConfirmation(true);
-// //     }
-// //   } catch (error) {
-// //     console.error('Error calculating price:', error);
-// //     alert('Error calculating price');
-// //   }
-// // };
-
-// const handleFreeProcessing = async (creditsUsed) => {
-//   setIsLoading(true);
-  
-//   try {
-//     const formData = new FormData();
-
-//     formData.append("employeeFile", file);
-//     formData.append("recordCount", recordCount);
-//     formData.append("creditsUsed", creditsUsed);
-//     setSameFile(file);
-
-//     let token = localStorage.getItem('token');
-
-//     const res = await fetch(`${BASE_URL}/api/enrich`, {
-//       method: 'POST',
-//       headers: {
-//         'Authorization': `Bearer ${token}`,
-//       },
-//       body: formData
-//     });
-    
-//     const data = await res.json();
-//     setCorrectPasscode(data.passcode);
-//     setResult(data.results);
-//     setIsReportLocked(false);
-    
-//     // Refresh credits
-//     await getCredits();
-    
-//     alert('File processed successfully using your credits!');
-//   } catch (error) {
-//     console.error('Upload error:', error);
-//     alert('Error uploading file');
-//   } finally {
-//     setIsLoading(false);
-//   }
-// };
-
-// const handleConfirmUpload = async () => {
-//   setShowConfirmation(false);
-//   setIsLoading(true);
-  
-//   try {
-//     const formData = new FormData();
-//     formData.append("employeeFile", file);
-    
-//     // Calculate how many credits SHOULD be deducted based on the price
-//     // This is the cost in credits, regardless of what user has
-//     const requiredCredits = originalAmount / 100; // Convert cents to dollars
-    
-//     // Always send the required credits amount - backend will validate
-//     formData.append("creditsUsed", requiredCredits.toString());
-//     formData.append("amountPaid", (totalAmount / 100).toString());
-    
-//     setSameFile(file);
-
-//     let token = localStorage.getItem('token');
-
-//     const res = await fetch(`${BASE_URL}/api/enrich`, {
-//       method: 'POST',
-//       headers: {
-//         'Authorization': `Bearer ${token}`,
-//       },
-//       body: formData
-//     });
-    
-//     if (!res.ok) {
-//       const errorData = await res.json();
-//       throw new Error(errorData.error || 'Failed to process file');
-//     }
-    
-//     const data = await res.json();
-//     setCorrectPasscode(data.passcode);
-//     setResult(data.results);
-//     setIsReportLocked(false);
-    
-//     // Refresh credits
-//     await getCredits();
-    
-//     alert('File processed successfully!');
-//   } catch (error) {
-//     console.error('Upload error:', error);
-//     alert(error.message || 'Error uploading file');
-//   } finally {
-//     setIsLoading(false);
-//   }
-// };
-
-
-//   const handlePaymentSuccess = async (paymentIntentId) => {
-//     setShowStripePayment(false);
-//     setIsLoading(true);
-    
-//     try {
-//       const formData = new FormData();
-//       formData.append("employeeFile", file);
-//       formData.append("paymentIntentId", paymentIntentId);
-//       setSameFile(file);
-  
-//       let token = localStorage.getItem('token');
-  
-//       const res = await fetch(`${BASE_URL}/api/enrich`, {
-//         method: 'POST',
-//         headers: {
-//           'Authorization': `Bearer ${token}`,
-//         },
-//         body: formData
-//       });
-      
-//       const data = await res.json();
-//       setCorrectPasscode(data.passcode);
-//       setResult(data.results);
-//       setIsReportLocked(false);
-      
-//       // Refresh credits after payment
-//       await getCredits();
-//     } catch (error) {
-//       console.error('Upload error:', error);
-//       alert('Error uploading file');
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-
-
-//   const getTopCategory = (employee) => {
-//     if (!employee) return null;
-    
-//     const categories = [
-//       { apiKey: 'WorkLifeBalance', displayName: 'Work-Life Balance' },
-//       { apiKey: 'Communication', displayName: 'Communication' },
-//       { apiKey: 'Financial', displayName: 'Money & Compensation' },
-//       { apiKey: 'Schedule', displayName: 'Schedule & Workload' }
-//     ];
-
-//     let maxScore = -1;
-//     let topCategory = null;
-
-//     categories.forEach(({ apiKey, displayName }) => {
-//       const score = employee[apiKey] || 0;
-//       if (score > maxScore) {
-//         maxScore = score;
-//         topCategory = displayName;
-//       }
-//     });
-
-//     return topCategory;
-//   };
-
-//   const getRiskLevel = (score) => {
-//     if (score >= 20) return 'High';
-//     if (score >= 10) return 'Medium';
-//     return 'Low';
-//   };
-
-//   const getImprovementArea = (employee) => {
-//     if (!employee) return 'N/A';
-    
-//     const categories = [
-//       { apiKey: 'WorkLifeBalance', displayName: 'Work-Life Balance' },
-//       { apiKey: 'Communication', displayName: 'Communication' },
-//       { apiKey: 'Financial', displayName: 'Money & Compensation' },
-//       { apiKey: 'Schedule', displayName: 'Schedule & Workload' }
-//     ];
-    
-//     let maxScore = -1;
-//     let improvementArea = 'N/A';
-//     let allZeros = true;
-  
-//     categories.forEach(({ apiKey, displayName }) => {
-//       const score = employee[apiKey] || 0;
-//       if (score > 0) allZeros = false;
-//       if (score > maxScore) {
-//         maxScore = score;
-//         improvementArea = displayName;
-//       }
-//     });
-  
-//     return allZeros ? 'N/A' : improvementArea;
-//   };
-
-//   const calculateImprovedScore = (currentScore) => {
-//     return Math.round(currentScore * 0.8);
-//   };
-
-//   const handleProceedToPayment = () => {
-//     setShowPaymentPopup(false);
-//     alert('Redirecting to payment gateway...\n\nAfter payment, you will receive passcode: DEMO2024');
-//     setShowPasscodePopup(true);
-//   };
-
-//   const handlePasscodeSubmit = (passcode) => {
-//     console.log("CORRECt")
-//     console.log(correctPasscode)
-//     if (passcode === correctPasscode) {
-//       setPasscodeError('');
-//       setShowPasscodePopup(false);
-//       setIsReportLocked(false);
-//       alert('Report unlocked successfully! You can now download your report.');
-//     } else {
-//       setPasscodeError('Invalid passcode. Please try again.');
-//     }
-//   };
-
-
-//   const SampleFormatModal = () => {
-//     if (!showSampleFormat) return null;
-
-//     return (
-//       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-//         <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-fadeIn">
-//           <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-//             <h2 className="text-2xl font-bold text-gray-900">Sample File Format</h2>
-//             <button
-//               onClick={() => setShowSampleFormat(false)}
-//               className="text-gray-400 hover:text-gray-600 transition-colors"
-//             >
-//               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-//               </svg>
-//             </button>
-//           </div>
-          
-//           <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-//             <div className="mb-4">
-//               <h3 className="text-lg font-semibold text-gray-800 mb-2">Required Columns:</h3>
-//               <p className="text-sm text-gray-600 mb-4">
-//                 Your CSV file should include the following columns (in any order):
-//               </p>
-//             </div>
-
-//             <div className="bg-gray-50 rounded-lg p-4 mb-6 overflow-x-auto">
-//               <table className="min-w-full text-sm">
-//                 <thead>
-//                   <tr className="border-b border-gray-300">
-//                     <th className="text-left py-2 px-3 font-semibold text-gray-700">Column Name</th>
-//                     <th className="text-left py-2 px-3 font-semibold text-gray-700">Description</th>
-//                     <th className="text-left py-2 px-3 font-semibold text-gray-700">Example</th>
-//                   </tr>
-//                 </thead>
-//                 <tbody>
-//   <tr className="border-b border-gray-200">
-//     <td className="py-2 px-3 font-mono text-xs bg-white">Employee Name (Last Suffix, First MI)</td>
-//     <td className="py-2 px-3">Full name in format: Last, First MI</td>
-//     <td className="py-2 px-3 text-gray-600">Abernathy, Rita K.</td>
-//   </tr>
-//   <tr className="border-b border-gray-200">
-//     <td className="py-2 px-3 font-mono text-xs bg-white">E-mail Address</td>
-//     <td className="py-2 px-3">Work email</td>
-//     <td className="py-2 px-3 text-gray-600">rabernathy@company.org</td>
-//   </tr>
-//   <tr className="border-b border-gray-200">
-//     <td className="py-2 px-3 font-mono text-xs bg-white">Home Phone (Formatted)</td>
-//     <td className="py-2 px-3">Contact number with formatting</td>
-//     <td className="py-2 px-3 text-gray-600">(317) 752-2091</td>
-//   </tr>
-//   <tr className="border-b border-gray-200">
-//     <td className="py-2 px-3 font-mono text-xs bg-white">Company Name</td>
-//     <td className="py-2 px-3">Employer company name</td>
-//     <td className="py-2 px-3 text-gray-600">Acme Corporation</td>
-//   </tr>
-//   <tr className="border-b border-gray-200">
-//     <td className="py-2 px-3 font-mono text-xs bg-white">Date of Birth</td>
-//     <td className="py-2 px-3">Employee birth date</td>
-//     <td className="py-2 px-3 text-gray-600">01/15/1985</td>
-//   </tr>
-//   <tr className="border-b border-gray-200">
-//     <td className="py-2 px-3 font-mono text-xs bg-white">Last Hire Date</td>
-//     <td className="py-2 px-3">Most recent hire date</td>
-//     <td className="py-2 px-3 text-gray-600">03/20/2020</td>
-//   </tr>
-//   <tr className="border-b border-gray-200">
-//     <td className="py-2 px-3 font-mono text-xs bg-white">Job Title</td>
-//     <td className="py-2 px-3">Current position</td>
-//     <td className="py-2 px-3 text-gray-600">Marketing Manager</td>
-//   </tr>
-//   <tr className="border-b border-gray-200">
-//     <td className="py-2 px-3 font-mono text-xs bg-white">Department</td>
-//     <td className="py-2 px-3">Department name</td>
-//     <td className="py-2 px-3 text-gray-600">Marketing</td>
-//   </tr>
-//   <tr className="border-b border-gray-200">
-//     <td className="py-2 px-3 font-mono text-xs bg-white">Employment Status</td>
-//     <td className="py-2 px-3">Current status</td>
-//     <td className="py-2 px-3 text-gray-600">Active</td>
-//   </tr>
-// </tbody>
-//               </table>
-//             </div>
-
-//             <div className="mb-4">
-//               <h3 className="text-lg font-semibold text-gray-800 mb-2">Sample Data Preview:</h3>
-//               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 overflow-x-auto">
-//                 <pre className="text-xs font-mono whitespace-pre">
-// {`Employee Number,Employee Name,E-mail Address,Address Line 1,City State Zip,Home Phone
-// 3321,Abernathy Rita K.,rabernathy@company.org,9790 North 100 West,Fountaintown IN 46130,(317) 752-2091
-// 7051,Abram Crystal M.,cabram@company.org,4082 Congaree Ln,Indianapolis IN 46235,(317) 640-9743
-// 8866,Abrams Tina J.,tabrams@company.org,8538 S. Co. Rd. 200 W,Spiceland IN 47385,(765) 524-8688`}
-//                 </pre>
-//               </div>
-//             </div>
-
-//             <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
-//               <div className="flex items-start gap-3">
-//                 <svg className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-//                 </svg>
-//                 <div>
-//                   <p className="font-semibold text-yellow-900 mb-1">Important Notes:</p>
-//                   <ul className="text-sm text-yellow-800 space-y-1 list-disc list-inside">
-//                     <li>File must be in CSV or Excel (.xlsx) format</li>
-//                     <li>First row should contain column headers</li>
-//                     <li>Email addresses are required for analysis</li>
-//                     <li>Empty fields are allowed but may affect analysis quality</li>
-//                   </ul>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="p-6 border-t border-gray-200 flex justify-end">
-//             <button
-//               onClick={() => setShowSampleFormat(false)}
-//               className="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
-//             >
-//               Got it
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   };
-
-
-
-//   const exportToCSV = () => {
-//     if (isReportLocked) {
-//       setShowPasscodePopup(true);
-//       return;
-//     }
-
-//     if (!result || result.length === 0) {
-//       alert('No data to export');
-//       return;
-//     }
-  
-//     const categories = [
-//       'Work Life Balance',
-//       'Communication',
-//       'Financial',
-//       'Schedule'
-//     ];
-  
-//     const headers = [
-//       'Employee Number',
-//       'Employee Name',
-//       'Email',
-//       'Last Hire Date',
-//       'Job Start Date',
-//       'Termination Date',
-//       'Termination Reason',
-//       'Employment Status',
-//       'Date of Birth',
-//       'Job Title',
-//       'Department',
-//       'Facility',
-//       ...categories,
-//       'Final Score',
-//       'Improvement Area',
-//       'Risk Level',
-//       'Possible Improved Score',
-//       'Phone'
-//     ];
-  
-//     const csvRows = result.map((emp, index) => {
-//       const improvementArea = getImprovementArea(emp);
-//       const riskLevel = emp.riskLevel || getRiskLevel(emp.totalScore);
-//       let improvedScore = calculateImprovedScore(emp.totalScore);
-//       if(!improvedScore){
-//         improvedScore=0;
-//       }
-//       return [
-//         index + 1,
-//         emp.name || 'Unknown',
-//         emp.email || '',
-//         emp.last_hire_date || '',
-//         emp.job_start || '',
-//         emp.termination_date || '',
-//         emp.termination_reason || '',
-//         emp.employement_status || '',
-//         emp.date_of_birth || '',
-//         emp.job_title || '',
-//         emp.department || '',
-//         emp.facility || '',
-//         ...categories.map(cat => emp[cat] || 0),
-//         emp.totalScore || 0,
-//         improvementArea,
-//         riskLevel,
-//         improvedScore,
-//         emp.phone
-//       ];
-//     });
-  
-//     const csvContent = [headers, ...csvRows]
-//       .map(row => row.map(cell => `"${cell}"`).join(','))
-//       .join('\n');
-  
-//     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-//     const link = document.createElement('a');
-    
-//     if (link.download !== undefined) {
-//       const url = URL.createObjectURL(blob);
-//       link.setAttribute('href', url);
-//       link.setAttribute('download', `employee_engagement_report_${new Date().toISOString().split('T')[0]}.csv`);
-//       link.style.visibility = 'hidden';
-//       document.body.appendChild(link);
-//       link.click();
-//       document.body.removeChild(link);
-//     }
-//   };
-
-//   const EmployeeDashboard = () => {
-//     const getRiskColor = (risk) => {
-//       if (risk >= 70) return 'bg-red-500';
-//       if (risk >= 50) return 'bg-yellow-500';
-//       return 'bg-green-500';
-//     };
-
-//     const totalAverage = result.length > 0 
-//       ? Math.round(result.reduce((sum, employee) => sum + (employee.totalScore || 0), 0) / result.length)
-//       : 0;
-
-//     return (
-//       <div className="mt-8">
-//         <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6">
-       
-//           <div className="flex flex-row items-center gap-3 sm:gap-4 lg:gap-6 mb-6 lg:mb-8">
-//             <div className="w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 lg:w-24 lg:h-24 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg md:text-xl lg:text-2xl flex-shrink-0">
-//               {totalAverage}%
-//             </div>
-//             <div className="flex-1 min-w-0">
-             
-//               <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 md:mb-2 leading-tight">
-//                 Employee Sentiment Dashboard
-//               </h1>
-//               <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 mb-1 leading-tight">
-//                 Overall Sentiment Risk Score
-//               </p>
-//               <p className="text-xs sm:text-sm md:text-base text-gray-600 leading-tight">
-//                 Team: Marketing • Last 30 Days
-//               </p>
-//             </div>
-//           </div>
-
-//           {isReportLocked && (
-//             <div className="mb-6 bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 flex items-center gap-3">
-//               <svg className="w-6 h-6 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-//               </svg>
-//               <div className="flex-1">
-//                 <p className="font-semibold text-yellow-900">Report Locked</p>
-//                 <p className="text-sm text-yellow-700">Complete payment to unlock and download</p>
-//               </div>
-//             </div>
-//           )}
-
-//           <div className="hidden lg:grid lg:grid-cols-12 gap-4 px-4 py-3 border-b border-gray-200 text-gray-600 font-medium text-sm">
-//             <div className="col-span-1 text-center">#</div>
-//             <div className="col-span-5">Employee</div>
-//             <div className="col-span-3 text-center">Risk Score</div>
-//             <div className="col-span-3 text-center">Top Category</div>
-//           </div>
-
-//           <div className="space-y-0">
-//             {result?.map((employee, index) => (
-//               <div key={index} className="border-b last:border-b-0 border-gray-100 hover:bg-gray-50 transition-colors">
-//                 <div className="hidden lg:grid lg:grid-cols-12 gap-4 items-center px-4 py-4">
-//                   <div className="col-span-1 flex justify-center">
-//                     <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white font-medium text-xs">
-//                       👤
-//                     </div>
-//                   </div>
-//                   <div className="col-span-5">
-//                     <h3 className="font-semibold text-gray-900 text-base">
-//                       {employee?.name || 'Unknown'}
-//                     </h3>
-//                   </div>
-//                   <div className="col-span-3 flex justify-center items-center gap-2">
-//                     <div className={`w-10 h-10 ${getRiskColor(employee?.totalScore || 0)} rounded-full flex items-center justify-center text-white font-bold text-sm`}>
-//                       {employee?.totalScore || 0}
-//                     </div>
-//                     <span className="font-semibold text-gray-700 text-sm">
-//                       {employee?.totalScore || 0}%
-//                     </span>
-//                   </div>
-//                   <div className="col-span-3 text-center">
-//                     <span className="font-semibold text-gray-900 text-sm">
-//                       {getTopCategory(employee) || "No categories"}
-//                     </span>
-//                   </div>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
-//           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 text-center lg:text-left">
-//             Average Risk Score by Category
-//           </h2>
-          
-//           <div className="space-y-3 sm:space-y-4">
-//             {categoryAverages.map((category, index) => (
-//               <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-//                 <div className="w-full sm:w-32 md:w-36 lg:w-40 flex-shrink-0">
-//                   <span className="font-medium text-gray-700 text-sm sm:text-base">
-//                     {category.name}
-//                   </span>
-//                 </div>
-//                 <div className="flex-1">
-//                   <div className="relative">
-//                     <div className="w-full bg-gray-200 rounded-full h-6 sm:h-8 lg:h-10">
-//                       <div 
-//                         className="bg-blue-500 h-6 sm:h-8 lg:h-10 rounded-full flex items-center justify-end pr-2 sm:pr-3 transition-all duration-500 ease-out"
-//                         style={{ width: `${Math.max(category.score * 2, 5)}%` }}
-//                       >
-//                         <span className="text-white font-bold text-xs sm:text-sm">
-//                           {category.score}
-//                         </span>
-//                       </div>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-
-//           <div className="mt-4 sm:mt-6 flex justify-between text-xs sm:text-sm text-gray-500 px-4 sm:px-8 lg:px-32">
-//             <span>0</span>
-//             <span>25</span>
-//             <span>50</span>
-//             <span>75</span>
-//             <span>100</span>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6">
-//       <div className="max-w-4xl mx-auto">
-//       <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6">
-//       <div className='flex justify-center items-center text-center mb-4'>
-//   <img 
-//     src="/logo.jpg" 
-//     alt="Company Logo" 
-//     className="h-20 sm:h-24 lg:h-32 w-auto object-contain"
-//   />
-// </div>
-
-// {/* Add this credits badge */}
-// <div className="flex justify-center mb-4">
-//   <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-full px-6 py-2 shadow-lg">
-//     <p className="text-white font-semibold text-sm sm:text-base">
-//       💰 Available Credits: ${credits.toFixed(2)}
-//     </p>
-//   </div>
-// </div>
-
-//   <div className="flex items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-   
-//     <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 text-center">
-//       Employee Engagement Insights
-//     </h2>
-//   </div>
-          
-//           <div className="mb-3 flex justify-end">
-//             <button
-//               onClick={() => setShowSampleFormat(true)}
-//               className="text-sm text-blue-600 hover:text-blue-700 underline"
-//             >
-//               View sample file format
-//             </button>
-//           </div>
-
-//           <div 
-//             className={`border-2 border-dashed rounded-xl p-4 sm:p-6 lg:p-8 text-center mb-4 sm:mb-6 transition-all duration-300 ${
-//               isDragging 
-//                 ? 'border-blue-500 bg-blue-50' 
-//                 : 'border-blue-300 bg-white hover:border-blue-400 hover:bg-blue-50'
-//             }`}
-//           >
-//             <input 
-//               type="file" 
-//               id="fileInput" 
-//               onChange={handleFileChange} 
-//               accept=".csv, .xlsx"
-//               className="hidden"
-//             />
-//             <label htmlFor="fileInput" className="cursor-pointer">
-//               <svg 
-//                 xmlns="http://www.w3.org/2000/svg" 
-//                 width="40" 
-//                 height="40" 
-//                 viewBox="0 0 24 24"
-//                 fill="#3B82F6"
-//                 className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16"
-//               >
-//                 <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
-//               </svg>
-//               <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-2">
-//                 Drag and drop your CSV/Excel file here or click to browse
-//               </p>
-//               {file && (
-//                 <p className="text-blue-600 font-medium text-sm sm:text-base mt-2">
-//                   Selected file: {file.name}
-//                 </p>
-//               )}
-//             </label>
-//           </div>
-
-//           <button 
-//             onClick={handleUploadClick} 
-//             disabled={!file || isLoading}
-//             className={`w-full sm:w-auto mx-auto block px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${
-//               !file || isLoading
-//                 ? 'bg-gray-400 text-white cursor-not-allowed' 
-//                 : 'bg-blue-500 text-white hover:bg-blue-600 hover:transform hover:scale-105 active:scale-95'
-//             }`}
-//           >
-//             {isLoading ? 'Processing...' : 'Upload & Analyze'}
-//           </button>
-
-//           {result.length > 0 && (
-//             <button 
-//               onClick={exportToCSV}
-//               className={`w-full sm:w-auto mx-auto block mt-3 px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${
-//                 isReportLocked 
-//                   ? 'bg-gray-400 text-white cursor-not-allowed' 
-//                   : 'bg-purple-500 text-white hover:bg-purple-600 hover:transform hover:scale-105 active:scale-95'
-//               }`}
-//             >
-//               {isReportLocked ? '🔒 Export Locked' : 'Export CSV'}
-//             </button>
-//           )}
-//         </div>
-
-//         {result.length > 0 && <EmployeeDashboard />}
-//       </div>
-
-//       <ConfirmationPopup
-//   isOpen={showConfirmation}
-//   onClose={() => setShowConfirmation(false)}
-//   onConfirm={handleConfirmUpload}
-//   isLoading={isLoading}
-//   title="Confirm File Processing"
-//   message={`
-//     File Count: ${recordCount} contact${recordCount !== 1 ? 's' : ''}
-//     Contact Rate: $2.95
-//     Amount: $${isNaN(originalAmount) || originalAmount === 0 ? '0.00' : (originalAmount / 100).toFixed(2)}
-    
-//     Are you sure you want to proceed?
-//   `}
-// />
-
-//       <PaymentPopup
-//         isOpen={showPaymentPopup}
-//         onClose={() => setShowPaymentPopup(false)}
-//         onDownload={handleProceedToPayment}
-//       />
-
-//       <PasscodePopup
-//         isOpen={showPasscodePopup}
-//         onClose={() => {
-//           setShowPasscodePopup(false);
-//           setPasscodeError('');
-//         }}
-//         onSubmit={handlePasscodeSubmit}
-//         error={passcodeError}
-//       />
-//       <StripePaymentPopup
-//         isOpen={showStripePayment}
-//         onClose={() => setShowStripePayment(false)}
-//         onSuccess={handlePaymentSuccess}
-//         amount={totalAmount}
-//         recordCount={recordCount}
-//       />
-
-// <SampleFormatModal />
-//       <style>{`
-//         @keyframes fadeIn {
-//           from {
-//             opacity: 0;
-//             transform: scale(0.95);
-//           }
-//           to {
-//             opacity: 1;
-//             transform: scale(1);
-//           }
-//         }
-//         .animate-fadeIn {
-//           animation: fadeIn 0.2s ease-out;
-//         }
-//       `}</style>
-//     </div>
-//   );
-// }
-
-// export default UploadFile;
-
-
-
-
-
-
-
-
-
-  import React, { useEffect, useState } from 'react';
-  import ConfirmationPopup from './components/ConfirmationPopup';
-  import PasscodePopup from './components/PasscodePopup';
-  import PaymentPopup from './components/PaymentPopup';
-  import StripePaymentPopup from './components/StripePaymentPopup';
-
-  import { BASE_URL } from './baseurl';
-  function UploadFile() {
-    const [file, setFile] = useState(null);
-    const [result, setResult] = useState([]);
-    const [isDragging, setIsDragging] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [sameFile, setSameFile] = useState(null);
-    const [showSampleFormat, setShowSampleFormat] = useState(false);
-    const [showFilterPopup, setShowFilterPopup] = useState(false);
-    // Popup states
-    const [showConfirmation, setShowConfirmation] = useState(false);
-    const [showPaymentPopup, setShowPaymentPopup] = useState(false);
-    const [showPasscodePopup, setShowPasscodePopup] = useState(false);
-    const [passcodeError, setPasscodeError] = useState('');
-    const [isReportLocked, setIsReportLocked] = useState(false);
-    const [correctPasscode,setCorrectPasscode] = useState('DEMO2024');
-    const [recordCount, setRecordCount] = useState(0);
-    const [totalAmount, setTotalAmount] = useState(0);
-    const [showStripePayment, setShowStripePayment] = useState(false);
-    const [credits,setCredits]=useState(0)
-    const [originalAmount, setOriginalAmount] = useState(0);
-    const [activeTab, setActiveTab] = useState('prehire');
-
-    // NEW: Filter states
-  // NEW: Filter states
+import React, { useEffect, useState } from 'react';
+import ConfirmationPopup from './components/ConfirmationPopup';
+import PasscodePopup from './components/PasscodePopup';
+import PaymentPopup from './components/PaymentPopup';
+import StripePaymentPopup from './components/StripePaymentPopup';
+import { BASE_URL } from './baseurl';
+
+function UploadFile() {
+  const [file, setFile] = useState(null);
+  const [result, setResult] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [sameFile, setSameFile] = useState(null);
+  const [showSampleFormat, setShowSampleFormat] = useState(false);
+  const [showFilterPopup, setShowFilterPopup] = useState(false);
+
+  // Popup states
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+  const [showPasscodePopup, setShowPasscodePopup] = useState(false);
+  const [passcodeError, setPasscodeError] = useState('');
+  const [isReportLocked, setIsReportLocked] = useState(false);
+  const [correctPasscode, setCorrectPasscode] = useState('DEMO2024');
+  const [recordCount, setRecordCount] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [showStripePayment, setShowStripePayment] = useState(false);
+  const [credits, setCredits] = useState(0);
+  const [originalAmount, setOriginalAmount] = useState(0);
+  const [activeTab, setActiveTab] = useState('prehire');
+
+  // Filter states
   const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [selectedJobClass, setSelectedJobClass] = useState('all');
   const [selectedHireDate, setSelectedHireDate] = useState('all');
@@ -1021,801 +44,340 @@
     'Job Class': ['Receptionist', 'Therapist', 'Nurse'],
     'Hire Date': ['03/20/2025', '03/20/2023', '03/20/2022', '03/20/2021', '03/20/2020'],
     'Term Date': ['01/10/2025'],
-    'Salary Range': ['40k-50k', '60k-80k', '70k-90k']
+    'Salary Range': ['40k-50k', '60k-80k', '70k-90k'],
   });
 
   const [filteredResult, setFilteredResult] = useState([]);
   const [filteredEmployeesData, setFilteredEmployeesData] = useState(null);
 
-  const HARDCODED_DATA = [
-    {
-      employeeNumber: 3321,
-      name: 'Abernathy, Rita K.',
-      address: '9790 North 100 West',
-      cityStateZip: 'Fountaintown, IN 46130',
-      email: 'rabernathy@hancockregional.org',
-      alternateEmail: '',
-      phone: '(317) 752-2091',
-      organization: 'Healthcare Services',
-      division: 'Clinical Operations',
-      department: 'Administration',
-      jobClass: 'Receptionist',
-      hireDate: '03/20/2025',
-      termDate: '',
-      salaryRange: '40k-50k',
-      dateOfBirth: '04/15/1983',  // age: 41
-      distanceMiles: 12,
-      tenureMonths: 22,
-      rightFitCandidate: true,
-      // Raw social scores (1-10 from CSV)
-      financeScore: 6,
-      scheduleScore: 8,
-      wlbScore: 6,
-      familyScore: 9,
-      // Sub-scores from scoring engine
-      agePoints: 7,
-      distancePoints: 10,
-      tenurePoints: 5,
-      turnoverPoints: 6,
-      financePoints: 0,
-      schedulePoints: -3,
-      wlbPoints: 0,
-      familyPoints: -5,
-      // Total retention score (sum of all 8)
-      retentionScore: 20,   // displayed as +20%
-      categoryScores: {
-        'finances': 6,
-        'work life': 6,
-        'schedule': 8,
-        'family': 9
-      },
-      overallScore: 5.5,
-      totalScore: 5.5,
-      improvementArea: 'Financial'
-    },
-    {
-      employeeNumber: 7051,
-      name: 'Abram, Crystal M.',
-      address: '4082 Congaree Ln',
-      cityStateZip: 'Indianapolis, IN 46235',
-      email: 'cabram@hancockregional.org',
-      alternateEmail: 'crystalabram45@gmail.com',
-      phone: '(317) 640-9743',
-      organization: 'Healthcare Services',
-      division: 'Clinical Operations',
-      department: 'Administration',
-      jobClass: 'Receptionist',
-      hireDate: '03/20/2023',
-      termDate: '',
-      salaryRange: '70k-90k',
-      dateOfBirth: '07/22/1990',  // age: 34
-      distanceMiles: 8,
-      tenureMonths: 14,
-      rightFitCandidate: true,
-      financeScore: 4,
-      scheduleScore: 9,
-      wlbScore: 5,
-      familyScore: 8,
-      agePoints: 10,
-      distancePoints: 10,
-      tenurePoints: 7,
-      turnoverPoints: 6,
-      financePoints: 2,
-      schedulePoints: -5,
-      wlbPoints: 1,
-      familyPoints: -3,
-      retentionScore: 28,
-      categoryScores: {
-        'finances': 4,
-        'work life': 5,
-        'schedule': 9,
-        'family': 8
-      },
-      overallScore: 6.5,
-      totalScore: 6.5,
-      improvementArea: 'Work Life Balance'
-    },
-    {
-      employeeNumber: 8866,
-      name: 'Abrams, Tina J.',
-      address: '8538 S. Co. Rd. 200 W',
-      cityStateZip: 'Spiceland, IN 47385',
-      email: 'tabrams@hancockregional.org',
-      alternateEmail: 'tabrams8688@gmail.com',
-      phone: '(765) 524-8688',
-      organization: 'Healthcare Services',
-      division: 'Clinical Operations',
-      department: 'Physical Therapy',
-      jobClass: 'Therapist',
-      hireDate: '03/20/2021',
-      termDate: '01/10/2025',
-      salaryRange: '70k-90k',
-      dateOfBirth: '11/03/1978',  // age: 46
-      distanceMiles: 45,
-      tenureMonths: 36,
-      rightFitCandidate: false,
-      financeScore: 8,
-      scheduleScore: 8,
-      wlbScore: 5,
-      familyScore: 7,
-      agePoints: 5,
-      distancePoints: 3,
-      tenurePoints: 3,
-      turnoverPoints: 9,
-      financePoints: -3,
-      schedulePoints: -3,
-      wlbPoints: 1,
-      familyPoints: -1,
-      retentionScore: 14,
-      categoryScores: {
-        'finances': 8,
-        'work life': 5,
-        'schedule': 8,
-        'family': 7
-      },
-      overallScore: 7,
-      totalScore: 7,
-      improvementArea: 'None'
-    },
-    {
-      employeeNumber: 8368,
-      name: 'Abu Manneh, Rona',
-      address: '10550 Geist View Drive',
-      cityStateZip: 'McCordsville, IN 46055',
-      email: 'rabu-manneh@hancockregional.org',
-      alternateEmail: '',
-      phone: '',
-      organization: 'Healthcare Services',
-      division: 'Clinical Operations',
-      department: 'Physical Therapy',
-      jobClass: 'Therapist',
-      hireDate: '03/20/2022',
-      termDate: '01/10/2025',
-      salaryRange: '60k-80k',
-      dateOfBirth: '02/14/1995',  // age: 29
-      distanceMiles: 6,
-      tenureMonths: 10,
-      rightFitCandidate: false,
-      financeScore: 5,
-      scheduleScore: 4,
-      wlbScore: 2,
-      familyScore: 3,
-      agePoints: 10,
-      distancePoints: 10,
-      tenurePoints: 7,
-      turnoverPoints: 9,
-      financePoints: 1,
-      schedulePoints: 2,
-      wlbPoints: 5,
-      familyPoints: 3,
-      retentionScore: 47,
-      categoryScores: {
-        'finances': 5,
-        'work life': 2,
-        'schedule': 4,
-        'family': 3
-      },
-      overallScore: 3.5,
-      totalScore: 3.5,
-      improvementArea: 'Communication, Financial, Schedule'
-    },
-    {
-      employeeNumber: 6885,
-      name: 'Acosta, Caitlin',
-      address: '2915 Sheffield Dr',
-      cityStateZip: 'Indianapolis, IN 46229',
-      email: '',
-      alternateEmail: '',
-      phone: '(608) 839-9957',
-      organization: 'Healthcare Services',
-      division: 'Clinical Operations',
-      department: 'Physical Therapy',
-      jobClass: 'Therapist',
-      hireDate: '03/20/2020',
-      termDate: '01/10/2025',
-      salaryRange: '60k-80k',
-      dateOfBirth: '09/30/1987',  // age: 37
-      distanceMiles: 20,
-      tenureMonths: 48,
-      rightFitCandidate: true,
-      financeScore: 7,
-      scheduleScore: 1,
-      wlbScore: 8,
-      familyScore: 8,
-      agePoints: 7,
-      distancePoints: 7,
-      tenurePoints: 1,
-      turnoverPoints: 9,
-      financePoints: -1,
-      schedulePoints: 7,
-      wlbPoints: -3,
-      familyPoints: -3,
-      retentionScore: 24,
-      categoryScores: {
-        'finances': 7,
-        'work life': 8,
-        'schedule': 1,
-        'family': 8
-      },
-      overallScore: 6,
-      totalScore: 6,
-      improvementArea: 'Financial'
-    },
-    {
-      employeeNumber: 900003,
-      name: 'Adams, Debra',
-      address: '801 N. State St.',
-      cityStateZip: 'Greenfield, IN 46140',
-      email: '',
-      alternateEmail: '',
-      phone: '',
-      organization: 'Healthcare Services',
-      division: 'Clinical Operations',
-      department: 'Nursing',
-      jobClass: 'Nurse',
-      hireDate: '03/20/2020',
-      termDate: '',
-      salaryRange: '40k-50k',
-      dateOfBirth: '06/12/1970',  // age: 54
-      distanceMiles: 3,
-      tenureMonths: 60,
-      rightFitCandidate: false,
-      financeScore: 10,
-      scheduleScore: 1,
-      wlbScore: 8,
-      familyScore: 2,
-      agePoints: 3,
-      distancePoints: 15,
-      tenurePoints: -1,
-      turnoverPoints: 12,
-      financePoints: -7,
-      schedulePoints: 7,
-      wlbPoints: -3,
-      familyPoints: 5,
-      retentionScore: 31,
-      categoryScores: {
-        'finances': 10,
-        'work life': 8,
-        'schedule': 1,
-        'family': 2
-      },
-      overallScore: 5.25,
-      totalScore: 5.25,
-      improvementArea: 'Financial, Schedule'
-    },
-    {
-      employeeNumber: 7579,
-      name: 'Adams, Natalie N.',
-      address: '1611 Whisler Drive',
-      cityStateZip: 'Greenfield, IN 46140',
-      email: 'nadams@hancockhealth.org',
-      alternateEmail: 'nadams@hancockhealth.org',
-      phone: '(317) 414-4477',
-      organization: 'Healthcare Services',
-      division: 'Clinical Operations',
-      department: 'Nursing',
-      jobClass: 'Nurse',
-      hireDate: '03/20/2020',
-      termDate: '',
-      salaryRange: '40k-50k',
-      dateOfBirth: '03/08/1992',  // age: 32
-      distanceMiles: 2,
-      tenureMonths: 60,
-      rightFitCandidate: true,
-      financeScore: 3,
-      scheduleScore: 1,
-      wlbScore: 1,
-      familyScore: 10,
-      agePoints: 10,
-      distancePoints: 15,
-      tenurePoints: -1,
-      turnoverPoints: 12,
-      financePoints: 3,
-      schedulePoints: 7,
-      wlbPoints: 7,
-      familyPoints: -7,
-      retentionScore: 46,
-      categoryScores: {
-        'finances': 3,
-        'work life': 1,
-        'schedule': 1,
-        'family': 10
-      },
-      overallScore: 3.75,
-      totalScore: 3.75,
-      improvementArea: 'Work Life Balance, Communication, Financial'
-    },
-    {
-      employeeNumber: 5706,
-      name: 'Adolay, Jennifer L.',
-      address: '9917 Wild Turkey Row',
-      cityStateZip: 'McCordsville, IN 46055',
-      email: 'jadolay@hancockregional.org',
-      alternateEmail: 'adolayp@comcast.net',
-      phone: '',
-      organization: 'Healthcare Services',
-      division: 'Clinical Operations',
-      department: 'Nursing',
-      jobClass: 'Nurse',
-      hireDate: '03/20/2020',
-      termDate: '',
-      salaryRange: '60k-80k',
-      dateOfBirth: '12/25/1985',  // age: 39
-      distanceMiles: 15,
-      tenureMonths: 60,
-      rightFitCandidate: true,
-      financeScore: 7,
-      scheduleScore: 1,
-      wlbScore: 8,
-      familyScore: 9,
-      agePoints: 7,
-      distancePoints: 7,
-      tenurePoints: -1,
-      turnoverPoints: 12,
-      financePoints: -1,
-      schedulePoints: 7,
-      wlbPoints: -3,
-      familyPoints: -5,
-      retentionScore: 23,
-      categoryScores: {
-        'finances': 7,
-        'work life': 8,
-        'schedule': 1,
-        'family': 9
-      },
-      overallScore: 6.25,
-      totalScore: 6.25,
-      improvementArea: 'Financial'
-    },
-    {
-      employeeNumber: 6725,
-      name: 'Aitken, Madison O.',
-      address: '4029 E 1100 N',
-      cityStateZip: 'Pendleton, IN 46064',
-      email: 'MGELLINGER@HANCOCKREGIONAL.ORG',
-      alternateEmail: 'madisongellinger2016@gmail.com',
-      phone: '(317) 617-8903',
-      organization: 'Healthcare Services',
-      division: 'Clinical Operations',
-      department: 'Nursing',
-      jobClass: 'Nurse',
-      hireDate: '03/20/2020',
-      termDate: '',
-      salaryRange: '60k-80k',
-      dateOfBirth: '08/19/1998',  // age: 26
-      distanceMiles: 18,
-      tenureMonths: 60,
-      rightFitCandidate: true,
-      financeScore: 8,
-      scheduleScore: 8,
-      wlbScore: 5,
-      familyScore: 4,
-      agePoints: 10,
-      distancePoints: 7,
-      tenurePoints: -1,
-      turnoverPoints: 12,
-      financePoints: -3,
-      schedulePoints: -3,
-      wlbPoints: 1,
-      familyPoints: 2,
-      retentionScore: 25,
-      categoryScores: {
-        'finances': 8,
-        'work life': 5,
-        'schedule': 8,
-        'family': 4
-      },
-      overallScore: 6.25,
-      totalScore: 6.25,
-      improvementArea: 'Schedule'
+  // ─── Pre-hire states ────────────────────────────────────────────────────────
+  const [preHireFile, setPreHireFile] = useState(null);
+  const [preHireError, setPreHireError] = useState('');
+  const [preHireSuccess, setPreHireSuccess] = useState(false);
+  const [preHireLoading, setPreHireLoading] = useState(false);
+  const [preHireDragging, setPreHireDragging] = useState(false);
+
+  // ────────────────────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    applyFilters();
+  }, [result, selectedDepartment, selectedJobClass, selectedHireDate, selectedTermDate, selectedOrganization, selectedDivision, selectedSalaryRange]);
+
+  useEffect(() => {
+    getCredits();
+  }, []);
+
+  const applyFilters = () => {
+    let filtered = [...result];
+    if (selectedDepartment !== 'all') filtered = filtered.filter(emp => emp.department === selectedDepartment);
+    if (selectedJobClass !== 'all') filtered = filtered.filter(emp => emp.jobClass === selectedJobClass);
+    if (selectedOrganization !== 'all') filtered = filtered.filter(emp => emp.organization === selectedOrganization);
+    if (selectedDivision !== 'all') filtered = filtered.filter(emp => emp.division === selectedDivision);
+    if (selectedHireDate !== 'all') filtered = filtered.filter(emp => emp.hireDate === selectedHireDate);
+    if (selectedTermDate !== 'all') filtered = filtered.filter(emp => emp.termDate === selectedTermDate);
+    if (selectedSalaryRange !== 'all') filtered = filtered.filter(emp => emp.salaryRange === selectedSalaryRange);
+    setFilteredResult(filtered);
+  };
+
+  const getUniqueSalaryRanges = () => [...new Set(result.map(emp => emp.salaryRange).filter(Boolean))].sort();
+  const getUniqueOrganizations = () => [...new Set(result.map(emp => emp.organization).filter(Boolean))].sort();
+  const getUniqueDivisions = () => [...new Set(result.map(emp => emp.division).filter(Boolean))].sort();
+  const getUniqueHireDates = () => [...new Set(result.map(emp => emp.hireDate).filter(Boolean))].sort();
+  const getUniqueTermDates = () => [...new Set(result.map(emp => emp.termDate).filter(Boolean))].sort();
+  const getUniqueDepartments = () => [...new Set(result.map(emp => emp.department).filter(Boolean))].sort();
+  const getUniqueJobClasses = () => [...new Set(result.map(emp => emp.jobClass).filter(Boolean))].sort();
+
+  const getCredits = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${BASE_URL}/getCurrentCredits`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      const data = await response.json();
+      setCredits(data.user.credits);
+    } catch (e) {
+      console.log(e.message);
     }
-  ];  
-
-    // NEW: Apply filters whenever result, selectedDepartment, or selectedJobClass changes
-    useEffect(() => {
-      applyFilters();
-    }, [result, selectedDepartment, selectedJobClass, selectedHireDate, selectedTermDate, selectedOrganization, selectedDivision, selectedSalaryRange]);
-
-    // NEW: Function to apply filters
-    const applyFilters = () => {
-      let filtered = [...result];
-    
-      // Filter by department
-      if (selectedDepartment !== 'all') {
-        filtered = filtered.filter(emp => emp.department === selectedDepartment);
-      }
-    
-      // Filter by job class
-      if (selectedJobClass !== 'all') {
-        filtered = filtered.filter(emp => emp.jobClass === selectedJobClass);
-      }
-    
-      // Filter by organization
-      if (selectedOrganization !== 'all') {
-        filtered = filtered.filter(emp => emp.organization === selectedOrganization);
-      }
-    
-      // Filter by division
-      if (selectedDivision !== 'all') {
-        filtered = filtered.filter(emp => emp.division === selectedDivision);
-      }
-    
-      // Filter by hire date
-      if (selectedHireDate !== 'all') {
-        filtered = filtered.filter(emp => emp.hireDate === selectedHireDate);
-      }
-    
-      // Filter by term date
-      if (selectedTermDate !== 'all') {
-        filtered = filtered.filter(emp => emp.termDate === selectedTermDate);
-      }
-    
-      // Filter by salary range
-      if (selectedSalaryRange !== 'all') {
-        filtered = filtered.filter(emp => emp.salaryRange === selectedSalaryRange);
-      }
-    
-      setFilteredResult(filtered);
-    };
-
-    // NEW: Get unique job classes from result
-
-
-  // ADD THESE NEW FUNCTIONS:
-
-
-
-  // ADD THIS NEW FUNCTION:
-  const getUniqueSalaryRanges = () => {
-    const salaryRanges = [...new Set(result.map(emp => emp.salaryRange).filter(Boolean))];
-    return salaryRanges.sort();
   };
 
-  const getUniqueOrganizations = () => {
-    const organizations = [...new Set(result.map(emp => emp.organization).filter(Boolean))];
-    return organizations.sort();
-  };
+  // ─── Pre-hire file handling ─────────────────────────────────────────────────
 
-  const getUniqueDivisions = () => {
-    const divisions = [...new Set(result.map(emp => emp.division).filter(Boolean))];
-    return divisions.sort();
-  };
-
-  const getUniqueHireDates = () => {
-    const hireDates = [...new Set(result.map(emp => emp.hireDate).filter(Boolean))];
-    return hireDates.sort();
-  };
-
-  const getUniqueTermDates = () => {
-    const termDates = [...new Set(result.map(emp => emp.termDate).filter(Boolean))];
-    return termDates.sort();
-  };
-
-    // NEW: Get unique departments from result
-    const getUniqueDepartments = () => {
-      const departments = [...new Set(result.map(emp => emp.department).filter(Boolean))];
-      return departments.sort();
-    };
-
-    // NEW: Get unique job classes from result
-    const getUniqueJobClasses = () => {
-      const jobClasses = [...new Set(result.map(emp => emp.jobClass).filter(Boolean))];
-      return jobClasses.sort();
-    };
-
-
-    // Add this NEW function
-const getFilteredRecordCount = () => {
-  if (!file) return 0;
-  
-  let count = recordCount; // Start with total records
-  
-  // This is a simplified count - you'd need to actually parse the file
-  // For now, just return the filtered result length if available
-  if (result.length > 0) {
-    return filteredResult.length;
-  }
-  
-  return count;
-};
-
-const handleFileChange = async (e) => {
-  const selectedFile = e.target.files[0];
-  const allowedTypes = [
+  const PREHIRE_ACCEPTED_EXT = ['.csv', '.xls', '.xlsx'];
+  const PREHIRE_ACCEPTED_TYPES = [
     'text/csv',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   ];
 
-  if (!selectedFile || !allowedTypes.includes(selectedFile.type)) {
-    alert('Please upload a CSV or Excel file');
-    return;
-  }
+  const validatePreHireCSV = (text) => {
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) {
+      return 'Your file appears to be blank or contains no records. Please upload a file with at least one candidate row.';
+    }
+    const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, '').toLowerCase());
+    const hasName = headers.some(h => h.includes('name'));
+    const hasAddress = headers.some(h => h.includes('address'));
+    if (!hasName || !hasAddress) {
+      return 'Your file could not be accepted because it is missing required fields or is not in the correct format. Please upload a CSV, XLS, or XLSX file that includes Name, Address, Email, and Phone when available.';
+    }
+    return null;
+  };
 
-  setFile(selectedFile);
+  const processPreHireFile = async (selectedFile) => {
+    setPreHireError('');
+    setPreHireSuccess(false);
 
-  const REQUIRED_COLUMNS = [
-    { key: 'employee name', label: 'Employee Name' },
-    { key: 'address line 1', label: 'Address Line 1' },
-    { key: 'e-mail address', label: 'E-mail Address' },
-    { key: 'date of birth', label: 'Date of Birth' },
-    { key: 'hire date', label: 'Hire Date' },
-    { key: 'organization', label: 'Organization' },
-    { key: 'division', label: 'Division' },
-    { key: 'department', label: 'Department' },
-    { key: 'job class', label: 'Job Class' },
-    { key: 'finance score', label: 'Finance Score (1-10)' },
-    { key: 'schedule score', label: 'Schedule Score (1-10)' },
-    { key: 'work life balance', label: 'Work Life Balance Score (1-10)' },
-    { key: 'family score', label: 'Family Score (1-10)' }
-  ];
+    const ext = selectedFile.name.slice(selectedFile.name.lastIndexOf('.')).toLowerCase();
 
-  try {
-    const isXlsx = selectedFile.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-
-    if (isXlsx) {
-      // Use SheetJS to read Excel files
-      const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs');
-      const arrayBuffer = await selectedFile.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-      if (rows.length <= 1) {
-        setRecordCount(0);
-        return;
-      }
-
-      const headers = rows[0].map(h => String(h || '').trim());
-      const headersJoined = headers.join('|').toLowerCase();
-
-      const missingColumns = REQUIRED_COLUMNS.filter(({ key }) =>
-        !headersJoined.includes(key.toLowerCase())
+    if (!PREHIRE_ACCEPTED_EXT.includes(ext)) {
+      setPreHireError(
+        'Your file could not be accepted because it is not in an accepted format. Please upload a CSV, XLS, or XLSX file that includes Name, Address, Email, and Phone when available.'
       );
-
-      if (missingColumns.length > 0) {
-        alert(`❌ Invalid file format. Missing required columns:\n\n${missingColumns.map(c => c.label).join('\n')}\n\nPlease check the sample file format and try again.`);
-        setFile(null);
-        setRecordCount(0);
-        e.target.value = '';
-        return;
-      }
-
-      const empNameIdx = headers.findIndex(h => h.toLowerCase().includes('employee name'));
-      const validCount = rows.slice(1).filter(row => {
-        const name = String(row[empNameIdx] || '').trim();
-        return name.length > 0;
-      }).length;
-
-      setRecordCount(validCount);
-
-    } else {
-      // CSV handling
-      const text = await selectedFile.text();
-      const lines = text.trim().split('\n');
-
-      if (lines.length <= 1) {
-        setRecordCount(0);
-        return;
-      }
-
-      const delimiter = lines[0].includes('\t') ? '\t' : ',';
-      const headers = lines[0].split(delimiter).map(h => h.trim().replace(/['"]/g, ''));
-      const headersJoined = headers.join('|').toLowerCase();
-
-      const missingColumns = REQUIRED_COLUMNS.filter(({ key }) =>
-        !headersJoined.includes(key.toLowerCase())
-      );
-
-      if (missingColumns.length > 0) {
-        alert(`❌ Invalid file format. Missing required columns:\n\n${missingColumns.map(c => c.label).join('\n')}\n\nPlease check the sample file format and try again.`);
-        setFile(null);
-        setRecordCount(0);
-        e.target.value = '';
-        return;
-      }
-
-      const empNameIdx = headers.findIndex(h => h.toLowerCase().includes('employee name'));
-      let validCount = 0;
-      for (let i = 1; i < lines.length; i++) {
-        const columns = lines[i].split(delimiter);
-        const name = columns[empNameIdx]?.trim().replace(/['"]/g, '') || '';
-        if (name.length > 0) validCount++;
-      }
-
-      setRecordCount(validCount);
+      return;
     }
 
-  } catch (error) {
-    console.error('Error parsing file:', error);
-    alert('Error reading file. Please ensure it is a valid CSV or Excel file.');
-    setFile(null);
-    setRecordCount(0);
-  }
-};
-
-
-    
-
-    const LoadingOverlay = () => {
-      console.log('LoadingOverlay rendered, recordCount:', recordCount);
-      
-      return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
-            <div className="flex flex-col items-center">
-              <div className="relative w-20 h-20 mb-6">
-                <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
-                <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Processing Your File</h3>
-              <p className="text-gray-600 text-center mb-4">
-                Analyzing {recordCount} employee record{recordCount !== 1 ? 's' : ''}...
-              </p>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
-              </div>
-              <p className="text-sm text-gray-500 mt-4">This may take a few moments</p>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-
-    const calculateCategoryAverages = () => {
-      if (!filteredResult || filteredResult.length === 0) return [];
-      
-      const categories = [
-        { apiKey: 'finances', displayName: 'Finances' },
-        { apiKey: 'work life', displayName: 'Work Life' },
-        { apiKey: 'schedule', displayName: 'Schedule' },
-        { apiKey: 'family', displayName: 'Family' }
-      ];
-      const categoryTotals = {};
-      const categoryCounts = {};
-      
-      categories.forEach(({ displayName }) => {
-        categoryTotals[displayName] = 0;
-        categoryCounts[displayName] = 0;
-      });
-      
-      filteredResult.forEach(employee => {
-        if (employee.categoryScores) {
-          categories.forEach(({ apiKey, displayName }) => {
-            const score = employee.categoryScores[apiKey] || 0;
-            categoryTotals[displayName] += score;
-            categoryCounts[displayName] += 1;
-          });
+    if (ext === '.csv') {
+      try {
+        const text = await selectedFile.text();
+        const err = validatePreHireCSV(text);
+        if (err) {
+          setPreHireError(err);
+          return;
         }
-      });
-      
-      return categories.map(({ displayName }) => {
-        const average = categoryCounts[displayName] > 0 
-          ? categoryTotals[displayName] / categoryCounts[displayName]
-          : 0;
-        return {
-          name: displayName,
-          score: parseFloat(average.toFixed(1))
-        };
-      });
-    };
-    const categoryAverages = calculateCategoryAverages();
-
-  useEffect(()=>{
-  getCredits();
-  },[])
-
-  const getCredits=async()=>{
-    try{
-      let token = localStorage.getItem('token');
-
-      let response = await fetch(`${BASE_URL}/getCurrentCredits`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        } 
-      });
-      
-      // Convert the response to JSON
-      let data = await response.json();
-      
-      console.log(data);
-      setCredits(data.user.credits)
-      
-    }catch(e){
-      console.log(e.message)
+      } catch {
+        setPreHireError('Error reading the file. Please ensure it is a valid CSV file.');
+        return;
+      }
     }
-  }
+
+    setPreHireFile(selectedFile);
+  };
+
+  const handlePreHireFileChange = async (e) => {
+    const f = e.target.files[0];
+    if (f) await processPreHireFile(f);
+  };
+
+  const handlePreHireDrop = async (e) => {
+    e.preventDefault();
+    setPreHireDragging(false);
+    const f = e.dataTransfer.files[0];
+    if (f) await processPreHireFile(f);
+  };
+
+  const handlePreHireUpload = async () => {
+    if (!preHireFile) return;
+    setPreHireLoading(true);
+    setPreHireError('');
+
+    try {
+      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      formData.append('preHireFile', preHireFile);
+
+      const res = await fetch(`${BASE_URL}/prehire-upload`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Upload failed. Please try again.');
+      }
+
+      setPreHireSuccess(true);
+    } catch (error) {
+      console.log(error.message)
+      setPreHireError(error.message || 'An unexpected error occurred. Please try again.');
+    } finally {
+      setPreHireLoading(false);
+    }
+  };
+
+  // ─── Current staff file handling ────────────────────────────────────────────
+
+  const handleFileChange = async (e) => {
+    const selectedFile = e.target.files[0];
+    const allowedTypes = [
+      'text/csv',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ];
+
+    if (!selectedFile || !allowedTypes.includes(selectedFile.type)) {
+      alert('Please upload a CSV or Excel file');
+      return;
+    }
+
+    setFile(selectedFile);
+
+    const REQUIRED_COLUMNS = [
+      { key: 'employee name', label: 'Employee Name' },
+      { key: 'address line 1', label: 'Address Line 1' },
+      { key: 'e-mail address', label: 'E-mail Address' },
+      { key: 'date of birth', label: 'Date of Birth' },
+      { key: 'hire date', label: 'Hire Date' },
+      { key: 'organization', label: 'Organization' },
+      { key: 'division', label: 'Division' },
+      { key: 'department', label: 'Department' },
+      { key: 'job class', label: 'Job Class' },
+      { key: 'finance score', label: 'Finance Score (1-10)' },
+      { key: 'schedule score', label: 'Schedule Score (1-10)' },
+      { key: 'work life balance', label: 'Work Life Balance Score (1-10)' },
+      { key: 'family score', label: 'Family Score (1-10)' },
+    ];
+
+    try {
+      const isXlsx = selectedFile.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+      if (isXlsx) {
+        const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs');
+        const arrayBuffer = await selectedFile.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        if (rows.length <= 1) { setRecordCount(0); return; }
+
+        const headers = rows[0].map(h => String(h || '').trim());
+        const headersJoined = headers.join('|').toLowerCase();
+        const missingColumns = REQUIRED_COLUMNS.filter(({ key }) => !headersJoined.includes(key.toLowerCase()));
+
+        if (missingColumns.length > 0) {
+          alert(`❌ Invalid file format. Missing required columns:\n\n${missingColumns.map(c => c.label).join('\n')}\n\nPlease check the sample file format and try again.`);
+          setFile(null); setRecordCount(0); e.target.value = ''; return;
+        }
+
+        const empNameIdx = headers.findIndex(h => h.toLowerCase().includes('employee name'));
+        const validCount = rows.slice(1).filter(row => String(row[empNameIdx] || '').trim().length > 0).length;
+        setRecordCount(validCount);
+      } else {
+        const text = await selectedFile.text();
+        const lines = text.trim().split('\n');
+        if (lines.length <= 1) { setRecordCount(0); return; }
+
+        const delimiter = lines[0].includes('\t') ? '\t' : ',';
+        const headers = lines[0].split(delimiter).map(h => h.trim().replace(/['"]/g, ''));
+        const headersJoined = headers.join('|').toLowerCase();
+        const missingColumns = REQUIRED_COLUMNS.filter(({ key }) => !headersJoined.includes(key.toLowerCase()));
+
+        if (missingColumns.length > 0) {
+          alert(`❌ Invalid file format. Missing required columns:\n\n${missingColumns.map(c => c.label).join('\n')}\n\nPlease check the sample file format and try again.`);
+          setFile(null); setRecordCount(0); e.target.value = ''; return;
+        }
+
+        const empNameIdx = headers.findIndex(h => h.toLowerCase().includes('employee name'));
+        let validCount = 0;
+        for (let i = 1; i < lines.length; i++) {
+          const columns = lines[i].split(delimiter);
+          const name = columns[empNameIdx]?.trim().replace(/['"]/g, '') || '';
+          if (name.length > 0) validCount++;
+        }
+        setRecordCount(validCount);
+      }
+    } catch (error) {
+      console.error('Error parsing file:', error);
+      alert('Error reading file. Please ensure it is a valid CSV or Excel file.');
+      setFile(null); setRecordCount(0);
+    }
+  };
+
+  const LoadingOverlay = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+        <div className="flex flex-col items-center">
+          <div className="relative w-20 h-20 mb-6">
+            <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Processing Your File</h3>
+          <p className="text-gray-600 text-center mb-4">
+            Analyzing {recordCount} employee record{recordCount !== 1 ? 's' : ''}...
+          </p>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+          </div>
+          <p className="text-sm text-gray-500 mt-4">This may take a few moments</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const calculateCategoryAverages = () => {
+    if (!filteredResult || filteredResult.length === 0) return [];
+    const categories = [
+      { apiKey: 'finances', displayName: 'Finances' },
+      { apiKey: 'work life', displayName: 'Work Life' },
+      { apiKey: 'schedule', displayName: 'Schedule' },
+      { apiKey: 'family', displayName: 'Family' },
+    ];
+    const totals = {}; const counts = {};
+    categories.forEach(({ displayName }) => { totals[displayName] = 0; counts[displayName] = 0; });
+    filteredResult.forEach(employee => {
+      if (employee.categoryScores) {
+        categories.forEach(({ apiKey, displayName }) => {
+          totals[displayName] += employee.categoryScores[apiKey] || 0;
+          counts[displayName] += 1;
+        });
+      }
+    });
+    return categories.map(({ displayName }) => ({
+      name: displayName,
+      score: parseFloat((counts[displayName] > 0 ? totals[displayName] / counts[displayName] : 0).toFixed(1)),
+    }));
+  };
+
+  const categoryAverages = calculateCategoryAverages();
 
   const handleUploadClick = async () => {
     if (!file) return;
-  
     if (recordCount === 0) {
       alert('No valid employee records found in the file. Please ensure your file contains records with Employee Names.');
       return;
     }
-    
     setIsLoading(true);
-  
     try {
-      let token = localStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const formData = new FormData();
       formData.append('file', file);
-      
-      // Add filters to form data
-      const filters = {
-        department: selectedDepartment,
-        jobClass: selectedJobClass,
-        hireDate: selectedHireDate,
-        termDate: selectedTermDate,
-        organization: selectedOrganization,
-        division: selectedDivision,
-        salaryRange: selectedSalaryRange
-      };
-      formData.append('filters', JSON.stringify(filters));
-      
-      // Call the NEW filter-and-count endpoint
+      const filtersPayload = { department: selectedDepartment, jobClass: selectedJobClass, hireDate: selectedHireDate, termDate: selectedTermDate, organization: selectedOrganization, division: selectedDivision, salaryRange: selectedSalaryRange };
+      formData.append('filters', JSON.stringify(filtersPayload));
+
       const response = await fetch(`${BASE_URL}/filter-and-count`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
       });
-    
+
       const { recordCount: filteredCount, totalAmount, originalCount, tempId, filteredEmployees } = await response.json();
-
-      console.log('=== FILTER AND COUNT RESPONSE ===');
-      console.log('Filtered Count:', filteredCount);
-      console.log('Original Count:', originalCount);
-      console.log('Total Amount:', totalAmount);
-      console.log('Temp ID:', tempId);
-      console.log('Filtered Employees:', filteredEmployees);
-      
-    
       setFilteredEmployeesData(filteredEmployees);
-if (filteredCount === 0) {
-  setIsLoading(false);
-  setShowFilterPopup(true);
-  alert(`No records match the selected filters. Found 0 records out of ${originalCount} total records. Please adjust your filters and try again.`);
-  return; 
-}
 
+      if (filteredCount === 0) {
+        setIsLoading(false);
+        setShowFilterPopup(true);
+        alert(`No records match the selected filters. Found 0 records out of ${originalCount} total records. Please adjust your filters and try again.`);
+        return;
+      }
 
-setRecordCount(filteredCount);
-setOriginalAmount(totalAmount);
+      setRecordCount(filteredCount);
+      setOriginalAmount(totalAmount);
+      localStorage.setItem('tempId', tempId);
 
+      const creditsInCents = credits * 100;
+      let finalAmount = totalAmount;
+      if (creditsInCents > 0) {
+        finalAmount = creditsInCents >= totalAmount ? 0 : totalAmount - creditsInCents;
+      }
+      setTotalAmount(finalAmount);
+      setIsLoading(false);
 
-localStorage.setItem('tempId', tempId);
-
-const creditsInCents = credits * 100;
-let finalAmount = totalAmount;
-
-console.log('Credits in cents:', creditsInCents);
-
-if (creditsInCents > 0) {
-  if (creditsInCents >= totalAmount) {
-    finalAmount = 0;
-  } else {
-    finalAmount = totalAmount - creditsInCents;
-  }
-}
-
-console.log('Final Amount:', finalAmount);
-
-setTotalAmount(finalAmount);
-setIsLoading(false);
-
-if (finalAmount > 0 && creditsInCents === 0) {
-  alert(`Insufficient Credits. Filtered ${filteredCount} out of ${originalCount} records. Please contact admin support rsmith@prognosticare.org`);
-} else if (finalAmount > 0 && creditsInCents > 0) {
-  alert(`Insufficient Credits. Filtered ${filteredCount} out of ${originalCount} records. Please contact admin support rsmith@prognosticare.org`);
-} else if (finalAmount === 0) {
-  console.log('Opening confirmation popup...');
-  setShowConfirmation(true);
-}
+      if (finalAmount > 0) {
+        alert(`Insufficient Credits. Filtered ${filteredCount} out of ${originalCount} records. Please contact admin support rsmith@prognosticare.org`);
+      } else {
+        setShowConfirmation(true);
+      }
     } catch (error) {
       console.error('Error calculating price:', error);
       setIsLoading(false);
@@ -1823,31 +385,58 @@ if (finalAmount > 0 && creditsInCents === 0) {
     }
   };
 
-  const handleFreeProcessing = async (creditsUsed) => {
+  const handleConfirmUpload = async () => {
+    setShowConfirmation(false);
     setIsLoading(true);
-    
     try {
+      const token = localStorage.getItem('token');
+      const creditsToUse = originalAmount / 100;
+      const deductResponse = await fetch(`${BASE_URL}/deductCredits`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ creditsToDeduct: creditsToUse }),
+      });
+      if (!deductResponse.ok) throw new Error('Failed to deduct credits. Please contact support.');
+
       const formData = new FormData();
-      formData.append("employeeFile", file);
-      formData.append("recordCount", recordCount);
-      formData.append("creditsUsed", creditsUsed);
-      setSameFile(file);
-  
-      let token = localStorage.getItem('token');
-  
+      formData.append('employeeFile', file);
+      formData.append('recordCount', recordCount);
+      formData.append('creditsUsed', '0');
+
       const res = await fetch(`${BASE_URL}/enrich`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
       });
-  
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to process file'); }
+
       const data = await res.json();
       setCorrectPasscode(data.passcode);
       setResult(data.results);
       setIsReportLocked(false);
-      
+      await getCredits();
+    } catch (error) {
+      console.error('Upload error:', error.message);
+      alert(error.message || 'Error uploading file');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePaymentSuccess = async (paymentIntentId) => {
+    setShowStripePayment(false);
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('employeeFile', file);
+      formData.append('paymentIntentId', paymentIntentId);
+      setSameFile(file);
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${BASE_URL}/enrich`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
+      const data = await res.json();
+      setCorrectPasscode(data.passcode);
+      setResult(data.results);
+      setIsReportLocked(false);
       await getCredits();
     } catch (error) {
       console.error('Upload error:', error);
@@ -1857,10 +446,213 @@ if (finalAmount > 0 && creditsInCents === 0) {
     }
   };
 
+  const handleFreeProcessing = async (creditsUsed) => {
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('employeeFile', file);
+      formData.append('recordCount', recordCount);
+      formData.append('creditsUsed', creditsUsed);
+      setSameFile(file);
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${BASE_URL}/enrich`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
+      const data = await res.json();
+      setCorrectPasscode(data.passcode);
+      setResult(data.results);
+      setIsReportLocked(false);
+      await getCredits();
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Error uploading file');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getTopCategory = (employee) => {
+    if (!employee || !employee.categoryScores) return 'No categories';
+    const categories = [
+      { apiKey: 'finances', displayName: 'Finances' },
+      { apiKey: 'work life', displayName: 'Work Life' },
+      { apiKey: 'schedule', displayName: 'Schedule' },
+      { apiKey: 'family', displayName: 'Family' },
+    ];
+    let minScore = Infinity; let topCategory = 'No categories';
+    categories.forEach(({ apiKey, displayName }) => {
+      const score = employee.categoryScores[apiKey] || 0;
+      if (score < minScore) { minScore = score; topCategory = displayName; }
+    });
+    return topCategory;
+  };
+
+  const getRiskLevel = (score) => {
+    if (score >= 7) return 'High Risk';
+    if (score >= 4) return 'Medium Risk';
+    return 'Low Risk';
+  };
+
+  const getCategoryRiskLevel = (score) => {
+    if (score >= 7) return 'HIGH RISK';
+    if (score >= 4) return 'MEDIUM RISK';
+    return 'LOW RISK';
+  };
+
+  const getCategoryRiskColor = (score) => {
+    if (score >= 7) return 'text-[#fb0000]';
+    if (score >= 4) return 'text-[#fdc002]';
+    return 'text-[#41d756]';
+  };
+
+  const getImprovementArea = (employee) => {
+    if (!employee || !employee.categoryScores) return 'N/A';
+    const categories = [
+      { apiKey: 'finances', displayName: 'Finances' },
+      { apiKey: 'work life', displayName: 'Work Life' },
+      { apiKey: 'schedule', displayName: 'Schedule' },
+      { apiKey: 'family', displayName: 'Family' },
+    ];
+    const areas = categories.filter(({ apiKey }) => (employee.categoryScores[apiKey] || 0) >= 5).map(({ displayName }) => displayName);
+    return areas.length > 0 ? areas.join(', ') : 'None';
+  };
+
+  const handlePasscodeSubmit = (passcode) => {
+    if (passcode === correctPasscode) {
+      setPasscodeError('');
+      setShowPasscodePopup(false);
+      setIsReportLocked(false);
+      alert('Report unlocked successfully! You can now download your report.');
+    } else {
+      setPasscodeError('Invalid passcode. Please try again.');
+    }
+  };
+
+  const exportToCSV = () => {
+    if (isReportLocked) { setShowPasscodePopup(true); return; }
+    if (!filteredResult || filteredResult.length === 0) { alert('No data to export'); return; }
+
+    const headers = ['Employee Number','Employee Name (Last Suffix, First MI)','Address Line 1 + Address Line 2','City, State Zip Code (Formatted)','E-mail Address','Alternate Email','Home Phone (Formatted)','Organization','Division','Department','Job Class','Hire Date','Term Date','Salary Range','Finances','Work Life','Schedule','Family','Final Score','Improvement Areas'];
+    const csvRows = filteredResult.map((emp, index) => [
+      emp.employeeNumber || (3321 + index), emp.name || 'Unknown', emp.address || '', emp.cityStateZip || '',
+      emp.email || '', emp.alternateEmail || '', emp.phone || '', emp.organization || '', emp.division || '',
+      emp.department || '', emp.jobClass || '', emp.hireDate || '', emp.termDate || '', emp.salaryRange || '',
+      emp.categoryScores?.['finances'] || 0, emp.categoryScores?.['work life'] || 0,
+      emp.categoryScores?.['schedule'] || 0, emp.categoryScores?.['family'] || 0,
+      emp.overallScore || emp.totalScore || 0, emp.improvementArea || getImprovementArea(emp) || 'N/A',
+    ]);
+
+    const csvContent = [headers, ...csvRows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `employee_engagement_report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // ─── Sub-components ──────────────────────────────────────────────────────────
+
+  const PreHireScreen = () => (
+    <div className="mt-2">
+      <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Upload pre-hire data</h3>
+      <p className="text-sm sm:text-base text-gray-600 mb-6 leading-relaxed">
+        Please upload your pre-hire candidate file for processing. The file must include the required candidate information so PrognostiCare can begin the retention risk analysis.
+      </p>
+
+      {/* Drop zone */}
+      <div
+        className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center mb-5 transition-all duration-300 cursor-pointer ${
+          preHireDragging ? 'border-blue-500 bg-blue-50' : 'border-blue-300 bg-white hover:border-blue-400 hover:bg-blue-50'
+        }`}
+        onDragOver={(e) => { e.preventDefault(); setPreHireDragging(true); }}
+        onDragLeave={() => setPreHireDragging(false)}
+        onDrop={handlePreHireDrop}
+        onClick={() => document.getElementById('preHireFileInput').click()}
+      >
+        <input
+          type="file"
+          id="preHireFileInput"
+          accept=".csv,.xls,.xlsx"
+          className="hidden"
+          onChange={handlePreHireFileChange}
+        />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3B82F6" className="mx-auto mb-3 w-10 h-10 sm:w-12 sm:h-12">
+          <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
+        </svg>
+        <p className="text-sm sm:text-base text-gray-700 mb-1">
+          Drag and drop your file here, or click to browse
+        </p>
+        <p className="text-xs text-gray-500">Accepted formats: .CSV &nbsp;·&nbsp; .XLS &nbsp;·&nbsp; .XLSX</p>
+        {preHireFile && (
+          <p className="text-blue-600 font-medium text-sm mt-2">Selected: {preHireFile.name}</p>
+        )}
+      </div>
+
+      {/* Required fields */}
+      <div className="mb-5">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Required fields</p>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { label: 'Name', required: true },
+            { label: 'Address', required: true },
+            { label: 'Email', required: false },
+            { label: 'Phone', required: false },
+          ].map(({ label, required }) => (
+            <div key={label} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-700">
+              <span>{label}</span>
+              {required ? (
+                <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Required</span>
+              ) : (
+                <span className="text-xs text-gray-400 border border-gray-200 px-2 py-0.5 rounded-full">If available</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Error message */}
+      {preHireError && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="font-semibold text-red-800 text-sm mb-1">Upload error</p>
+          <p className="text-red-700 text-sm leading-relaxed">{preHireError}</p>
+        </div>
+      )}
+
+      {/* Success message */}
+      {preHireSuccess ? (
+        <div className="bg-green-50 border border-green-300 rounded-xl p-6 text-center">
+          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <path d="M4 11l5 5 9-9" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <p className="font-bold text-green-800 text-base mb-2">File received successfully</p>
+          <p className="text-green-700 text-sm leading-relaxed">
+            Thank you. The PrognostiCare team has received your pre-hire data file.
+            <br /><br />
+            We will begin processing your file and will notify you once the analysis is complete and your results are ready for review.
+          </p>
+        </div>
+      ) : (
+        <button
+          onClick={handlePreHireUpload}
+          disabled={!preHireFile || preHireLoading}
+          className={`w-full sm:w-auto mx-auto block px-8 py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${
+            !preHireFile || preHireLoading
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 active:scale-95'
+          }`}
+        >
+          {preHireLoading ? 'Uploading...' : 'Upload & process file'}
+        </button>
+      )}
+    </div>
+  );
 
   const FilterPopup = () => {
     if (!showFilterPopup) return null;
-
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-fadeIn">
@@ -1869,1287 +661,299 @@ if (finalAmount > 0 && creditsInCents === 0) {
               <h2 className="text-2xl font-bold text-gray-900">Filter Data Before Processing</h2>
               <p className="text-sm text-gray-600 mt-1">Select filters to apply to your {recordCount} employee records</p>
             </div>
-            <button
-              onClick={() => setShowFilterPopup(false)}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
+            <button onClick={() => setShowFilterPopup(false)} className="text-gray-400 hover:text-gray-600">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
-          
           <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Organization Filter */}
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Organization
-                </label>
-                <select
-                  value={selectedOrganization}
-                  onChange={(e) => setSelectedOrganization(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="all">All Organizations</option>
-                  {filters.Organization.map((org) => (
-                    <option key={org} value={org}>
-                      {org}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Division Filter */}
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Division
-                </label>
-                <select
-                  value={selectedDivision}
-                  onChange={(e) => setSelectedDivision(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="all">All Divisions</option>
-                  {filters.Division.map((div) => (
-                    <option key={div} value={div}>
-                      {div}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Department Filter */}
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Department
-                </label>
-                <select
-                  value={selectedDepartment}
-                  onChange={(e) => setSelectedDepartment(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="all">All Departments</option>
-                  {filters.Department.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Job Class Filter */}
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Job Class
-                </label>
-                <select
-                  value={selectedJobClass}
-                  onChange={(e) => setSelectedJobClass(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="all">All Job Classes</option>
-                  {filters['Job Class'].map((jobClass) => (
-                    <option key={jobClass} value={jobClass}>
-                      {jobClass}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Hire Date Filter */}
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Hire Date
-                </label>
-                <select
-                  value={selectedHireDate}
-                  onChange={(e) => setSelectedHireDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="all">All Hire Dates</option>
-                  {filters['Hire Date'].map((date) => (
-                    <option key={date} value={date}>
-                      {date}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Term Date Filter */}
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Term Date
-                </label>
-                <select
-                  value={selectedTermDate}
-                  onChange={(e) => setSelectedTermDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="all">All Term Dates</option>
-                  {filters['Term Date'].map((date) => (
-                    <option key={date} value={date}>
-                      {date || 'Active'}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Salary Range Filter */}
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Salary Range
-                </label>
-                <select
-                  value={selectedSalaryRange}
-                  onChange={(e) => setSelectedSalaryRange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="all">All Salary Ranges</option>
-                  {filters['Salary Range'].map((range) => (
-                    <option key={range} value={range}>
-                      {range}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {[
+                { label: 'Organization', value: selectedOrganization, setter: setSelectedOrganization, options: filters.Organization, allLabel: 'All Organizations' },
+                { label: 'Division', value: selectedDivision, setter: setSelectedDivision, options: filters.Division, allLabel: 'All Divisions' },
+                { label: 'Department', value: selectedDepartment, setter: setSelectedDepartment, options: filters.Department, allLabel: 'All Departments' },
+                { label: 'Job Class', value: selectedJobClass, setter: setSelectedJobClass, options: filters['Job Class'], allLabel: 'All Job Classes' },
+                { label: 'Hire Date', value: selectedHireDate, setter: setSelectedHireDate, options: filters['Hire Date'], allLabel: 'All Hire Dates' },
+                { label: 'Term Date', value: selectedTermDate, setter: setSelectedTermDate, options: filters['Term Date'], allLabel: 'All Term Dates' },
+                { label: 'Salary Range', value: selectedSalaryRange, setter: setSelectedSalaryRange, options: filters['Salary Range'], allLabel: 'All Salary Ranges' },
+              ].map(({ label, value, setter, options, allLabel }) => (
+                <div key={label}>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+                  <select value={value} onChange={e => setter(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                    <option value="all">{allLabel}</option>
+                    {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                </div>
+              ))}
             </div>
-
-            {/* Clear Filters Button */}
-            {(selectedDepartment !== 'all' || selectedJobClass !== 'all' || selectedHireDate !== 'all' || 
-              selectedTermDate !== 'all' || selectedOrganization !== 'all' || selectedDivision !== 'all' || 
-              selectedSalaryRange !== 'all') && (
-              <button
-                onClick={() => {
-                  setSelectedDepartment('all');
-                  setSelectedJobClass('all');
-                  setSelectedHireDate('all');
-                  setSelectedTermDate('all');
-                  setSelectedOrganization('all');
-                  setSelectedDivision('all');
-                  setSelectedSalaryRange('all');
-                }}
-                className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Clear all filters
-              </button>
-            )}
           </div>
-
-          <div className="p-6 border-t border-gray-200 flex justify-between items-center">
- 
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowFilterPopup(false)}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setShowFilterPopup(false);
-                  handleUploadClick();
-                }}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
-              >
-                Proceed to Upload
-              </button>
-            </div>
+          <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+            <button onClick={() => setShowFilterPopup(false)} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50">Cancel</button>
+            <button onClick={() => { setShowFilterPopup(false); handleUploadClick(); }} className="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600">Proceed to Upload</button>
           </div>
         </div>
       </div>
     );
   };
 
-  const handleConfirmUpload = async () => {
-    setShowConfirmation(false);
-    setIsLoading(true);
-  
-    try {
-      let token = localStorage.getItem('token');
-  
-      // Deduct credits first
-      const creditsToUse = originalAmount / 100;
-      const deductResponse = await fetch(`${BASE_URL}/deductCredits`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ creditsToDeduct: creditsToUse })
-      });
-  
-      if (!deductResponse.ok) {
-        throw new Error('Failed to deduct credits. Please contact support.');
-      }
-  
-      // Call /api/enrich with the file — this triggers PDL + social scoring
-      const formData = new FormData();
-      formData.append('employeeFile', file);
-      formData.append('recordCount', recordCount);
-      formData.append('creditsUsed', '0'); // already deducted above
-  
-      const res = await fetch(`${BASE_URL}/enrich`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
-      });
-  
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to process file');
-      }
-  
-      const data = await res.json();
-      setCorrectPasscode(data.passcode);
-      setResult(data.results);
-      setIsReportLocked(false);
-      await getCredits();
-  
-    } catch (error) {
-      console.error('Upload error:', error.message);
-      alert(error.message || 'Error uploading file');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-
-
-
-
-    const handlePaymentSuccess = async (paymentIntentId) => {
-      setShowStripePayment(false);
-      setIsLoading(true);
-      
-      try {
-        const formData = new FormData();
-        formData.append("employeeFile", file);
-        formData.append("paymentIntentId", paymentIntentId);
-        setSameFile(file);
-    
-        let token = localStorage.getItem('token');
-    
-        const res = await fetch(`${BASE_URL}/enrich`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          body: formData
-        });
-        
-        const data = await res.json();
-        setCorrectPasscode(data.passcode);
-        setResult(data.results);
-        setIsReportLocked(false);
-        
-        await getCredits();
-      } catch (error) {
-        console.error('Upload error:', error);
-        alert('Error uploading file');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-
-
-    const getTopCategory = (employee) => {
-      if (!employee || !employee.categoryScores) return 'No categories';
-      
-      const categories = [
-        { apiKey: 'finances', displayName: 'Finances' },
-        { apiKey: 'work life', displayName: 'Work Life' },
-        { apiKey: 'schedule', displayName: 'Schedule' },
-        { apiKey: 'family', displayName: 'Family' }
-      ];
-    
-      let minScore = Infinity;
-      let topCategory = 'No categories';
-    
-      categories.forEach(({ apiKey, displayName }) => {
-        const score = employee.categoryScores[apiKey] || 0;
-        if (score < minScore) {
-          minScore = score;
-          topCategory = displayName;
-        }
-      });
-    
-      return topCategory;
-    };
-
-    const getRiskLevel = (score) => {
-      if (score >= 7) return 'High Risk';
-      if (score >= 4) return 'Medium Risk';
-      return 'Low Risk';
-    };
-    
-    const getCategoryRiskLevel = (score) => {
-      if (score >= 7) return 'HIGH RISK';
-      if (score >= 4) return 'MEDIUM RISK';
-      return 'LOW RISK';
-    };
-    
-    const getCategoryRiskColor = (score) => {
-      if (score >= 7) return 'text-[#fb0000]';
-      if (score >= 4) return 'text-[#fdc002]';
-      return 'text-[#41d756]';
-    };
-
-
-    const getImprovementArea = (employee) => {
-      if (!employee || !employee.categoryScores) return 'N/A';
-      
-      const categories = [
-        { apiKey: 'finances', displayName: 'Finances' },
-        { apiKey: 'work life', displayName: 'Work Life' },
-        { apiKey: 'schedule', displayName: 'Schedule' },
-        { apiKey: 'family', displayName: 'Family' }
-      ];
-      const improvementAreas = [];
-    
-      categories.forEach(({ apiKey, displayName }) => {
-        const score = employee.categoryScores[apiKey] || 0;
-        if (score >= 5) {
-          improvementAreas.push(displayName);
-        }
-      });
-    
-      return improvementAreas.length > 0 ? improvementAreas.join(', ') : 'None';
-    };
-
-    const calculateImprovedScore = (currentScore) => {
-      return Math.round(currentScore * 0.8);
-    };
-
-    const handleProceedToPayment = () => {
-      setShowPaymentPopup(false);
-      alert('Redirecting to payment gateway...\n\nAfter payment, you will receive passcode: DEMO2024');
-      setShowPasscodePopup(true);
-    };
-
-    const handlePasscodeSubmit = (passcode) => {
-      console.log("CORRECt")
-      console.log(correctPasscode)
-      if (passcode === correctPasscode) {
-        setPasscodeError('');
-        setShowPasscodePopup(false);
-        setIsReportLocked(false);
-        alert('Report unlocked successfully! You can now download your report.');
-      } else {
-        setPasscodeError('Invalid passcode. Please try again.');
-      }
-    };
-
-
-    const SampleFormatModal = () => {
-      if (!showSampleFormat) return null;
-
-      return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-fadeIn">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Sample File Format</h2>
-              <button
-                onClick={() => setShowSampleFormat(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+  const SampleFormatModal = () => {
+    if (!showSampleFormat) return null;
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-fadeIn">
+          <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-900">Sample File Format</h2>
+            <button onClick={() => setShowSampleFormat(false)} className="text-gray-400 hover:text-gray-600">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 overflow-x-auto mb-4">
+              <pre className="text-xs font-mono whitespace-pre">{`Employee Name,E-mail Address,Address Line 1,Date of Birth,Hire Date,Organization,Division,Department,Job Class,Finance Score,Schedule Score,Work Life Balance Score,Family Score
+Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2020,Healthcare Services,Clinical Ops,Emergency,Nurse,6,8,6,9`}</pre>
             </div>
-            
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Required Columns:</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Your file must include all of the following columns. Optional columns are listed separately below.
-                </p>
-              </div>
-
-              {/* Required Columns Table */}
-              <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6 overflow-x-auto">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">REQUIRED</span>
-                  <span className="text-sm text-red-700 font-semibold">These columns must be present in your file</span>
-                </div>
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-red-300">
-                      <th className="text-left py-2 px-3 font-semibold text-gray-700">Column Name</th>
-                      <th className="text-left py-2 px-3 font-semibold text-gray-700">Description</th>
-                      <th className="text-left py-2 px-3 font-semibold text-gray-700">Example</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-red-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">Employee Name (Last Suffix, First MI)</td>
-                      <td className="py-2 px-3">Full name in format: Last, First MI</td>
-                      <td className="py-2 px-3 text-gray-600">Abernathy, Rita K.</td>
-                    </tr>
-                    <tr className="border-b border-red-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">Address Line 1 + Address Line 2</td>
-                      <td className="py-2 px-3">Complete address</td>
-                      <td className="py-2 px-3 text-gray-600">9790 North 100 West</td>
-                    </tr>
-                    <tr className="border-b border-red-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">City, State Zip Code (Formatted)</td>
-                      <td className="py-2 px-3">City, state and zip code</td>
-                      <td className="py-2 px-3 text-gray-600">Fountaintown IN 46130</td>
-                    </tr>
-                    <tr className="border-b border-red-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">E-mail Address</td>
-                      <td className="py-2 px-3">Work email</td>
-                      <td className="py-2 px-3 text-gray-600">rabernathy@company.org</td>
-                    </tr>
-                    <tr className="border-b border-red-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">Hire Date</td>
-                      <td className="py-2 px-3">Employee hire date</td>
-                      <td className="py-2 px-3 text-gray-600">03/20/2020</td>
-                    </tr>
-                    <tr className="border-b border-red-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">Term Date</td>
-                      <td className="py-2 px-3">Termination date (if applicable)</td>
-                      <td className="py-2 px-3 text-gray-600">-</td>
-                    </tr>
-                    <tr className="border-b border-red-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">Organization</td>
-                      <td className="py-2 px-3">Organization name</td>
-                      <td className="py-2 px-3 text-gray-600">Healthcare Services</td>
-                    </tr>
-                    <tr className="border-b border-red-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">Division</td>
-                      <td className="py-2 px-3">Division name</td>
-                      <td className="py-2 px-3 text-gray-600">Clinical Operations</td>
-                    </tr>
-                    <tr className="border-b border-red-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">Department</td>
-                      <td className="py-2 px-3">Department name</td>
-                      <td className="py-2 px-3 text-gray-600">Emergency Services</td>
-                    </tr>
-                    <tr className="border-b border-red-200">
-  <td className="py-2 px-3 font-mono text-xs bg-white">Job Class</td>
-  <td className="py-2 px-3">Job classification</td>
-  <td className="py-2 px-3 text-gray-600">Registered Nurse</td>
-</tr>
-<tr className="border-b border-red-200">
-  <td className="py-2 px-3 font-mono text-xs bg-white">Date of Birth</td>
-  <td className="py-2 px-3">Used to calculate age score</td>
-  <td className="py-2 px-3 text-gray-600">01/15/1985</td>
-</tr>
-<tr className="border-b border-red-200">
-  <td className="py-2 px-3 font-mono text-xs bg-white">Finance Score (1-10)</td>
-  <td className="py-2 px-3">Social listening score for finances</td>
-  <td className="py-2 px-3 text-gray-600">6</td>
-</tr>
-<tr className="border-b border-red-200">
-  <td className="py-2 px-3 font-mono text-xs bg-white">Schedule Score (1-10)</td>
-  <td className="py-2 px-3">Social listening score for schedule</td>
-  <td className="py-2 px-3 text-gray-600">8</td>
-</tr>
-<tr className="border-b border-red-200">
-  <td className="py-2 px-3 font-mono text-xs bg-white">Work Life Balance Score (1-10)</td>
-  <td className="py-2 px-3">Social listening score for work life balance</td>
-  <td className="py-2 px-3 text-gray-600">6</td>
-</tr>
-<tr className="border-b border-red-200">
-  <td className="py-2 px-3 font-mono text-xs bg-white">Family Score (1-10)</td>
-  <td className="py-2 px-3">Social listening score for family</td>
-  <td className="py-2 px-3 text-gray-600">9</td>
-</tr>
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Optional Columns Table */}
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Optional Columns:</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  These columns are optional but recommended for better data quality:
-                </p>
-              </div>
-
-              <div className="bg-gray-50 rounded-lg p-4 mb-6 overflow-x-auto">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded">OPTIONAL</span>
-                  <span className="text-sm text-gray-600 font-semibold">Include these if available</span>
-                </div>
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-300">
-                      <th className="text-left py-2 px-3 font-semibold text-gray-700">Column Name</th>
-                      <th className="text-left py-2 px-3 font-semibold text-gray-700">Description</th>
-                      <th className="text-left py-2 px-3 font-semibold text-gray-700">Example</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-gray-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">Home Phone (Formatted)</td>
-                      <td className="py-2 px-3">Contact number with formatting</td>
-                      <td className="py-2 px-3 text-gray-600">(317) 752-2091</td>
-                    </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">Employee Number</td>
-                      <td className="py-2 px-3">Unique employee identifier</td>
-                      <td className="py-2 px-3 text-gray-600">3321</td>
-                    </tr>
-                   
-                    <tr className="border-b border-gray-200">
-                      <td className="py-2 px-3 font-mono text-xs bg-white">Employment Status</td>
-                      <td className="py-2 px-3">Current status</td>
-                      <td className="py-2 px-3 text-gray-600">Active</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Sample Data Preview:</h3>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 overflow-x-auto">
-                  <pre className="text-xs font-mono whitespace-pre">
-                  {`Employee Name (Last Suffix, First MI),E-mail Address,Address Line 1 + Address Line 2,City State Zip Code (Formatted),Date of Birth,Hire Date,Term Date,Organization,Division,Department,Job Class,Finance Score,Schedule Score,Work Life Balance Score,Family Score
-Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,Fountaintown IN 46130,01/15/1985,03/20/2020,,Healthcare Services,Clinical Ops,Emergency,Registered Nurse,6,8,6,9
-Abram, Crystal M.,cabram@company.org,4082 Congaree Ln,Indianapolis IN 46235,03/22/1990,01/15/2019,,Healthcare Services,Admin,Reception,Receptionist,4,9,5,8
-Abrams, Tina J.,tabrams@company.org,8538 S. Co. Rd. 200 W,Spiceland IN 47385,07/11/1988,05/10/2021,,Healthcare Services,Admin,Reception,Receptionist,8,8,5,7`} </pre>
-                </div>
-              </div>
-
-              <div className="rounded-lg p-4" style={{ backgroundColor: '#fef3e2', border: '1px solid #fdc002' }}>
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: '#fdc002' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div>
-                    <p className="font-semibold mb-1" style={{ color: '#b88a00' }}>Important Notes:</p>
-                    <ul className="text-sm space-y-1 list-disc list-inside" style={{ color: '#996f00' }}>
-                      <li>File must be in CSV or Excel (.xlsx) format</li>
-                      <li>First row must contain exact column headers as shown above</li>
-                      <li><strong>All required columns must be present</strong> or upload will fail</li>
-                      <li>Column names must match exactly (case-sensitive)</li>
-                      <li>Optional fields can be left empty</li>
-                      <li>Term Date can be blank for active employees</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-gray-200 flex justify-end">
-              <button
-                onClick={() => setShowSampleFormat(false)}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
-              >
-                Got it
-              </button>
-            </div>
+          </div>
+          <div className="p-6 border-t border-gray-200 flex justify-end">
+            <button onClick={() => setShowSampleFormat(false)} className="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600">Got it</button>
           </div>
         </div>
-      );
+      </div>
+    );
+  };
+
+  const EmployeeDashboard = () => {
+    const [expandedEmployee, setExpandedEmployee] = useState(null);
+
+    const getRiskColor = (risk) => {
+      if (risk >= 7) return 'bg-red-500';
+      if (risk >= 4) return 'bg-yellow-500';
+      return 'bg-green-500';
     };
 
-
-    const exportToCSV = () => {
-      if (isReportLocked) {
-        setShowPasscodePopup(true);
-        return;
-      }
-    
-      if (!filteredResult || filteredResult.length === 0) {
-        alert('No data to export');
-        return;
-      }
-    
-      const headers = [
-        'Employee Number',
-        'Employee Name (Last Suffix, First MI)',
-        'Address Line 1 + Address Line 2',
-        'City, State Zip Code (Formatted)',
-        'E-mail Address',
-        'Alternate Email',
-        'Home Phone (Formatted)',
-        'Organization',
-        'Division',
-        'Department',
-        'Job Class',
-        'Hire Date',
-        'Term Date',
-        'Salary Range',
-        'Finances',
-        'Work Life',
-        'Schedule',
-        'Family',
-        'Final Score',
-        'Improvement Areas',
-      ];
-    
-      const csvRows = filteredResult.map((emp, index) => {
-        return [
-          emp.employeeNumber || (3321 + index),
-          emp.name || 'Unknown',
-          emp.address || '',
-          emp.cityStateZip || '',
-          emp.email || '',
-          emp.alternateEmail || '',
-          emp.phone || '',
-          emp.organization || '',
-          emp.division || '',
-          emp.department || '',
-          emp.jobClass || '',
-          emp.hireDate || '',
-          emp.termDate || '',
-          emp.salaryRange || '',
-          emp.categoryScores?.['finances'] || 0,
-          emp.categoryScores?.['work life'] || 0,
-          emp.categoryScores?.['schedule'] || 0,
-          emp.categoryScores?.['family'] || 0,
-          emp.overallScore || emp.totalScore || 0,
-          emp.improvementArea || getImprovementArea(emp) || 'N/A',
-          emp.categoryScores?.['finances'] || 0,
-emp.categoryScores?.['work life'] || 0,
-emp.categoryScores?.['schedule'] || 0,
-emp.categoryScores?.['family'] || 0,
-
-        ];
-      });
-      const csvContent = [headers, ...csvRows]
-        .map(row => row.map(cell => `"${cell}"`).join(','))
-        .join('\n');
-    
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      
-      if (link.download !== undefined) {
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `employee_engagement_report_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
+    const getRetentionPercentage = (score) => {
+      if (score === 0) return 'Neutral';
+      if (score > 5) return 'Promoter';
+      return 'Detractor';
     };
 
+    const getNPSLabel = (score) => {
+      if (score >= 7) return 'Promoter';
+      if (score >= 4) return 'Neutral';
+      return 'Detractor';
+    };
 
-    const EmployeeDashboard = () => {
-      const getRiskColor = (risk) => {
-        if (risk >= 7) return 'bg-red-500';
-        if (risk >= 4) return 'bg-yellow-500';
-        return 'bg-green-500';
-      };
-    
-      const getRetentionPercentage = (score) => {
-        const percentage = Math.round((score - 5) * 10);
-        
-        if (percentage === 0) return 'Neutral';
-        if (percentage > 0) return 'Promoter';
-        return 'Detractor';
-      };
-    
-      const getNPSLabel = (score) => {
-        if (score >= 7) return 'Promoter';
-        if (score >= 4) return 'Neutral';
-        return 'Detractor';
-      };
-    
-      const getNPSColor = (score) => {
-        if (score >= 7) return 'text-white';
-        if (score >= 4) return 'text-white';
-        return 'text-white';
-      };
-  
+    const totalAverage = filteredResult.length > 0
+      ? Math.round(filteredResult.reduce((sum, e) => sum + (e.totalScore || 0), 0) / filteredResult.length)
+      : 0;
 
-      const getDomainColor = (score) => {
-        if (score >= 7) return '';
-        if (score >= 4) return '';
-        return '';
-      };
-
-
-    
-      const totalAverage = filteredResult.length > 0 
-        ? Math.round(filteredResult.reduce((sum, employee) => sum + (employee.totalScore || 0), 0) / filteredResult.length)
-        : 0;
-      const [expandedEmployee, setExpandedEmployee] = useState(null);
-      
-      return (
-        <div className="mt-8">
+    return (
+      <div className="mt-8">
         <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6">
-          <div className="flex flex-row items-center gap-3 sm:gap-4 lg:gap-6 mb-6 lg:mb-8">
-          <div 
-    className="
-      w-20 h-20
-      sm:w-24 sm:h-24
-      md:w-28 md:h-28
-      lg:w-32 lg:h-32
-      rounded-full
-      flex items-center justify-center
-      text-white
-      font-bold
-      text-[10px] sm:text-sm md:text-base lg:text-lg
-      text-center
-      leading-tight
-      px-2
-      flex-shrink-0
-    "
-    style={{
-      backgroundColor: 
-        totalAverage >= 7 ? '#41d756' : 
-        totalAverage >= 4 ? '#fdc002' : 
-        '#fb0000'
-    }}
-  >
-    {getRiskLevel(totalAverage)}
-  </div>
-      
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 md:mb-2 leading-tight">
-                Employee Sentiment Dashboard
-              </h1>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 mb-1 leading-tight">
-                Overall Sentiment Risk Score
-              </p>
-              <p className="text-xs sm:text-sm text-gray-500">
-                Showing {filteredResult.length} of {result.length} employees
-              </p>
+          <div className="flex flex-row items-center gap-4 mb-6">
+            <div
+              className="w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-sm text-center leading-tight px-2 flex-shrink-0"
+              style={{ backgroundColor: totalAverage >= 7 ? '#41d756' : totalAverage >= 4 ? '#fdc002' : '#fb0000' }}
+            >
+              {getRiskLevel(totalAverage)}
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">Employee Sentiment Dashboard</h1>
+              <p className="text-lg text-gray-700 mb-1">Overall Sentiment Risk Score</p>
+              <p className="text-sm text-gray-500">Showing {filteredResult.length} of {result.length} employees</p>
             </div>
           </div>
 
-          {/* NEW: Filter Section */}
-        {/* NEW: Filter Section */}
-  <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-    <h3 className="text-sm font-semibold text-gray-700 mb-3">Filter Results</h3>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {/* Organization Filter */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          Organization
-        </label>
-        <select
-          value={selectedOrganization}
-          onChange={(e) => setSelectedOrganization(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-        >
-          <option value="all">All Organizations</option>
-          {getUniqueOrganizations().map((org) => (
-            <option key={org} value={org}>
-              {org}
-            </option>
-          ))}
-        </select>
-      </div>
+          {/* Filters */}
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Filter Results</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                { label: 'Organization', value: selectedOrganization, setter: setSelectedOrganization, options: getUniqueOrganizations(), allLabel: 'All Organizations' },
+                { label: 'Division', value: selectedDivision, setter: setSelectedDivision, options: getUniqueDivisions(), allLabel: 'All Divisions' },
+                { label: 'Department', value: selectedDepartment, setter: setSelectedDepartment, options: getUniqueDepartments(), allLabel: 'All Departments' },
+                { label: 'Job Class', value: selectedJobClass, setter: setSelectedJobClass, options: getUniqueJobClasses(), allLabel: 'All Job Classes' },
+                { label: 'Hire Date', value: selectedHireDate, setter: setSelectedHireDate, options: getUniqueHireDates(), allLabel: 'All Hire Dates' },
+                { label: 'Term Date', value: selectedTermDate, setter: setSelectedTermDate, options: getUniqueTermDates(), allLabel: 'All Term Dates' },
+                { label: 'Salary Range', value: selectedSalaryRange, setter: setSelectedSalaryRange, options: getUniqueSalaryRanges(), allLabel: 'All Salary Ranges' },
+              ].map(({ label, value, setter, options, allLabel }) => (
+                <div key={label}>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+                  <select value={value} onChange={e => setter(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                    <option value="all">{allLabel}</option>
+                    {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                </div>
+              ))}
+            </div>
+            {[selectedDepartment, selectedJobClass, selectedHireDate, selectedTermDate, selectedOrganization, selectedDivision, selectedSalaryRange].some(v => v !== 'all') && (
+              <button onClick={() => { setSelectedDepartment('all'); setSelectedJobClass('all'); setSelectedHireDate('all'); setSelectedTermDate('all'); setSelectedOrganization('all'); setSelectedDivision('all'); setSelectedSalaryRange('all'); }} className="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium">
+                Clear all filters
+              </button>
+            )}
+          </div>
 
-      {/* Division Filter */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          Division
-        </label>
-        <select
-          value={selectedDivision}
-          onChange={(e) => setSelectedDivision(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-        >
-          <option value="all">All Divisions</option>
-          {getUniqueDivisions().map((div) => (
-            <option key={div} value={div}>
-              {div}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Department Filter */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          Department
-        </label>
-        <select
-          value={selectedDepartment}
-          onChange={(e) => setSelectedDepartment(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-        >
-          <option value="all">All Departments</option>
-          {getUniqueDepartments().map((dept) => (
-            <option key={dept} value={dept}>
-              {dept}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Job Class Filter */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          Job Class
-        </label>
-        <select
-          value={selectedJobClass}
-          onChange={(e) => setSelectedJobClass(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-        >
-          <option value="all">All Job Classes</option>
-          {getUniqueJobClasses().map((jobClass) => (
-            <option key={jobClass} value={jobClass}>
-              {jobClass}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Hire Date Filter */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          Hire Date
-        </label>
-        <select
-          value={selectedHireDate}
-          onChange={(e) => setSelectedHireDate(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-        >
-          <option value="all">All Hire Dates</option>
-          {getUniqueHireDates().map((date) => (
-            <option key={date} value={date}>
-              {date}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Term Date Filter */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          Term Date
-        </label>
-        <select
-          value={selectedTermDate}
-          onChange={(e) => setSelectedTermDate(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-        >
-          <option value="all">All Term Dates</option>
-          {getUniqueTermDates().map((date) => (
-            <option key={date} value={date}>
-              {date || 'Active'}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      
-
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          Salary Range
-        </label>
-        <select
-          value={selectedSalaryRange}
-          onChange={(e) => setSelectedSalaryRange(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-        >
-          <option value="all">All Salary Ranges</option>
-          {getUniqueSalaryRanges().map((range) => (
-            <option key={range} value={range}>
-              {range}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
-
-    {/* Clear Filters Button */}
-    {(selectedDepartment !== 'all' || selectedJobClass !== 'all' || selectedHireDate !== 'all' || 
-    selectedTermDate !== 'all' || selectedOrganization !== 'all' || selectedDivision !== 'all' || 
-    selectedSalaryRange !== 'all') && (
-    <button
-      onClick={() => {
-        setSelectedDepartment('all');
-        setSelectedJobClass('all');
-        setSelectedHireDate('all');
-        setSelectedTermDate('all');
-        setSelectedOrganization('all');
-        setSelectedDivision('all');
-        setSelectedSalaryRange('all');
-      }}
-      className="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium"
-    >
-      Clear all filters
-    </button>
-  )}
-  </div>
           {isReportLocked && (
-    <div className="mb-6 rounded-lg p-4 flex items-center gap-3" style={{ backgroundColor: '#fef3e2', border: '2px solid #fdc002' }}>
-      <svg className="w-6 h-6 flex-shrink-0" style={{ color: '#fdc002' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mb-6 rounded-lg p-4 flex items-center gap-3" style={{ backgroundColor: '#fef3e2', border: '2px solid #fdc002' }}>
+              <svg className="w-6 h-6 flex-shrink-0" style={{ color: '#fdc002' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              <div className="flex-1">
-    <p className="font-semibold" style={{ color: '#b88a00' }}>Report Locked</p>
-    <p className="text-sm" style={{ color: '#996f00' }}>Complete payment to unlock and download</p>
-  </div>
+              <div>
+                <p className="font-semibold" style={{ color: '#b88a00' }}>Report Locked</p>
+                <p className="text-sm" style={{ color: '#996f00' }}>Complete payment to unlock and download</p>
+              </div>
             </div>
           )}
-      
+
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-              <tr className="bg-gray-50 border-b-2 border-gray-200">
-  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Applicant</th>
-  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Department</th>
-  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Job Class</th>
-  <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Retention Likelihood</th>
-  <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Retention Delta</th>
-  <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Right Fit</th>
-  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Domains</th>
-</tr>
+                <tr className="bg-gray-50 border-b-2 border-gray-200">
+                  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Applicant</th>
+                  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Department</th>
+                  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Job Class</th>
+                  <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Retention Likelihood</th>
+                  <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Retention Delta</th>
+                  <th className="text-center py-4 px-4 font-semibold text-gray-600 text-sm">Right Fit</th>
+                  <th className="text-left py-4 px-4 font-semibold text-gray-600 text-sm">Domains</th>
+                </tr>
               </thead>
               <tbody>
                 {filteredResult?.map((employee, index) => (
                   <React.Fragment key={index}>
-                    <tr 
+                    <tr
                       className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
                       onClick={() => setExpandedEmployee(expandedEmployee === index ? null : index)}
                     >
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-white font-medium flex-shrink-0">
-                            👤
-                          </div>
+                          <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-white flex-shrink-0">👤</div>
                           <div>
-                            <div className="font-semibold text-gray-900 text-sm">
-                              {employee?.name || 'Unknown'}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              ID: {employee?.employeeNumber || 'N/A'}
-                            </div>
+                            <div className="font-semibold text-gray-900 text-sm">{employee?.name || 'Unknown'}</div>
+                            <div className="text-xs text-gray-500">ID: {employee?.employeeNumber || 'N/A'}</div>
                           </div>
                         </div>
                       </td>
-
-                      <td className="py-4 px-4 text-gray-700 text-sm">
-                        {employee?.department || 'N/A'}
-                      </td>
-      
-                      <td className="py-4 px-4 text-gray-700 text-sm">
-                        {employee?.jobClass || 'N/A'}
-                      </td>
-      
+                      <td className="py-4 px-4 text-gray-700 text-sm">{employee?.department || 'N/A'}</td>
+                      <td className="py-4 px-4 text-gray-700 text-sm">{employee?.jobClass || 'N/A'}</td>
                       <td className="py-4 px-4">
-    <div className="flex justify-center">
-      <span 
-        className="inline-block px-5 py-2 rounded-full font-semibold text-sm text-white"
-        style={{
-          backgroundColor: 
-            (employee?.totalScore || 0) >= 7 ? '#41d756' : 
-            (employee?.totalScore || 0) >= 4 ? '#fdc002' : 
-            '#fb0000'
-        }}
-      >
-        {getRetentionPercentage(employee?.totalScore || 0)}
-      </span>
-    </div>
-  </td>
-      
-  <td className="py-4 px-4">
                         <div className="flex justify-center">
-                          <span
-                            className={`inline-block px-5 py-2 rounded-full font-semibold text-sm ${getNPSColor(employee?.totalScore || 0)}`}
-                            style={{
-                              backgroundColor:
-                                (employee?.totalScore || 0) >= 7 ? '#41d756' :
-                                (employee?.totalScore || 0) >= 4 ? '#fdc002' :
-                                '#fb0000'
-                            }}
-                          >
+                          <span className="inline-block px-5 py-2 rounded-full font-semibold text-sm text-white" style={{ backgroundColor: (employee?.totalScore || 0) >= 7 ? '#41d756' : (employee?.totalScore || 0) >= 4 ? '#fdc002' : '#fb0000' }}>
+                            {getRetentionPercentage(employee?.totalScore || 0)}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex justify-center">
+                          <span className="inline-block px-5 py-2 rounded-full font-semibold text-sm text-white" style={{ backgroundColor: (employee?.totalScore || 0) >= 7 ? '#41d756' : (employee?.totalScore || 0) >= 4 ? '#fdc002' : '#fb0000' }}>
                             {getNPSLabel(employee?.totalScore || 0)}
                           </span>
                         </div>
                       </td>
-
-                      {/* Retention Delta */}
-                    {/* Retention Delta */}
-                    <td className="py-4 px-4">
+                      <td className="py-4 px-4">
                         <div className="flex justify-center">
-                          <span
-                            className="inline-block px-4 py-2 rounded-full text-white font-bold text-sm"
-                            style={{
-                              backgroundColor:
-                                (employee?.retentionScore || 0) >= 20 ? '#41d756' :
-                                (employee?.retentionScore || 0) >= 0 ? '#fdc002' :
-                                '#fb0000'
-                            }}
-                          >
+                          <span className="inline-block px-4 py-2 rounded-full text-white font-bold text-sm" style={{ backgroundColor: (employee?.retentionScore || 0) >= 20 ? '#41d756' : (employee?.retentionScore || 0) >= 0 ? '#fdc002' : '#fb0000' }}>
                             {(employee?.retentionScore || 0) >= 0 ? `+${employee?.retentionScore}%` : `${employee?.retentionScore}%`}
                           </span>
                         </div>
                       </td>
-
-                      {/* Right Fit */}
                       <td className="py-4 px-4">
                         <div className="flex justify-center">
-                          <span
-                            className="inline-block px-3 py-1 rounded-full text-white text-xs font-semibold"
-                            style={{ backgroundColor: employee?.rightFitCandidate ? '#41d756' : '#fb0000' }}
-                          >
+                          <span className="inline-block px-3 py-1 rounded-full text-white text-xs font-semibold" style={{ backgroundColor: employee?.rightFitCandidate ? '#41d756' : '#fb0000' }}>
                             {employee?.rightFitCandidate ? '✓ Yes' : '✗ No'}
                           </span>
                         </div>
                       </td>
-
-                  
-      
                       <td className="py-4 px-4">
-    <div className="flex flex-col gap-2">
-      {Object.entries(employee?.categoryScores || {}).map(([category, score]) => (
-        <span 
-          key={category}
-          className="inline-block px-3 py-1 rounded-full text-white text-xs font-semibold"
-          style={{
-            backgroundColor: 
-              score >= 7 ? '#41d756' : 
-              score >= 4 ? '#fdc002' : 
-              '#fb0000'
-          }}
-        >
-          {category.charAt(0).toUpperCase() + category.slice(1)}
-        </span>
-      ))}
-    </div>
-  </td>
+                        <div className="flex flex-col gap-2">
+                          {Object.entries(employee?.categoryScores || {}).map(([category, score]) => (
+                            <span key={category} className="inline-block px-3 py-1 rounded-full text-white text-xs font-semibold" style={{ backgroundColor: score >= 7 ? '#41d756' : score >= 4 ? '#fdc002' : '#fb0000' }}>
+                              {category.charAt(0).toUpperCase() + category.slice(1)}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
                     </tr>
-      
+
                     {expandedEmployee === index && (
                       <tr className="bg-gray-50">
-             <td colSpan="8" className="p-6 border-b border-gray-200">
+                        <td colSpan="8" className="p-6 border-b border-gray-200">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+                            {[
+                              { label: 'Name', value: employee?.name },
+                              { label: 'Department', value: employee?.department },
+                              { label: 'Job Class', value: employee?.jobClass },
+                              { label: 'Hire Date', value: employee?.hireDate },
+                              { label: 'Salary Range', value: employee?.salaryRange },
+                            ].map(({ label, value }) => (
+                              <div key={label}>
+                                <p className="text-xs text-gray-500 mb-1">{label}</p>
+                                <p className="text-sm font-medium text-gray-900">{value || 'N/A'}</p>
+                              </div>
+                            ))}
+                          </div>
 
-<div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
-  <div>
-    <p className="text-xs text-gray-500 mb-1">Name</p>
-    <p className="text-sm font-medium text-gray-900">{employee?.name || 'N/A'}</p>
-  </div>
-  <div>
-    <p className="text-xs text-gray-500 mb-1">Department</p>
-    <p className="text-sm font-medium text-gray-900">{employee?.department || 'N/A'}</p>
-  </div>
-  <div>
-    <p className="text-xs text-gray-500 mb-1">Job Class</p>
-    <p className="text-sm font-medium text-gray-900">{employee?.jobClass || 'N/A'}</p>
-  </div>
-  <div>
-    <p className="text-xs text-gray-500 mb-1">Age</p>
-    <p className="text-sm font-medium text-gray-900">
-      {(() => {
-        if (employee?.age) return `${employee.age} years`;
-        if (employee?.dateOfBirth) {
-          const dob = new Date(employee.dateOfBirth);
-          const today = new Date();
-          let age = today.getFullYear() - dob.getFullYear();
-          const m = today.getMonth() - dob.getMonth();
-          if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
-          return isNaN(age) ? 'N/A' : `${age} years`;
-        }
-        return 'N/A';
-      })()}
-    </p>
-  </div>
-  <div>
-  <p className="text-xs text-gray-500 mb-1">Age Band</p>
-  <p className="text-sm font-medium text-gray-900">
-    {employee?.agePoints != null ? (
-      <span className={`font-bold ${
-        employee.agePoints >= 10 ? 'text-green-600' : 
-        employee.agePoints >= 5 ? 'text-yellow-600' : 
-        'text-red-500'
-      }`}>
-        {employee.agePoints >= 15 ? '15–19' :
-         employee.agePoints >= 10 ? '20–24 (Optimal)' :
-         employee.agePoints >= 7  ? '25–34' :
-         employee.agePoints >= 5  ? '35–44' :
-         employee.agePoints >= 3  ? '45–54' :
-         employee.agePoints >= 1  ? '55–64' :
-                                    '65+'}
-      </span>
-    ) : 'N/A'}
-  </p>
-</div>
+                          <div className="border-t border-gray-200 pt-4 mt-4">
+                            <p className="text-sm font-semibold text-gray-700 mb-3">Category Scores</p>
+                            <div className="space-y-3">
+                              {['finances', 'work life', 'schedule', 'family'].map(cat => {
+                                const score = employee?.categoryScores?.[cat] || 0;
+                                return (
+                                  <div key={cat}>
+                                    <div className="flex justify-between text-xs mb-1">
+                                      <span className="text-gray-600">{cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+                                      <span className={`font-bold ${getCategoryRiskColor(score)}`}>{getCategoryRiskLevel(score)}</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                      <div className="h-2 rounded-full transition-all" style={{ width: `${score * 10}%`, backgroundColor: score >= 7 ? '#fb0000' : score >= 4 ? '#fdc002' : '#41d756' }} />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
 
-<div>
-  <p className="text-xs text-gray-500 mb-1">Tenure Band</p>
-  <p className="text-sm font-medium text-gray-900">
-    {employee?.tenurePoints != null ? (
-      <span className={`font-bold ${
-        employee.tenurePoints >= 10 ? 'text-green-600' : 
-        employee.tenurePoints >= 5  ? 'text-yellow-600' : 
-        'text-red-500'
-      }`}>
-        {employee.tenurePoints >= 15 ? '0–3 mo (High Risk)' :
-         employee.tenurePoints >= 10 ? '4–6 mo' :
-         employee.tenurePoints >= 7  ? '7–12 mo' :
-         employee.tenurePoints >= 5  ? '13–24 mo' :
-         employee.tenurePoints >= 3  ? '25–36 mo' :
-         employee.tenurePoints >= -1 ? '37–60 mo' :
-                                       '5+ yr'}
-      </span>
-    ) : 'N/A'}
-  </p>
-</div>
-
-<div>
-  <p className="text-xs text-gray-500 mb-1">Distance Band</p>
-  <p className="text-sm font-medium text-gray-900">
-    {employee?.distancePoints != null ? (
-      <span className={`font-bold ${
-        employee.distancePoints >= 10 ? 'text-green-600' : 
-        employee.distancePoints >= 5  ? 'text-yellow-600' : 
-        'text-red-500'
-      }`}>
-        {employee.distancePoints >= 15 ? '0–5 mi' :
-         employee.distancePoints >= 10 ? '6–10 mi' :
-         employee.distancePoints >= 7  ? '11–20 mi' :
-         employee.distancePoints >= 5  ? '21–30 mi' :
-         employee.distancePoints >= 3  ? '31–50 mi' :
-         employee.distancePoints >= -5 ? '51–100 mi' :
-                                         '100+ mi'}
-      </span>
-    ) : 'N/A'}
-  </p>
-  </div>
-  <div>
-    <p className="text-xs text-gray-500 mb-1">Hire Date</p>
-    <p className="text-sm font-medium text-gray-900">{employee?.hireDate || 'N/A'}</p>
-  </div>
-  <div>
-    <p className="text-xs text-gray-500 mb-1">Salary Range</p>
-    <p className="text-sm font-medium text-gray-900">{employee?.salaryRange || 'N/A'}</p>
-  </div>
-</div>
-
-<div className="border-t border-gray-200 pt-4 mt-4">
-  <p className="text-sm font-semibold text-gray-700 mb-3">Category Scores</p>
-  <div className="space-y-3">
-    <div>
-      <div className="flex justify-between text-xs mb-1">
-        <span className="text-gray-600">Finances</span>
-        <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['finances'] || 0)}`}>
-          {getCategoryRiskLevel(employee?.categoryScores?.['finances'] || 0)}
-        </span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div
-          className="h-2 rounded-full transition-all"
-          style={{
-            width: `${(employee?.categoryScores?.['finances'] || 0) * 10}%`,
-            backgroundColor:
-              (employee?.categoryScores?.['finances'] || 0) >= 7 ? '#fb0000' :
-              (employee?.categoryScores?.['finances'] || 0) >= 4 ? '#fdc002' :
-              '#41d756'
-          }}
-        />
-      </div>
-    </div>
-    <div>
-      <div className="flex justify-between text-xs mb-1">
-        <span className="text-gray-600">Work Life</span>
-        <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['work life'] || 0)}`}>
-          {getCategoryRiskLevel(employee?.categoryScores?.['work life'] || 0)}
-        </span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div
-          className="h-2 rounded-full transition-all"
-          style={{
-            width: `${(employee?.categoryScores?.['work life'] || 0) * 10}%`,
-            backgroundColor:
-              (employee?.categoryScores?.['work life'] || 0) >= 7 ? '#fb0000' :
-              (employee?.categoryScores?.['work life'] || 0) >= 4 ? '#fdc002' :
-              '#41d756'
-          }}
-        />
-      </div>
-    </div>
-    <div>
-      <div className="flex justify-between text-xs mb-1">
-        <span className="text-gray-600">Schedule</span>
-        <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['schedule'] || 0)}`}>
-          {getCategoryRiskLevel(employee?.categoryScores?.['schedule'] || 0)}
-        </span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div
-          className="h-2 rounded-full transition-all"
-          style={{
-            width: `${(employee?.categoryScores?.['schedule'] || 0) * 10}%`,
-            backgroundColor:
-              (employee?.categoryScores?.['schedule'] || 0) >= 7 ? '#fb0000' :
-              (employee?.categoryScores?.['schedule'] || 0) >= 4 ? '#fdc002' :
-              '#41d756'
-          }}
-        />
-      </div>
-    </div>
-    <div>
-      <div className="flex justify-between text-xs mb-1">
-        <span className="text-gray-600">Family</span>
-        <span className={`font-bold ${getCategoryRiskColor(employee?.categoryScores?.['family'] || 0)}`}>
-          {getCategoryRiskLevel(employee?.categoryScores?.['family'] || 0)}
-        </span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div
-          className="h-2 rounded-full transition-all"
-          style={{
-            width: `${(employee?.categoryScores?.['family'] || 0) * 10}%`,
-            backgroundColor:
-              (employee?.categoryScores?.['family'] || 0) >= 7 ? '#fb0000' :
-              (employee?.categoryScores?.['family'] || 0) >= 4 ? '#fdc002' :
-              '#41d756'
-          }}
-        />
-      </div>
-    </div>
-  </div>
-</div>
-
-<div className="border-t border-gray-200 pt-4 mt-4">
-  <p className="text-sm font-semibold text-gray-700 mb-3">Scoring Breakdown</p>
-  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-    {[
-      { label: 'Age', value: employee?.agePoints },
-      { label: 'Distance', value: employee?.distancePoints },
-      { label: 'Tenure', value: employee?.tenurePoints },
-      { label: 'Turnover Risk', value: employee?.turnoverPoints },
-      { label: 'Finance', value: employee?.financePoints },
-      { label: 'Schedule', value: employee?.schedulePoints },
-      { label: 'Work Life', value: employee?.wlbPoints },
-      { label: 'Family', value: employee?.familyPoints },
-    ].map(({ label, value }) => (
-      <div key={label} className="bg-white border border-gray-200 rounded-lg p-2 text-center">
-        <p className="text-xs text-gray-500 mb-1">{label}</p>
-        <p className={`text-sm font-bold ${value >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-          {value >= 0 ? `+${value}` : value}
-        </p>
-      </div>
-    ))}
-  </div>
-
-  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    <div>
-      <p className="text-xs text-gray-500 mb-1">Total Score</p>
-      <p className={`text-lg font-bold ${getCategoryRiskColor(employee?.totalScore || 0)}`}>
-        {getCategoryRiskLevel(employee?.totalScore || 0)}
-      </p>
-    </div>
-    <div>
-      <p className="text-xs text-gray-500 mb-1">Retention Likelihood Delta</p>
-      <p className={`text-lg font-bold ${(employee?.retentionScore || 0) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-        {(employee?.retentionScore || 0) >= 0 ? `+${employee?.retentionScore}%` : `${employee?.retentionScore}%`}
-      </p>
-    </div>
-    <div>
-      <p className="text-xs text-gray-500 mb-1">Improvement Area</p>
-      <p className="text-sm font-semibold" style={{ color: '#fb0000' }}>{getImprovementArea(employee)}</p>
-    </div>
-  </div>
-</div>
-
-</td>
+                          <div className="border-t border-gray-200 pt-4 mt-4">
+                            <p className="text-sm font-semibold text-gray-700 mb-3">Scoring Breakdown</p>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                              {[
+                                { label: 'Age', value: employee?.agePoints },
+                                { label: 'Distance', value: employee?.distancePoints },
+                                { label: 'Tenure', value: employee?.tenurePoints },
+                                { label: 'Turnover Risk', value: employee?.turnoverPoints },
+                                { label: 'Finance', value: employee?.financePoints },
+                                { label: 'Schedule', value: employee?.schedulePoints },
+                                { label: 'Work Life', value: employee?.wlbPoints },
+                                { label: 'Family', value: employee?.familyPoints },
+                              ].map(({ label, value }) => (
+                                <div key={label} className="bg-white border border-gray-200 rounded-lg p-2 text-center">
+                                  <p className="text-xs text-gray-500 mb-1">{label}</p>
+                                  <p className={`text-sm font-bold ${(value || 0) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                    {(value || 0) >= 0 ? `+${value}` : value}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                              <div>
+                                <p className="text-xs text-gray-500 mb-1">Total Score</p>
+                                <p className={`text-lg font-bold ${getCategoryRiskColor(employee?.totalScore || 0)}`}>{getCategoryRiskLevel(employee?.totalScore || 0)}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 mb-1">Retention Likelihood Delta</p>
+                                <p className={`text-lg font-bold ${(employee?.retentionScore || 0) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                  {(employee?.retentionScore || 0) >= 0 ? `+${employee?.retentionScore}%` : `${employee?.retentionScore}%`}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 mb-1">Improvement Area</p>
+                                <p className="text-sm font-semibold" style={{ color: '#fb0000' }}>{getImprovementArea(employee)}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
                       </tr>
                     )}
                   </React.Fragment>
@@ -3159,218 +963,131 @@ emp.categoryScores?.['family'] || 0,
           </div>
         </div>
       </div>
-      );
-    };
+    );
+  };
 
-    return (
-      <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6">
+  // ─── Main render ─────────────────────────────────────────────────────────────
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6">
       {isLoading && <LoadingOverlay />}
-        <div className="max-w-4xl mx-auto">
+
+      <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6">
-        <div className='flex justify-center items-center text-center mb-4'>
-    <img 
-      src="/logo.jpg" 
-      alt="Company Logo" 
-      className="h-20 sm:h-24 lg:h-32 w-auto object-contain"
-    />
-  </div>
 
-  <div className="flex justify-center mb-4">
-    <div className="rounded-full px-6 py-2 shadow-lg" style={{ background: 'linear-gradient(to right, #41d756, #2ebd47)' }}>
-      <p className="text-white font-semibold text-sm sm:text-base">
-      Available Credits: {credits.toFixed(2)}
-      </p>
-    </div>
-  </div>
-
-  <div className="flex items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-  
-
-  <div className="flex gap-2">
-    <button 
-      onClick={() => setActiveTab('prehire')}
-      className={`px-4 py-2 text-sm sm:text-base font-medium text-white rounded ${
-        activeTab === 'prehire' ? 'bg-blue-600' : 'bg-blue-400'
-      } hover:bg-blue-700`}
-    >
-      Prehire
-    </button>
-    
-  </div>
-
-  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 text-center">
-    Staff Retention Application
-  </h2>
-  <button 
-    onClick={() => setActiveTab('current')}
-    className={`px-4 py-2 text-sm sm:text-base font-medium text-white rounded ${
-      activeTab === 'current' ? 'bg-green-600' : 'bg-green-400'
-    } hover:bg-green-700`}
-  >
-    Current Staff
-  </button>
-
-  </div>
-  
-  {activeTab === 'current' && (
-    <>
-      <div className="mb-3 flex justify-end">
-        <button
-          onClick={() => setShowSampleFormat(true)}
-          className="text-sm text-blue-600 hover:text-blue-700 underline"
-        >
-          View sample file format
-        </button>
-      </div>
-
-      <div 
-        className={`border-2 border-dashed rounded-xl p-4 sm:p-6 lg:p-8 text-center mb-4 sm:mb-6 transition-all duration-300 ${
-          isDragging 
-            ? 'border-blue-500 bg-blue-50' 
-            : 'border-blue-300 bg-white hover:border-blue-400 hover:bg-blue-50'
-        }`}
-      >
-        <input 
-          type="file" 
-          id="fileInput" 
-          onChange={handleFileChange} 
-          accept=".csv, .xlsx"
-          className="hidden"
-        />
-        <label htmlFor="fileInput" className="cursor-pointer">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="40" 
-            height="40" 
-            viewBox="0 0 24 24"
-            fill="#3B82F6"
-            className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16"
-          >
-            <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
-          </svg>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-2">
-            Drag and drop your CSV/Excel file here or click to browse
-          </p>
-          {file && (
-            <p className="text-blue-600 font-medium text-sm sm:text-base mt-2">
-              Selected file: {file.name}
-            </p>
-          )}
-        </label>
-      </div>
-
-      <button 
-    onClick={() => setShowFilterPopup(true)} 
-    disabled={!file || isLoading}
-    className={`w-full sm:w-auto mx-auto block px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${
-      !file || isLoading
-        ? 'bg-gray-400 text-white cursor-not-allowed' 
-        : 'bg-blue-500 text-white hover:bg-blue-600 hover:transform hover:scale-105 active:scale-95'
-    }`}
-  >
-    {isLoading ? 'Processing...' : 'Upload & Analyze'}
-  </button>
-
-      {result.length > 0 && (
-        <button 
-          onClick={exportToCSV}
-          className={`w-full sm:w-auto mx-auto block mt-3 px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${
-            isReportLocked 
-              ? 'bg-gray-400 text-white cursor-not-allowed' 
-              : 'bg-purple-500 text-white hover:bg-purple-600 hover:transform hover:scale-105 active:scale-95'
-          }`}
-        >
-          {isReportLocked ? '🔒 Export Locked' : 'Export CSV'}
-        </button>
-      )}
-    </>
-  )}
-        
-
-        
-
-            
+          {/* Logo */}
+          <div className="flex justify-center items-center text-center mb-4">
+            <img src="/logo.jpg" alt="Company Logo" className="h-20 sm:h-24 lg:h-32 w-auto object-contain" />
           </div>
 
-          {result.length > 0 && <EmployeeDashboard />}
+          {/* Credits badge */}
+          <div className="flex justify-center mb-4">
+            <div className="rounded-full px-6 py-2 shadow-lg" style={{ background: 'linear-gradient(to right, #41d756, #2ebd47)' }}>
+              <p className="text-white font-semibold text-sm sm:text-base">
+                Available Credits: {credits.toFixed(2)}
+              </p>
+            </div>
+          </div>
+
+          {/* Tab bar */}
+          <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6">
+            <button
+              onClick={() => setActiveTab('prehire')}
+              className={`px-4 py-2 text-sm sm:text-base font-medium text-white rounded transition-colors ${activeTab === 'prehire' ? 'bg-blue-600' : 'bg-blue-400 hover:bg-blue-500'}`}
+            >
+              Prehire
+            </button>
+
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 text-center">
+              Staff Retention Application
+            </h2>
+
+            <button
+              onClick={() => setActiveTab('current')}
+              className={`px-4 py-2 text-sm sm:text-base font-medium text-white rounded transition-colors ${activeTab === 'current' ? 'bg-green-600' : 'bg-green-400 hover:bg-green-500'}`}
+            >
+              Current Staff
+            </button>
+          </div>
+
+          {/* ── Pre-hire tab ─────────────────────────────────────────────────── */}
+          {activeTab === 'prehire' && <PreHireScreen />}
+
+          {/* ── Current staff tab ────────────────────────────────────────────── */}
+          {activeTab === 'current' && (
+            <>
+              <div className="mb-3 flex justify-end">
+                <button onClick={() => setShowSampleFormat(true)} className="text-sm text-blue-600 hover:text-blue-700 underline">
+                  View sample file format
+                </button>
+              </div>
+
+              <div
+                className={`border-2 border-dashed rounded-xl p-4 sm:p-6 lg:p-8 text-center mb-4 sm:mb-6 transition-all duration-300 ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-blue-300 bg-white hover:border-blue-400 hover:bg-blue-50'}`}
+              >
+                <input type="file" id="fileInput" onChange={handleFileChange} accept=".csv, .xlsx" className="hidden" />
+                <label htmlFor="fileInput" className="cursor-pointer">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#3B82F6" className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16">
+                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
+                  </svg>
+                  <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-2">
+                    Drag and drop your CSV/Excel file here or click to browse
+                  </p>
+                  {file && <p className="text-blue-600 font-medium text-sm sm:text-base mt-2">Selected file: {file.name}</p>}
+                </label>
+              </div>
+
+              <button
+                onClick={() => setShowFilterPopup(true)}
+                disabled={!file || isLoading}
+                className={`w-full sm:w-auto mx-auto block px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${!file || isLoading ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 active:scale-95'}`}
+              >
+                {isLoading ? 'Processing...' : 'Upload & Analyze'}
+              </button>
+
+              {result.length > 0 && (
+                <button
+                  onClick={exportToCSV}
+                  className={`w-full sm:w-auto mx-auto block mt-3 px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${isReportLocked ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-purple-500 text-white hover:bg-purple-600 hover:scale-105 active:scale-95'}`}
+                >
+                  {isReportLocked ? '🔒 Export Locked' : 'Export CSV'}
+                </button>
+              )}
+            </>
+          )}
         </div>
 
-        <ConfirmationPopup
-    isOpen={showConfirmation}
-    onClose={() => setShowConfirmation(false)}
-    onConfirm={handleConfirmUpload}
-    isLoading={isLoading}
-    title="Confirm File Processing"
-    message={`
-      File Count: ${recordCount} contact${recordCount !== 1 ? 's' : ''}
-      Contact Rate: 2.95
-      Amount: ${isNaN(originalAmount) || originalAmount === 0 ? '0.00' : (originalAmount / 100).toFixed(2)}
-      
-      Are you sure you want to proceed?
-    `}
-  />
-
-        <PaymentPopup
-          isOpen={showPaymentPopup}
-          onClose={() => setShowPaymentPopup(false)}
-          onDownload={handleProceedToPayment}
-        />
-
-        <PasscodePopup
-          isOpen={showPasscodePopup}
-          onClose={() => {
-            setShowPasscodePopup(false);
-            setPasscodeError('');
-          }}
-          onSubmit={handlePasscodeSubmit}
-          error={passcodeError}
-        />
-        <StripePaymentPopup
-          isOpen={showStripePayment}
-          onClose={() => setShowStripePayment(false)}
-          onSuccess={handlePaymentSuccess}
-          amount={totalAmount}
-          recordCount={recordCount}
-        />
-
-  <SampleFormatModal />
-  <FilterPopup />
-  <style>{`
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-    .animate-fadeIn {
-      animation: fadeIn 0.2s ease-out;
-    }
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-    .animate-spin {
-      animation: spin 1s linear infinite;
-    }
-    @keyframes pulse {
-      0%, 100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.5;
-      }
-    }
-    .animate-pulse {
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-  `}</style>
+        {activeTab === 'current' && result.length > 0 && <EmployeeDashboard />}
       </div>
-    );
-  }
 
-  export default UploadFile;
+      <ConfirmationPopup
+        isOpen={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
+        onConfirm={handleConfirmUpload}
+        isLoading={isLoading}
+        title="Confirm File Processing"
+        message={`File Count: ${recordCount} contact${recordCount !== 1 ? 's' : ''}\nContact Rate: 2.95\nAmount: ${isNaN(originalAmount) || originalAmount === 0 ? '0.00' : (originalAmount / 100).toFixed(2)}\n\nAre you sure you want to proceed?`}
+      />
+
+      <PaymentPopup isOpen={showPaymentPopup} onClose={() => setShowPaymentPopup(false)} onDownload={() => { setShowPaymentPopup(false); setShowPasscodePopup(true); }} />
+
+      <PasscodePopup isOpen={showPasscodePopup} onClose={() => { setShowPasscodePopup(false); setPasscodeError(''); }} onSubmit={handlePasscodeSubmit} error={passcodeError} />
+
+      <StripePaymentPopup isOpen={showStripePayment} onClose={() => setShowStripePayment(false)} onSuccess={handlePaymentSuccess} amount={totalAmount} recordCount={recordCount} />
+
+      <SampleFormatModal />
+      <FilterPopup />
+
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+      `}</style>
+    </div>
+  );
+}
+
+export default UploadFile;

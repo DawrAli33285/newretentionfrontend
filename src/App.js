@@ -21,6 +21,7 @@ import UserInvoiceManagement from './superadmin/invoicemanagement';
 // middleware
 import UserProtectedRoute from "./UserProtectedRoute";
 import AdminProtectedRoute from "./AdminProtectedRoute";
+import PreHireFileManagement from './superadmin/prehirefile';
 
 const stripePromise = loadStripe("pk_test_51OwuO4LcfLzcwwOYdssgGfUSfOgWT1LwO6ewi3CEPewY7WEL9ATqH6WJm3oAcLDA3IgUvVYLVEBMIEu0d8fUwhlw009JwzEYmV");
 
@@ -45,6 +46,7 @@ function App() {
         <Route path='/adminreset' element={<SuperAdminReset/>}/>
         <Route path='/adminregister' element={<SuperAdminRegister/>}/>
         <Route path='/adminlogin' element={<SuperAdminLogin/>}/>
+       
 
         {/* Admin Protected Routes */}
         <Route path='/admin' 
@@ -57,6 +59,7 @@ function App() {
           <Route path='usermanagement' element={<UserManagement />} />
           <Route path='filemanagement' element={<FileManagement />} />
           <Route path='invoicemanagement' element={<UserInvoiceManagement/>}/>
+          <Route path='prehire' element={<PreHireFileManagement/>}/>
         </Route>
 
       </Routes>

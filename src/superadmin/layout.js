@@ -10,7 +10,8 @@ export default function AdminLayout() {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
     { id: 'usermanagement', label: 'User Management', icon: Users, path: '/admin/usermanagement' },
-    { id: 'filemanagement', label: 'File Management', icon: FileText, path: '/admin/filemanagement' }
+    { id: 'filemanagement', label: 'File Management', icon: FileText, path: '/admin/filemanagement' },
+    {id:'prehire',label:'Pre hire',icon:Users,path:'/admin/prehire'}
   ];
 
   // Determine current page from URL
