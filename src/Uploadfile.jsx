@@ -8,6 +8,7 @@ import { BASE_URL } from './baseurl';
 function UploadFile() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState([]);
+  const [landingVisible, setLandingVisible] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [sameFile, setSameFile] = useState(null);
@@ -56,6 +57,8 @@ function UploadFile() {
   const [preHireSuccess, setPreHireSuccess] = useState(false);
   const [preHireLoading, setPreHireLoading] = useState(false);
   const [preHireDragging, setPreHireDragging] = useState(false);
+  const [preHireRecordCount, setPreHireRecordCount] = useState(0);  
+const [preHireResult, setPreHireResult] = useState([]);      
 
   // ────────────────────────────────────────────────────────────────────────────
 
@@ -116,43 +119,85 @@ function UploadFile() {
       return 'Your file appears to be blank or contains no records. Please upload a file with at least one candidate row.';
     }
     const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, '').toLowerCase());
-    const hasName = headers.some(h => h.includes('name'));
-    const hasAddress = headers.some(h => h.includes('address'));
+    const hasName = headers.some(h => h.includes('candidate') || h.includes('name'));
+    const hasAddress = headers.some(h => h.includes('address') || h.includes('address 1'));
     if (!hasName || !hasAddress) {
-      return 'Your file could not be accepted because it is missing required fields or is not in the correct format. Please upload a CSV, XLS, or XLSX file that includes Name, Address, Email, and Phone when available.';
+      return 'Your file could not be accepted because it is missing required fields. Please ensure your file includes Candidate Name and Address columns.';
     }
     return null;
   };
+  
 
   const processPreHireFile = async (selectedFile) => {
     setPreHireError('');
     setPreHireSuccess(false);
-
+    setPreHireResult([]);
+  
     const ext = selectedFile.name.slice(selectedFile.name.lastIndexOf('.')).toLowerCase();
-
+  
     if (!PREHIRE_ACCEPTED_EXT.includes(ext)) {
       setPreHireError(
         'Your file could not be accepted because it is not in an accepted format. Please upload a CSV, XLS, or XLSX file that includes Name, Address, Email, and Phone when available.'
       );
       return;
     }
-
-    if (ext === '.csv') {
-      try {
+  
+    try {
+      if (ext === '.xlsx' || ext === '.xls') {
+        const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs');
+        const arrayBuffer = await selectedFile.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        if (rows.length <= 1) { 
+          setPreHireRecordCount(0); 
+          return; 
+        }
+        
+        const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
+        const nameIdx = headers.findIndex(h => h.includes('name'));
+        
+        // Count valid records
+        const validCount = rows.slice(1).filter(row => String(row[nameIdx] || '').trim().length > 0).length;
+        setPreHireRecordCount(validCount);
+        
+      } else {
+        // CSV handling
         const text = await selectedFile.text();
         const err = validatePreHireCSV(text);
-        if (err) {
-          setPreHireError(err);
-          return;
+        if (err) { 
+          setPreHireError(err); 
+          return; 
         }
-      } catch {
-        setPreHireError('Error reading the file. Please ensure it is a valid CSV file.');
-        return;
+        const lines = text.trim().split('\n');
+        const delimiter = lines[0].includes('\t') ? '\t' : ',';
+        const headers = lines[0].split(delimiter).map(h => h.trim().replace(/['"]/g, '').toLowerCase());
+        const nameIdx = headers.findIndex(h => h.includes('name'));
+        
+        let validCount = 0;
+        
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(delimiter).map(cell => cell.trim().replace(/['"]/g, ''));
+          const name = (cols[nameIdx] || '').trim();
+          
+          if (name.length > 0) {
+            validCount++;
+          }
+        }
+        
+        setPreHireRecordCount(validCount);
       }
+    } catch (error) {
+      console.error('Error processing file:', error);
+      setPreHireError('Error reading the file. Please ensure it is a valid file.');
+      return;
     }
-
+  
     setPreHireFile(selectedFile);
   };
+
+
 
   const handlePreHireFileChange = async (e) => {
     const f = e.target.files[0];
@@ -168,33 +213,53 @@ function UploadFile() {
 
   const handlePreHireUpload = async () => {
     if (!preHireFile) return;
+    if (preHireRecordCount === 0) {
+      alert('No valid records found in the file.');
+      return;
+    }
     setPreHireLoading(true);
     setPreHireError('');
-
+    setPreHireResult([]); // Clear previous results
+  
     try {
       const token = localStorage.getItem('token');
       const formData = new FormData();
-      formData.append('preHireFile', preHireFile);
-
-      const res = await fetch(`${BASE_URL}/prehire-upload`, {
+      formData.append('employeeFile', preHireFile);
+      formData.append('recordCount', preHireRecordCount);
+      formData.append('creditsUsed', '0');
+      formData.append('isPreHire', 'true');
+  
+      const res = await fetch(`${BASE_URL}/enrich`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
-
+  
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || 'Upload failed. Please try again.');
       }
-
-      setPreHireSuccess(true);
+  
+      const data = await res.json();
+      console.log('Pre-hire results received:', data.results);
+      
+      // Only set results if we actually got data back
+      if (data.results && data.results.length > 0) {
+        setPreHireResult(data.results);
+        setPreHireSuccess(true);
+        await getCredits();
+      } else {
+        throw new Error('No results returned from the server. Please try again.');
+      }
     } catch (error) {
-      console.log(error.message)
+      console.log('Upload error:', error.message);
       setPreHireError(error.message || 'An unexpected error occurred. Please try again.');
+      setPreHireResult([]); // Clear results on error
     } finally {
       setPreHireLoading(false);
     }
   };
+
 
   // ─── Current staff file handling ────────────────────────────────────────────
 
@@ -284,26 +349,32 @@ function UploadFile() {
     }
   };
 
-  const LoadingOverlay = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
-        <div className="flex flex-col items-center">
-          <div className="relative w-20 h-20 mb-6">
-            <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+  const LoadingOverlay = () => {
+    const displayCount = activeTab === 'prehire' ? preHireRecordCount : recordCount;
+    const displayType = activeTab === 'prehire' ? 'candidate' : 'employee';
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+          <div className="flex flex-col items-center">
+            <div className="relative w-20 h-20 mb-6">
+              <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Processing Your File</h3>
+            <p className="text-gray-600 text-center mb-4">
+              Analyzing {displayCount} {displayType} record{displayCount !== 1 ? 's' : ''}...
+            </p>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+            </div>
+            <p className="text-sm text-gray-500 mt-4">This may take a few moments</p>
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Processing Your File</h3>
-          <p className="text-gray-600 text-center mb-4">
-            Analyzing {recordCount} employee record{recordCount !== 1 ? 's' : ''}...
-          </p>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
-          </div>
-          <p className="text-sm text-gray-500 mt-4">This may take a few moments</p>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
 
   const calculateCategoryAverages = () => {
     if (!filteredResult || filteredResult.length === 0) return [];
@@ -554,6 +625,113 @@ function UploadFile() {
 
   // ─── Sub-components ──────────────────────────────────────────────────────────
 
+  // ─── Landing Screen ──────────────────────────────────────────────────────────
+  const LandingScreen = () => {
+    const cardBase = {
+      width: '100%',
+      maxWidth: '400px',
+      background: '#ffffff',
+      border: '1.5px solid #e5e7eb',
+      borderRadius: '14px',
+      padding: '16px 20px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '14px',
+      marginBottom: '12px',
+      cursor: 'pointer',
+      textAlign: 'left',
+      transition: 'border-color 0.18s, box-shadow 0.18s',
+    };
+
+    const handleCardHoverIn = (e) => {
+      e.currentTarget.style.borderColor = '#3B82F6';
+      e.currentTarget.style.boxShadow = '0 4px 12px rgba(59,130,246,0.12)';
+    };
+    const handleCardHoverOut = (e) => {
+      e.currentTarget.style.borderColor = '#e5e7eb';
+      e.currentTarget.style.boxShadow = 'none';
+    };
+
+    return (
+      <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-10 mb-6 flex flex-col items-center">
+
+        {/* Logo */}
+        <div className="mb-4">
+          <img
+            src="/logo.jpg"
+            alt="PrognostiCare"
+            className="w-24 h-24 rounded-full object-cover shadow-md ring-4 ring-white"
+          />
+        </div>
+
+        {/* Brand name */}
+        <h1 className="text-2xl font-bold text-gray-800 mb-1">PrognostiCare</h1>
+
+        {/* Tagline */}
+        <p className="text-blue-500 text-sm mb-1">Turning Data Into Direction.</p>
+
+        {/* Section label */}
+        <p className="text-gray-400 text-sm tracking-wide mb-6">Staff Retention Application</p>
+
+        {/* Credits pill */}
+        <div
+          className="rounded-full px-6 py-2 shadow-sm mb-8"
+          style={{ background: 'linear-gradient(to right, #41d756, #2ebd47)' }}
+        >
+          <p className="text-white font-semibold text-sm">Available Credits: {credits.toFixed(2)}</p>
+        </div>
+
+        {/* Pre-Hire card */}
+        <button
+          style={cardBase}
+          onClick={() => { setActiveTab('prehire'); setLandingVisible(false); }}
+          onMouseEnter={handleCardHoverIn}
+          onMouseLeave={handleCardHoverOut}
+        >
+          <div className="w-11 h-11 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <line x1="19" y1="8" x2="19" y2="14" />
+              <line x1="22" y1="11" x2="16" y2="11" />
+            </svg>
+          </div>
+          <div style={{ flex: 1 }}>
+            <p className="text-gray-800 font-semibold text-sm">Pre-Hire</p>
+            <p className="text-gray-400 text-xs mt-0.5">Analyze candidates before hiring</p>
+          </div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+
+        {/* Current Staff card */}
+        <button
+          style={{ ...cardBase, marginBottom: 0 }}
+          onClick={() => { setActiveTab('current'); setLandingVisible(false); }}
+          onMouseEnter={handleCardHoverIn}
+          onMouseLeave={handleCardHoverOut}
+        >
+          <div className="w-11 h-11 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          </div>
+          <div style={{ flex: 1 }}>
+            <p className="text-gray-800 font-semibold text-sm">Current Staff</p>
+            <p className="text-gray-400 text-xs mt-0.5">Retention risk for existing employees</p>
+          </div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+      </div>
+    );
+  };
+
   const PreHireScreen = () => (
     <div className="mt-2">
       <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Upload pre-hire data</h3>
@@ -620,34 +798,18 @@ function UploadFile() {
         </div>
       )}
 
-      {/* Success message */}
-      {preHireSuccess ? (
-        <div className="bg-green-50 border border-green-300 rounded-xl p-6 text-center">
-          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-              <path d="M4 11l5 5 9-9" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <p className="font-bold text-green-800 text-base mb-2">File received successfully</p>
-          <p className="text-green-700 text-sm leading-relaxed">
-            Thank you. The PrognostiCare team has received your pre-hire data file.
-            <br /><br />
-            We will begin processing your file and will notify you once the analysis is complete and your results are ready for review.
-          </p>
-        </div>
-      ) : (
-        <button
-          onClick={handlePreHireUpload}
-          disabled={!preHireFile || preHireLoading}
-          className={`w-full sm:w-auto mx-auto block px-8 py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${
-            !preHireFile || preHireLoading
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 active:scale-95'
-          }`}
-        >
-          {preHireLoading ? 'Uploading...' : 'Upload & process file'}
-        </button>
-      )}
+<button
+        onClick={handlePreHireUpload}
+        disabled={!preHireFile || preHireLoading}
+        className={`w-full sm:w-auto mx-auto block px-8 py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${
+          !preHireFile || preHireLoading
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 active:scale-95'
+        }`}
+      >
+        {preHireLoading ? 'Processing...' : 'Upload & Analyze'}
+      </button>
+
     </div>
   );
 
@@ -724,7 +886,8 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
     );
   };
 
-  const EmployeeDashboard = () => {
+  const EmployeeDashboard = ({ overrideResult } = {}) => {
+    const dataToDisplay = overrideResult || filteredResult;
     const [expandedEmployee, setExpandedEmployee] = useState(null);
 
     const getRiskColor = (risk) => {
@@ -745,9 +908,9 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
       return 'Detractor';
     };
 
-    const totalAverage = filteredResult.length > 0
-      ? Math.round(filteredResult.reduce((sum, e) => sum + (e.totalScore || 0), 0) / filteredResult.length)
-      : 0;
+    const totalAverage = dataToDisplay.length > 0
+    ? Math.round(dataToDisplay.reduce((sum, e) => sum + (e.totalScore || 0), 0) / dataToDisplay.length)
+    : 0;
 
     return (
       <div className="mt-8">
@@ -762,7 +925,7 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mb-1">Employee Sentiment Dashboard</h1>
               <p className="text-lg text-gray-700 mb-1">Overall Sentiment Risk Score</p>
-              <p className="text-sm text-gray-500">Showing {filteredResult.length} of {result.length} employees</p>
+              <p className="text-sm text-gray-500">Showing {dataToDisplay.length} {overrideResult ? 'candidates' : `of ${result.length} employees`}</p>
             </div>
           </div>
 
@@ -821,7 +984,7 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
                 </tr>
               </thead>
               <tbody>
-                {filteredResult?.map((employee, index) => (
+              {dataToDisplay?.map((employee, index) => (
                   <React.Fragment key={index}>
                     <tr
                       className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
@@ -918,24 +1081,25 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
                           <div className="border-t border-gray-200 pt-4 mt-4">
                             <p className="text-sm font-semibold text-gray-700 mb-3">Scoring Breakdown</p>
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                              {[
-                                { label: 'Age', value: employee?.agePoints },
-                                { label: 'Distance', value: employee?.distancePoints },
-                                { label: 'Tenure', value: employee?.tenurePoints },
-                                { label: 'Turnover Risk', value: employee?.turnoverPoints },
-                                { label: 'Finance', value: employee?.financePoints },
-                                { label: 'Schedule', value: employee?.schedulePoints },
-                                { label: 'Work Life', value: employee?.wlbPoints },
-                                { label: 'Family', value: employee?.familyPoints },
-                              ].map(({ label, value }) => (
-                                <div key={label} className="bg-white border border-gray-200 rounded-lg p-2 text-center">
-                                  <p className="text-xs text-gray-500 mb-1">{label}</p>
-                                  <p className={`text-sm font-bold ${(value || 0) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                                    {(value || 0) >= 0 ? `+${value}` : value}
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
+  {[
+    { label: 'Age', value: employee?.agePoints ?? 0 },
+    { label: 'Distance', value: employee?.distancePoints ?? 0 },
+    { label: 'Tenure', value: employee?.tenurePoints ?? 0 },
+    { label: 'Turnover Risk', value: employee?.turnoverPoints ?? 0 },
+    { label: 'Finance', value: employee?.financePoints ?? 0 },
+    { label: 'Schedule', value: employee?.schedulePoints ?? 0 },
+    { label: 'Work Life', value: employee?.wlbPoints ?? 0 },
+    { label: 'Family', value: employee?.familyPoints ?? 0 },
+  ].map(({ label, value }) => (
+    <div key={label} className="bg-white border border-gray-200 rounded-lg p-2 text-center">
+      <p className="text-xs text-gray-500 mb-1">{label}</p>
+      <p className={`text-sm font-bold ${value >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+        {value >= 0 ? `+${value}` : value}
+      </p>
+    </div>
+  ))}
+</div>
+
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                               <div>
                                 <p className="text-xs text-gray-500 mb-1">Total Score</p>
@@ -970,94 +1134,100 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
 
   return (
     <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6">
-      {isLoading && <LoadingOverlay />}
+        {(isLoading || preHireLoading) && <LoadingOverlay />}
 
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6">
 
-          {/* Logo */}
-          <div className="flex justify-center items-center text-center mb-4">
-            <img src="/logo.jpg" alt="Company Logo" className="h-20 sm:h-24 lg:h-32 w-auto object-contain" />
-          </div>
+        {/* ── Landing screen ─────────────────────────────────────────────────── */}
+        {landingVisible ? (
+          <LandingScreen />
+        ) : (
+          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6">
 
-          {/* Credits badge */}
-          <div className="flex justify-center mb-4">
-            <div className="rounded-full px-6 py-2 shadow-lg" style={{ background: 'linear-gradient(to right, #41d756, #2ebd47)' }}>
-              <p className="text-white font-semibold text-sm sm:text-base">
-                Available Credits: {credits.toFixed(2)}
-              </p>
-            </div>
-          </div>
-
-          {/* Tab bar */}
-          <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6">
-            <button
-              onClick={() => setActiveTab('prehire')}
-              className={`px-4 py-2 text-sm sm:text-base font-medium text-white rounded transition-colors ${activeTab === 'prehire' ? 'bg-blue-600' : 'bg-blue-400 hover:bg-blue-500'}`}
-            >
-              Prehire
-            </button>
-
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 text-center">
-              Staff Retention Application
-            </h2>
-
-            <button
-              onClick={() => setActiveTab('current')}
-              className={`px-4 py-2 text-sm sm:text-base font-medium text-white rounded transition-colors ${activeTab === 'current' ? 'bg-green-600' : 'bg-green-400 hover:bg-green-500'}`}
-            >
-              Current Staff
-            </button>
-          </div>
-
-          {/* ── Pre-hire tab ─────────────────────────────────────────────────── */}
-          {activeTab === 'prehire' && <PreHireScreen />}
-
-          {/* ── Current staff tab ────────────────────────────────────────────── */}
-          {activeTab === 'current' && (
-            <>
-              <div className="mb-3 flex justify-end">
-                <button onClick={() => setShowSampleFormat(true)} className="text-sm text-blue-600 hover:text-blue-700 underline">
-                  View sample file format
-                </button>
-              </div>
-
-              <div
-                className={`border-2 border-dashed rounded-xl p-4 sm:p-6 lg:p-8 text-center mb-4 sm:mb-6 transition-all duration-300 ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-blue-300 bg-white hover:border-blue-400 hover:bg-blue-50'}`}
-              >
-                <input type="file" id="fileInput" onChange={handleFileChange} accept=".csv, .xlsx" className="hidden" />
-                <label htmlFor="fileInput" className="cursor-pointer">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#3B82F6" className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16">
-                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
-                  </svg>
-                  <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-2">
-                    Drag and drop your CSV/Excel file here or click to browse
-                  </p>
-                  {file && <p className="text-blue-600 font-medium text-sm sm:text-base mt-2">Selected file: {file.name}</p>}
-                </label>
-              </div>
-
+            {/* Back button + active tab label */}
+            <div className="flex items-center gap-3 mb-5">
               <button
-                onClick={() => setShowFilterPopup(true)}
-                disabled={!file || isLoading}
-                className={`w-full sm:w-auto mx-auto block px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${!file || isLoading ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 active:scale-95'}`}
+                onClick={() => setLandingVisible(true)}
+                className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 transition-colors"
               >
-                {isLoading ? 'Processing...' : 'Upload & Analyze'}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+                Back
               </button>
+              <span className="text-gray-300">|</span>
+              <span className="text-sm font-semibold text-gray-700">
+                {activeTab === 'prehire' ? 'Pre-Hire' : 'Current Staff'}
+              </span>
+            </div>
 
-              {result.length > 0 && (
-                <button
-                  onClick={exportToCSV}
-                  className={`w-full sm:w-auto mx-auto block mt-3 px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${isReportLocked ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-purple-500 text-white hover:bg-purple-600 hover:scale-105 active:scale-95'}`}
+            {/* Logo (compact inside tab view) */}
+            <div className="flex justify-center items-center text-center mb-4">
+              <img src="/logo.jpg" alt="Company Logo" className="h-16 sm:h-20 w-auto object-contain" />
+            </div>
+
+            {/* Credits badge */}
+            <div className="flex justify-center mb-6">
+              <div className="rounded-full px-6 py-2 shadow-lg" style={{ background: 'linear-gradient(to right, #41d756, #2ebd47)' }}>
+                <p className="text-white font-semibold text-sm sm:text-base">
+                  Available Credits: {credits.toFixed(2)}
+                </p>
+              </div>
+            </div>
+
+            {/* ── Pre-hire tab ──────────────────────────────────────────────── */}
+            {activeTab === 'prehire' && <PreHireScreen />}
+
+            {/* ── Current staff tab ─────────────────────────────────────────── */}
+            {activeTab === 'current' && (
+              <>
+                <div className="mb-3 flex justify-end">
+                  <button onClick={() => setShowSampleFormat(true)} className="text-sm text-blue-600 hover:text-blue-700 underline">
+                    View sample file format
+                  </button>
+                </div>
+
+                <div
+                  className={`border-2 border-dashed rounded-xl p-4 sm:p-6 lg:p-8 text-center mb-4 sm:mb-6 transition-all duration-300 ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-blue-300 bg-white hover:border-blue-400 hover:bg-blue-50'}`}
                 >
-                  {isReportLocked ? '🔒 Export Locked' : 'Export CSV'}
-                </button>
-              )}
-            </>
-          )}
-        </div>
+                  <input type="file" id="fileInput" onChange={handleFileChange} accept=".csv, .xlsx" className="hidden" />
+                  <label htmlFor="fileInput" className="cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#3B82F6" className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16">
+                      <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
+                    </svg>
+                    <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-2">
+                      Drag and drop your CSV/Excel file here or click to browse
+                    </p>
+                    {file && <p className="text-blue-600 font-medium text-sm sm:text-base mt-2">Selected file: {file.name}</p>}
+                  </label>
+                </div>
 
-        {activeTab === 'current' && result.length > 0 && <EmployeeDashboard />}
+                <button
+                  onClick={() => setShowFilterPopup(true)}
+                  disabled={!file || isLoading}
+                  className={`w-full sm:w-auto mx-auto block px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${!file || isLoading ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 active:scale-95'}`}
+                >
+                  {isLoading ? 'Processing...' : 'Upload & Analyze'}
+                </button>
+
+                {result.length > 0 && (
+                  <button
+                    onClick={exportToCSV}
+                    className={`w-full sm:w-auto mx-auto block mt-3 px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${isReportLocked ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-purple-500 text-white hover:bg-purple-600 hover:scale-105 active:scale-95'}`}
+                  >
+                    {isReportLocked ? '🔒 Export Locked' : 'Export CSV'}
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+{!landingVisible && activeTab === 'current' && result.length > 0 && <EmployeeDashboard />}
+        {!landingVisible && activeTab === 'prehire' && preHireResult.length > 0 && (
+          <EmployeeDashboard overrideResult={preHireResult} />
+        )}
+
       </div>
 
       <ConfirmationPopup
