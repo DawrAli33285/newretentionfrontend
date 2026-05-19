@@ -772,22 +772,29 @@ const [preHireResult, setPreHireResult] = useState([]);
       <div className="mb-5">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Required fields</p>
         <div className="grid grid-cols-2 gap-2">
-          {[
-            { label: 'Name', required: true },
-            { label: 'Address', required: true },
-            { label: 'Email', required: false },
-            { label: 'Phone', required: false },
-          ].map(({ label, required }) => (
-            <div key={label} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-700">
-              <span>{label}</span>
-              {required ? (
-                <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Required</span>
-              ) : (
-                <span className="text-xs text-gray-400 border border-gray-200 px-2 py-0.5 rounded-full">If available</span>
-              )}
-            </div>
-          ))}
-        </div>
+  {[
+    { label: 'Candidate (Last, Suffix First MI)', required: true },
+    { label: 'Source Job', required: true },
+    { label: 'Opportunity Title', required: true },
+    { label: 'Source Job Code', required: true },
+    { label: 'Department Name', required: true },
+    { label: 'Email Address', required: true },
+    { label: 'Primary Phone', required: true },
+    { label: 'Address 1', required: true },
+    { label: 'City', required: true },
+    { label: 'State/Province Code', required: true },
+    { label: 'Zip/Postal Code', required: true },
+  ].map(({ label, required }) => (
+    <div key={label} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-700">
+      <span>{label}</span>
+      {required ? (
+        <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Required</span>
+      ) : (
+        <span className="text-xs text-gray-400 border border-gray-200 px-2 py-0.5 rounded-full">If available</span>
+      )}
+    </div>
+  ))}
+</div>
       </div>
 
       {/* Error message */}
