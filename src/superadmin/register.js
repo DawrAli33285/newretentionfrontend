@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, User, Mail, Lock, EyeOff, Eye } from 'lucide-react';
+import { ArrowLeft, User, Mail, Lock, EyeOff, Eye, Shield } from 'lucide-react';
 import {ToastContainer,toast} from 'react-toastify'
 import { Link } from 'react-router-dom';
 import axios from 'axios'
@@ -72,33 +72,48 @@ if(e?.response?.data?.error){
   return (
    <>
    <ToastContainer containerId={"adminRegister"}/>
-   
-   <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
+
+   {/* Brand fonts: Anton (display) + Poppins (body) */}
+   <link
+     href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600&display=swap"
+     rel="stylesheet"
+   />
+
+   <div
+     className="min-h-screen flex items-center justify-center p-4 relative"
+     style={{ background: '#000000', fontFamily: "'Poppins', sans-serif" }}
+   >
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full filter blur-3xl opacity-20" style={{ background: '#233dff' }}></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full filter blur-3xl opacity-20" style={{ background: '#12229d' }}></div>
       </div>
 
       <div className="relative w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-green-600 to-green-800 px-8 py-10 text-center">
+        <div className="rounded-2xl shadow-2xl overflow-hidden" style={{ background: '#ffffff' }}>
+          <div className="px-8 py-10 text-center" style={{ background: '#12229d' }}>
           <div className="flex justify-center mb-6">
       <img
-        src="./logo.jpg"
-        alt="Company Logo"
-        className="w-24 h-24 rounded-full shadow-md object-cover ring-4 ring-white bg-white"
+        src="https://res.cloudinary.com/dbjwbveqn/image/upload/v1782471932/Apax_Group_Logo_1_qcrz5c.png"
+        alt="The Apax Group"
+        className="w-20 h-20 object-contain"
       />
     </div>
-            <h1 className="text-2xl font-bold text-white mb-2">Create Admin Account</h1>
-            <p className="text-green-100 text-sm">Register to access the admin panel</p>
+            <h1
+              className="text-2xl mb-2"
+              style={{ fontFamily: "'Anton', sans-serif", color: '#ffffff', letterSpacing: '0.5px' }}
+            >
+              CREATE ADMIN ACCOUNT
+            </h1>
+            <p className="text-sm" style={{ color: '#c7cdf5' }}>Register to access the admin panel</p>
           </div>
 
           <div className="px-8 py-10">
            <Link to='/adminlogin'>
-           <button 
-              
-              className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+           <button
+              className="flex items-center mb-6 transition-colors text-sm font-medium"
+              style={{ color: '#5a5f6b' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#233dff'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = '#5a5f6b'; }}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
@@ -107,59 +122,62 @@ if(e?.response?.data?.error){
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                <label className="block text-sm font-medium mb-2" style={{ color: '#000000' }}>Full Name</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-gray-400" />
+                    <User className="h-5 w-5" style={{ color: '#9ca3af' }} />
                   </div>
                   <input
                     name="name"
                     type="text"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`block w-full pl-10 pr-3 py-3 border ${
-                      errors.name ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors`}
+                    className="block w-full pl-10 pr-3 py-3 rounded-lg focus:outline-none transition-colors"
+                    style={{ border: `1px solid ${errors.name ? '#e24b4a' : '#d1d5db'}`, boxShadow: 'none' }}
+                    onFocus={(e) => { if (!errors.name) { e.target.style.borderColor = '#233dff'; e.target.style.boxShadow = '0 0 0 2px rgba(35,61,255,0.2)'; } }}
+                    onBlur={(e) => { e.target.style.boxShadow = 'none'; if (!errors.name) e.target.style.borderColor = '#d1d5db'; }}
                     placeholder="John Doe"
                   />
                 </div>
-                {errors.name && <p className="mt-2 text-sm text-red-600">{errors.name}</p>}
+                {errors.name && <p className="mt-2 text-sm" style={{ color: '#a13333' }}>{errors.name}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                <label className="block text-sm font-medium mb-2" style={{ color: '#000000' }}>Email Address</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
+                    <Mail className="h-5 w-5" style={{ color: '#9ca3af' }} />
                   </div>
                   <input
                     name="email"
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`block w-full pl-10 pr-3 py-3 border ${
-                      errors.email ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors`}
+                    className="block w-full pl-10 pr-3 py-3 rounded-lg focus:outline-none transition-colors"
+                    style={{ border: `1px solid ${errors.email ? '#e24b4a' : '#d1d5db'}`, boxShadow: 'none' }}
+                    onFocus={(e) => { if (!errors.email) { e.target.style.borderColor = '#233dff'; e.target.style.boxShadow = '0 0 0 2px rgba(35,61,255,0.2)'; } }}
+                    onBlur={(e) => { e.target.style.boxShadow = 'none'; if (!errors.email) e.target.style.borderColor = '#d1d5db'; }}
                     placeholder="admin@example.com"
                   />
                 </div>
-                {errors.email && <p className="mt-2 text-sm text-red-600">{errors.email}</p>}
+                {errors.email && <p className="mt-2 text-sm" style={{ color: '#a13333' }}>{errors.email}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <label className="block text-sm font-medium mb-2" style={{ color: '#000000' }}>Password</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
+                    <Lock className="h-5 w-5" style={{ color: '#9ca3af' }} />
                   </div>
                   <input
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     value={formData.password}
                     onChange={handleChange}
-                    className={`block w-full pl-10 pr-10 py-3 border ${
-                      errors.password ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors`}
+                    className="block w-full pl-10 pr-10 py-3 rounded-lg focus:outline-none transition-colors"
+                    style={{ border: `1px solid ${errors.password ? '#e24b4a' : '#d1d5db'}`, boxShadow: 'none' }}
+                    onFocus={(e) => { if (!errors.password) { e.target.style.borderColor = '#233dff'; e.target.style.boxShadow = '0 0 0 2px rgba(35,61,255,0.2)'; } }}
+                    onBlur={(e) => { e.target.style.boxShadow = 'none'; if (!errors.password) e.target.style.borderColor = '#d1d5db'; }}
                     placeholder="Minimum 8 characters"
                   />
                   <button 
@@ -168,29 +186,30 @@ if(e?.response?.data?.error){
                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      <EyeOff className="h-5 w-5" style={{ color: '#9ca3af' }} />
                     ) : (
-                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      <Eye className="h-5 w-5" style={{ color: '#9ca3af' }} />
                     )}
                   </button>
                 </div>
-                {errors.password && <p className="mt-2 text-sm text-red-600">{errors.password}</p>}
+                {errors.password && <p className="mt-2 text-sm" style={{ color: '#a13333' }}>{errors.password}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                <label className="block text-sm font-medium mb-2" style={{ color: '#000000' }}>Confirm Password</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
+                    <Lock className="h-5 w-5" style={{ color: '#9ca3af' }} />
                   </div>
                   <input
                     name="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className={`block w-full pl-10 pr-10 py-3 border ${
-                      errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors`}
+                    className="block w-full pl-10 pr-10 py-3 rounded-lg focus:outline-none transition-colors"
+                    style={{ border: `1px solid ${errors.confirmPassword ? '#e24b4a' : '#d1d5db'}`, boxShadow: 'none' }}
+                    onFocus={(e) => { if (!errors.confirmPassword) { e.target.style.borderColor = '#233dff'; e.target.style.boxShadow = '0 0 0 2px rgba(35,61,255,0.2)'; } }}
+                    onBlur={(e) => { e.target.style.boxShadow = 'none'; if (!errors.confirmPassword) e.target.style.borderColor = '#d1d5db'; }}
                     placeholder="Re-enter password"
                   />
                   <button 
@@ -199,27 +218,30 @@ if(e?.response?.data?.error){
                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   >
                     {showConfirmPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      <EyeOff className="h-5 w-5" style={{ color: '#9ca3af' }} />
                     ) : (
-                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      <Eye className="h-5 w-5" style={{ color: '#9ca3af' }} />
                     )}
                   </button>
                 </div>
-                {errors.confirmPassword && <p className="mt-2 text-sm text-red-600">{errors.confirmPassword}</p>}
+                {errors.confirmPassword && <p className="mt-2 text-sm" style={{ color: '#a13333' }}>{errors.confirmPassword}</p>}
               </div>
 
               <button
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className={`w-full bg-gradient-to-r from-green-600 to-green-800 text-white py-3 rounded-lg font-semibold transition-all duration-200 ${
-                  isLoading
-                    ? 'opacity-70 cursor-not-allowed'
-                    : 'hover:from-green-700 hover:to-green-900 transform hover:scale-[1.02]'
-                }`}
+                className="w-full py-3 rounded-lg font-semibold transition-colors"
+                style={{
+                  background: isLoading ? '#7c8cf7' : '#233dff',
+                  color: '#ffffff',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                }}
+                onMouseEnter={(e) => { if (!isLoading) e.currentTarget.style.background = '#12229d'; }}
+                onMouseLeave={(e) => { if (!isLoading) e.currentTarget.style.background = '#233dff'; }}
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5" style={{ color: '#ffffff' }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -231,16 +253,17 @@ if(e?.response?.data?.error){
               </button>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-xs text-gray-500 text-center">
-                🔒 By registering, you agree to our terms and conditions.
+            <div className="mt-6 pt-6" style={{ borderTop: '1px solid #e5e7eb' }}>
+              <p className="text-xs text-center flex items-center justify-center gap-1.5" style={{ color: '#9ca3af' }}>
+                <Shield className="w-3.5 h-3.5" />
+                By registering, you agree to our terms and conditions.
               </p>
             </div>
           </div>
         </div>
 
-        <p className="text-center text-white text-sm mt-6 opacity-75">
-          © 2025 Admin Panel. All rights reserved.
+        <p className="text-center text-sm mt-6 opacity-75" style={{ color: '#ffffff' }}>
+          © 2026 The Apax Group. All rights reserved.
         </p>
       </div>
     </div>

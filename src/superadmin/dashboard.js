@@ -56,54 +56,76 @@ export default function Dashboard() {
   };
 
   const getActivityIcon = (action) => {
-    if (action.includes('Upload')) return { icon: Upload, bg: 'bg-blue-100', color: 'text-blue-600' };
-    if (action.includes('Download')) return { icon: Download, bg: 'bg-green-100', color: 'text-green-600' };
-    return { icon: Users, bg: 'bg-purple-100', color: 'text-purple-600' };
+    if (action.includes('Upload')) return { icon: Upload, bg: '#e6ebff', color: '#233dff' };
+    if (action.includes('Download')) return { icon: Download, bg: '#e1e3f0', color: '#12229d' };
+    return { icon: Users, bg: '#ececec', color: '#000000' };
   };
 
-  const StatCard = ({ icon: Icon, title, value, change, trend, gradient, iconBg }) => (
-    <div className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
-      <div className={`absolute top-0 right-0 w-32 h-32 ${gradient} opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500`}></div>
-      
+  const StatCard = ({ icon: Icon, title, value, iconBg, iconColor }) => (
+    <div
+      className="group relative rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
+      style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}
+    >
       <div className="relative p-6">
         <div className="flex items-start justify-between mb-4">
-          <div className={`${iconBg} p-3 rounded-xl shadow-sm`}>
-            <Icon className="w-6 h-6" />
+          <div className="p-3 rounded-xl" style={{ background: iconBg }}>
+            <Icon className="w-6 h-6" style={{ color: iconColor }} />
           </div>
-        
-           
-        
         </div>
-        <h3 className="text-gray-500 text-sm font-medium mb-1">{title}</h3>
-        <p className="text-3xl font-bold text-gray-900">{value}</p>
+        <h3 className="text-sm font-medium mb-1" style={{ color: '#5a5f6b' }}>{title}</h3>
+        <p className="text-3xl font-semibold" style={{ color: '#000000' }}>{value}</p>
       </div>
     </div>
   );
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 p-8 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
-          <p className="mt-6 text-gray-600 text-lg font-medium">Loading dashboard...</p>
+      <>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
+        <div
+          className="min-h-screen p-8 flex items-center justify-center"
+          style={{ background: '#f5f6fa', fontFamily: "'Poppins', sans-serif" }}
+        >
+          <div className="rounded-2xl shadow-xl p-12 text-center" style={{ background: '#ffffff' }}>
+            <div
+              className="inline-block animate-spin rounded-full h-16 w-16 border-b-4"
+              style={{ borderColor: '#233dff' }}
+            ></div>
+            <p className="mt-6 text-lg font-medium" style={{ color: '#5a5f6b' }}>Loading dashboard...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 p-8 flex items-center justify-center">
-        <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-8 max-w-md">
-          <p className="text-red-600 text-lg mb-4">{error}</p>
-          <button 
-            onClick={fetchDashboardData}
-            className="w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition-colors font-medium"
-          >
-            Try Again
-          </button>
+      <>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
+        <div
+          className="min-h-screen p-8 flex items-center justify-center"
+          style={{ background: '#f5f6fa', fontFamily: "'Poppins', sans-serif" }}
+        >
+          <div className="rounded-2xl p-8 max-w-md" style={{ background: '#fdeeee', border: '2px solid #f3c9c9' }}>
+            <p className="text-lg mb-4" style={{ color: '#a13333' }}>{error}</p>
+            <button
+              onClick={fetchDashboardData}
+              className="w-full py-3 rounded-xl font-medium transition-colors"
+              style={{ background: '#d64545', color: '#ffffff' }}
+              onMouseEnter={(e) => { e.target.style.background = '#a13333'; }}
+              onMouseLeave={(e) => { e.target.style.background = '#d64545'; }}
+            >
+              Try Again
+            </button>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -111,143 +133,156 @@ export default function Dashboard() {
   const maxFiles = Math.max(...monthlyGrowth.map(m => m.files), 1);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-2 h-8 bg-gradient-to-b from-blue-600 to-purple-600 rounded-full"></div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              Dashboard
-            </h1>
+    <>
+      {/* Brand fonts: Anton (display) + Poppins (body) */}
+      <link
+        href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600&display=swap"
+        rel="stylesheet"
+      />
+      <div
+        className="min-h-screen p-8"
+        style={{ background: '#f5f6fa', fontFamily: "'Poppins', sans-serif" }}
+      >
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-2 h-8 rounded-full" style={{ background: '#233dff' }}></div>
+              <h1
+                className="text-4xl"
+                style={{ fontFamily: "'Anton', sans-serif", color: '#000000', letterSpacing: '0.5px' }}
+              >
+                DASHBOARD
+              </h1>
+            </div>
+            <p className="text-lg ml-5" style={{ color: '#5a5f6b' }}>Welcome back! Here's your system overview.</p>
           </div>
-          <p className="text-gray-600 text-lg ml-5">Welcome back! Here's your system overview.</p>
-        </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard 
-            icon={Users}
-            title="Total Users"
-            value={stats.totalUsers.count}
-            change={`${stats.totalUsers.growth >= 0 ? '+' : ''}${stats.totalUsers.growth}%`}
-            trend={stats.totalUsers.growth >= 0 ? 'up' : 'down'}
-            gradient="bg-gradient-to-br from-blue-400 to-blue-600"
-            iconBg="bg-gradient-to-br from-blue-500 to-blue-600 text-white"
-          />
-          <StatCard 
-            icon={Activity}
-            title="Active Users"
-            value={stats.activeUsers.count}
-            change={`${stats.activeUsers.growth >= 0 ? '+' : ''}${stats.activeUsers.growth}%`}
-            trend={stats.activeUsers.growth >= 0 ? 'up' : 'down'}
-            gradient="bg-gradient-to-br from-green-400 to-green-600"
-            iconBg="bg-gradient-to-br from-green-500 to-green-600 text-white"
-          />
-          <StatCard 
-            icon={FileText}
-            title="Total Files"
-            value={stats.totalFiles.count}
-            change={`${stats.totalFiles.growth >= 0 ? '+' : ''}${stats.totalFiles.growth}%`}
-            trend={stats.totalFiles.growth >= 0 ? 'up' : 'down'}
-            gradient="bg-gradient-to-br from-purple-400 to-purple-600"
-            iconBg="bg-gradient-to-br from-purple-500 to-purple-600 text-white"
-          />
-          <StatCard 
-            icon={Database}
-            title="Storage Used"
-            value={`${stats.storageUsed.size}MB`}
-            change={`${stats.storageUsed.growth >= 0 ? '+' : ''}${stats.storageUsed.growth}%`}
-            trend={stats.storageUsed.growth >= 0 ? 'up' : 'down'}
-            gradient="bg-gradient-to-br from-orange-400 to-orange-600"
-            iconBg="bg-gradient-to-br from-orange-500 to-orange-600 text-white"
-          />
-        </div>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <StatCard
+              icon={Users}
+              title="Total Users"
+              value={stats.totalUsers.count}
+              iconBg="#e6ebff"
+              iconColor="#233dff"
+            />
+            <StatCard
+              icon={Activity}
+              title="Active Users"
+              value={stats.activeUsers.count}
+              iconBg="#e1e3f0"
+              iconColor="#12229d"
+            />
+            <StatCard
+              icon={FileText}
+              title="Total Files"
+              value={stats.totalFiles.count}
+              iconBg="#ececec"
+              iconColor="#000000"
+            />
+            <StatCard
+              icon={Database}
+              title="Storage Used"
+              value={`${stats.storageUsed.size}MB`}
+              iconBg="#e6ebff"
+              iconColor="#12229d"
+            />
+          </div>
 
-        {/* Charts and Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Monthly Growth Chart */}
-          <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 p-8 border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Monthly Growth</h3>
-              <div className="flex items-center gap-4 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-gray-600">Users</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                  <span className="text-gray-600">Files</span>
+          {/* Charts and Activity */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Monthly Growth Chart */}
+            <div
+              className="rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-8"
+              style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold" style={{ color: '#000000' }}>Monthly growth</h3>
+                <div className="flex items-center gap-4 text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ background: '#233dff' }}></div>
+                    <span style={{ color: '#5a5f6b' }}>Users</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ background: '#12229d' }}></div>
+                    <span style={{ color: '#5a5f6b' }}>Files</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="space-y-5">
-              {monthlyGrowth.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">No data available</p>
-              ) : (
-                monthlyGrowth.map((stat, idx) => (
-                  <div key={idx} className="group">
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm font-semibold text-gray-700 w-12">{stat.month}</span>
-                      <div className="flex-1 space-y-2">
-                        <div className="relative">
-                          <div className="bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                            <div 
-                              className="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out group-hover:from-blue-600 group-hover:to-blue-700" 
-                              style={{ width: `${Math.min((stat.users / maxUsers) * 100, 100)}%` }}
-                            ></div>
+              <div className="space-y-5">
+                {monthlyGrowth.length === 0 ? (
+                  <p className="text-center py-8" style={{ color: '#9ca3af' }}>No data available</p>
+                ) : (
+                  monthlyGrowth.map((stat, idx) => (
+                    <div key={idx} className="group">
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm font-semibold w-12" style={{ color: '#000000' }}>{stat.month}</span>
+                        <div className="flex-1 space-y-2">
+                          <div className="relative">
+                            <div className="rounded-full h-2.5 overflow-hidden" style={{ background: '#ececec' }}>
+                              <div
+                                className="h-2.5 rounded-full transition-all duration-500 ease-out"
+                                style={{ width: `${Math.min((stat.users / maxUsers) * 100, 100)}%`, background: '#233dff' }}
+                              ></div>
+                            </div>
+                            <span className="absolute -top-6 right-0 text-xs font-medium" style={{ color: '#5a5f6b' }}>{stat.users}</span>
                           </div>
-                          <span className="absolute -top-6 right-0 text-xs font-medium text-gray-600">{stat.users}</span>
-                        </div>
-                        <div className="relative">
-                          <div className="bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                            <div 
-                              className="bg-gradient-to-r from-purple-500 to-purple-600 h-2.5 rounded-full transition-all duration-500 ease-out group-hover:from-purple-600 group-hover:to-purple-700" 
-                              style={{ width: `${Math.min((stat.files / maxFiles) * 100, 100)}%` }}
-                            ></div>
+                          <div className="relative">
+                            <div className="rounded-full h-2.5 overflow-hidden" style={{ background: '#ececec' }}>
+                              <div
+                                className="h-2.5 rounded-full transition-all duration-500 ease-out"
+                                style={{ width: `${Math.min((stat.files / maxFiles) * 100, 100)}%`, background: '#12229d' }}
+                              ></div>
+                            </div>
+                            <span className="absolute -top-6 right-0 text-xs font-medium" style={{ color: '#5a5f6b' }}>{stat.files}</span>
                           </div>
-                          <span className="absolute -top-6 right-0 text-xs font-medium text-gray-600">{stat.files}</span>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))
-              )}
+                  ))
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Recent Activity */}
-          <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 p-8 border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Recent Activity</h3>
-              
-            </div>
-            <div className="space-y-4">
-              {recentActivity.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">No recent activity</p>
-              ) : (
-                recentActivity.map((activity, idx) => {
-                  const { icon: Icon, bg, color } = getActivityIcon(activity.action);
-                  return (
-                    <div key={idx} className="group flex items-start gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors">
-                      <div className={`p-2.5 rounded-xl ${bg}`}>
-                        <Icon className={`w-4 h-4 ${color}`} />
+            {/* Recent Activity */}
+            <div
+              className="rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-8"
+              style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold" style={{ color: '#000000' }}>Recent activity</h3>
+              </div>
+              <div className="space-y-4">
+                {recentActivity.length === 0 ? (
+                  <p className="text-center py-8" style={{ color: '#9ca3af' }}>No recent activity</p>
+                ) : (
+                  recentActivity.map((activity, idx) => {
+                    const { icon: Icon, bg, color } = getActivityIcon(activity.action);
+                    return (
+                      <div
+                        key={idx}
+                        className="group flex items-start gap-4 p-3 rounded-xl transition-colors"
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#f5f6fa'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        <div className="p-2.5 rounded-xl" style={{ background: bg }}>
+                          <Icon className="w-4 h-4" style={{ color }} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold truncate" style={{ color: '#000000' }}>{activity.email}</p>
+                          <p className="text-xs mt-0.5" style={{ color: '#5a5f6b' }}>{activity.action}</p>
+                        </div>
+                        <span className="text-xs whitespace-nowrap" style={{ color: '#9ca3af' }}>{getTimeAgo(activity.time)}</span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{activity.email}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{activity.action}</p>
-                      </div>
-                      <span className="text-xs text-gray-400 whitespace-nowrap">{getTimeAgo(activity.time)}</span>
-                    </div>
-                  );
-                })
-              )}
+                    );
+                  })
+                )}
+              </div>
             </div>
           </div>
         </div>
-
-     
       </div>
-    </div>
+    </>
   );
 }

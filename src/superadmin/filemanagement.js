@@ -65,18 +65,18 @@ export default function FileManagement({ users }) {
 
   // Get appropriate icon based on file extension
   const getFileIcon = (fileName) => {
-    if (!fileName) return <FileText className="w-5 h-5 text-gray-600" />;
+    if (!fileName) return <FileText className="w-5 h-5" style={{ color: '#5a5f6b' }} />;
     const ext = fileName.split('.').pop()?.toLowerCase();
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) {
-      return <Image className="w-5 h-5 text-blue-600" />;
+      return <Image className="w-5 h-5" style={{ color: '#233dff' }} />;
     }
     if (['mp4', 'avi', 'mov', 'webm', 'mkv'].includes(ext)) {
-      return <Video className="w-5 h-5 text-purple-600" />;
+      return <Video className="w-5 h-5" style={{ color: '#12229d' }} />;
     }
     if (['mp3', 'wav', 'ogg', 'flac', 'aac'].includes(ext)) {
-      return <Music className="w-5 h-5 text-green-600" />;
+      return <Music className="w-5 h-5" style={{ color: '#000000' }} />;
     }
-    return <FileText className="w-5 h-5 text-gray-600" />;
+    return <FileText className="w-5 h-5" style={{ color: '#5a5f6b' }} />;
   };
 
   // Format date for display
@@ -187,24 +187,40 @@ if(e?.response?.data?.error){
 
   return (
   <>
-  
-  
 
-  <div className="min-h-screen bg-gray-50 p-6">
+  {/* Brand fonts: Anton (display) + Poppins (body) */}
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <div
+    className="min-h-screen p-6"
+    style={{ background: '#f5f6fa', fontFamily: "'Poppins', sans-serif" }}
+  >
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">File Management</h1>
-          <p className="text-gray-600">Upload and manage files for all users</p>
+          <h1
+            className="text-3xl mb-2"
+            style={{ fontFamily: "'Anton', sans-serif", color: '#000000', letterSpacing: '0.5px' }}
+          >
+            FILE MANAGEMENT
+          </h1>
+          <p style={{ color: '#5a5f6b' }}>Upload and manage files for all users</p>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+          <div
+            className="px-4 py-3 rounded-lg mb-6 flex items-center gap-2"
+            style={{ background: '#fdeeee', border: '1px solid #f3c9c9', color: '#a13333' }}
+          >
             <AlertCircle className="w-5 h-5" />
             <span>{error}</span>
-            <button 
+            <button
               onClick={() => setError(null)}
-              className="ml-auto text-red-700 hover:text-red-900"
+              className="ml-auto"
+              style={{ color: '#a13333' }}
             >
               ×
             </button>
@@ -212,24 +228,33 @@ if(e?.response?.data?.error){
         )}
 
         {/* Filters and Search */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+        <div
+          className="rounded-xl shadow-sm p-6 mb-6"
+          style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-3 w-5 h-5" style={{ color: '#9ca3af' }} />
               <input
                 type="text"
                 placeholder="Search files..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-3 rounded-lg focus:outline-none"
+                style={{ border: '1px solid #d1d5db', boxShadow: 'none' }}
+                onFocus={(e) => { e.target.style.borderColor = '#233dff'; e.target.style.boxShadow = '0 0 0 2px rgba(35,61,255,0.2)'; }}
+                onBlur={(e) => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none'; }}
               />
             </div>
             <div className="relative">
-              <Filter className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <Filter className="absolute left-3 top-3 w-5 h-5" style={{ color: '#9ca3af' }} />
               <select
                 value={selectedUser}
                 onChange={(e) => setSelectedUser(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+                className="w-full pl-10 pr-4 py-3 rounded-lg focus:outline-none appearance-none"
+                style={{ border: '1px solid #d1d5db', background: '#ffffff', boxShadow: 'none' }}
+                onFocus={(e) => { e.target.style.borderColor = '#233dff'; e.target.style.boxShadow = '0 0 0 2px rgba(35,61,255,0.2)'; }}
+                onBlur={(e) => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none'; }}
               >
                 <option value="all">All Users</option>
                 {users?.map(user => (
@@ -244,39 +269,48 @@ if(e?.response?.data?.error){
 
       
         {/* Files Table */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div
+          className="rounded-xl shadow-sm overflow-hidden"
+          style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}
+        >
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-              <span className="ml-3 text-gray-600">Loading files...</span>
+              <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#233dff' }} />
+              <span className="ml-3" style={{ color: '#5a5f6b' }}>Loading files...</span>
             </div>
           ) : (
             <>
               {filteredFiles.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200">
+                    <thead style={{ background: '#f5f6fa', borderBottom: '1px solid #e5e7eb' }}>
                       <tr>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">File Name</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">User</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Passcode</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Records</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Upload Date</th>
-                        <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Actions</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: '#000000' }}>File Name</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: '#000000' }}>User</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: '#000000' }}>Passcode</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: '#000000' }}>Records</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: '#000000' }}>Status</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: '#000000' }}>Upload Date</th>
+                        <th className="px-6 py-4 text-right text-sm font-semibold" style={{ color: '#000000' }}>Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
+                    <tbody style={{ borderTop: '1px solid #e5e7eb' }}>
                       {filteredFiles.map((file) => {
                         return (
-                          <tr key={file._id} className="hover:bg-gray-50 transition-colors">
+                          <tr
+                            key={file._id}
+                            className="transition-colors"
+                            style={{ borderBottom: '1px solid #e5e7eb' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = '#f5f6fa'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                          >
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
                                 {getFileIcon(file.file)}
                                 <div>
-                                  <p className="font-medium text-gray-800">{file.file}</p>
+                                  <p className="font-medium" style={{ color: '#000000' }}>{file.file}</p>
                                   {file.output && (
-                                    <p className="text-xs text-blue-600 mt-1 hover:underline cursor-pointer">
+                                    <p className="text-xs mt-1 hover:underline cursor-pointer" style={{ color: '#233dff' }}>
                                       <a href={file.output} target="_blank" rel="noopener noreferrer">
                                         View Output
                                       </a>
@@ -286,34 +320,38 @@ if(e?.response?.data?.error){
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm" style={{ color: '#5a5f6b' }}>
                                 {file.user?.email || 'Unknown User'}
                               </span>
                             </td>
                             <td className="px-6 py-4">
-                              <span className="text-sm font-mono text-gray-700 bg-gray-100 px-2 py-1 rounded">
+                              <span
+                                className="text-sm font-mono px-2 py-1 rounded"
+                                style={{ color: '#000000', background: '#f5f6fa' }}
+                              >
                                 {file.passcode || 'N/A'}
                               </span>
                             </td>
                             <td className="px-6 py-4">
-  <span className="text-sm text-gray-600 font-medium">
-    {file.recordCount || '0'}
-  </span>
-</td>
+                              <span className="text-sm font-medium" style={{ color: '#5a5f6b' }}>
+                                {file.recordCount || '0'}
+                              </span>
+                            </td>
                             <td className="px-6 py-4">
                               <button
                                 onClick={() => togglePaidStatus(file._id, file.paid)}
-                                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                                  file.paid 
-                                    ? 'bg-green-100 text-green-800 hover:bg-green-200' 
-                                    : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                                }`}
+                                className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
+                                style={
+                                  file.paid
+                                    ? { background: '#e3f3e9', color: '#1e7a44' }
+                                    : { background: '#fdf3df', color: '#9a6b0c' }
+                                }
                               >
                                 {file.paid ? 'Paid' : 'Unpaid'}
                               </button>
                             </td>
                             <td className="px-6 py-4">
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm" style={{ color: '#5a5f6b' }}>
                                 {formatDate(file.createdAt)}
                               </span>
                             </td>
@@ -321,26 +359,31 @@ if(e?.response?.data?.error){
                               <div className="flex items-center justify-end gap-2">
                              {file?.paid==false? <button
                                   onClick={()=>sendPasscode(file)}
-                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                  title="Delete"
+                                  className="p-2 rounded-lg transition-colors"
+                                  style={{ color: '#12229d' }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.background = '#e6ebff'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                  title="Send passcode"
                                 >
                                   <CreditCard className="w-5 h-5" />
                                 </button>:''}
                                 <button
                                   onClick={() => handleDownload(file.output, file.file)}
                                   disabled={!file.output}
-                                  className={`p-2 rounded-lg transition-colors ${
-                                    file.output
-                                      ? 'text-blue-600 hover:bg-blue-50'
-                                      : 'text-gray-400 cursor-not-allowed'
-                                  }`}
+                                  className="p-2 rounded-lg transition-colors"
+                                  style={file.output ? { color: '#233dff', cursor: 'pointer' } : { color: '#9ca3af', cursor: 'not-allowed' }}
+                                  onMouseEnter={(e) => { if (file.output) e.currentTarget.style.background = '#e6ebff'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                                   title={file.output ? 'Download' : 'No output available'}
                                 >
                                   <Download className="w-5 h-5" />
                                 </button>
                                 <button
                                   onClick={() => handleDelete(file._id)}
-                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  className="p-2 rounded-lg transition-colors"
+                                  style={{ color: '#d64545' }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.background = '#fdeeee'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                                   title="Delete"
                                 >
                                   <Trash2 className="w-5 h-5" />
@@ -354,9 +397,9 @@ if(e?.response?.data?.error){
                   </table>
                 </div>
               ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <File className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                  <p className="text-lg font-medium">No files found</p>
+                <div className="text-center py-12" style={{ color: '#9ca3af' }}>
+                  <File className="w-16 h-16 mx-auto mb-4" style={{ color: '#d1d5db' }} />
+                  <p className="text-lg font-medium" style={{ color: '#5a5f6b' }}>No files found</p>
                   <p className="text-sm mt-1">
                     {searchTerm || selectedUser !== 'all' 
                       ? 'Try adjusting your filters' 

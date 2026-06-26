@@ -5,6 +5,20 @@ import PaymentPopup from './components/PaymentPopup';
 import StripePaymentPopup from './components/StripePaymentPopup';
 import { BASE_URL } from './baseurl';
 
+// ─── Apax Group brand kit ──────────────────────────────────────────────────
+// Colors:  #233dff (primary blue) · #12229d (deep navy) · #000000 (near black)
+// Fonts:   Anton (display) · Poppins (body)
+// Tagline: "Empowering Healthcare Workforce Intelligence"
+// Note: risk-status colors (#41d756 green / #fdc002 amber / #fb0000 red) are
+// functional indicators, not brand colors, so they're left as-is throughout.
+
+const BRAND = {
+  primary: '#233dff',
+  navy: '#12229d',
+  black: '#000000',
+  primaryHover: '#1c30d6',
+};
+
 function UploadFile() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState([]);
@@ -57,8 +71,8 @@ function UploadFile() {
   const [preHireSuccess, setPreHireSuccess] = useState(false);
   const [preHireLoading, setPreHireLoading] = useState(false);
   const [preHireDragging, setPreHireDragging] = useState(false);
-  const [preHireRecordCount, setPreHireRecordCount] = useState(0);  
-const [preHireResult, setPreHireResult] = useState([]);      
+  const [preHireRecordCount, setPreHireRecordCount] = useState(0);
+  const [preHireResult, setPreHireResult] = useState([]);
 
   // ────────────────────────────────────────────────────────────────────────────
 
@@ -126,22 +140,22 @@ const [preHireResult, setPreHireResult] = useState([]);
     }
     return null;
   };
-  
+
 
   const processPreHireFile = async (selectedFile) => {
     setPreHireError('');
     setPreHireSuccess(false);
     setPreHireResult([]);
-  
+
     const ext = selectedFile.name.slice(selectedFile.name.lastIndexOf('.')).toLowerCase();
-  
+
     if (!PREHIRE_ACCEPTED_EXT.includes(ext)) {
       setPreHireError(
         'Your file could not be accepted because it is not in an accepted format. Please upload a CSV, XLS, or XLSX file that includes Name, Address, Email, and Phone when available.'
       );
       return;
     }
-  
+
     try {
       if (ext === '.xlsx' || ext === '.xls') {
         const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs');
@@ -149,43 +163,43 @@ const [preHireResult, setPreHireResult] = useState([]);
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        
-        if (rows.length <= 1) { 
-          setPreHireRecordCount(0); 
-          return; 
+
+        if (rows.length <= 1) {
+          setPreHireRecordCount(0);
+          return;
         }
-        
+
         const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
         const nameIdx = headers.findIndex(h => h.includes('name'));
-        
+
         // Count valid records
         const validCount = rows.slice(1).filter(row => String(row[nameIdx] || '').trim().length > 0).length;
         setPreHireRecordCount(validCount);
-        
+
       } else {
         // CSV handling
         const text = await selectedFile.text();
         const err = validatePreHireCSV(text);
-        if (err) { 
-          setPreHireError(err); 
-          return; 
+        if (err) {
+          setPreHireError(err);
+          return;
         }
         const lines = text.trim().split('\n');
         const delimiter = lines[0].includes('\t') ? '\t' : ',';
         const headers = lines[0].split(delimiter).map(h => h.trim().replace(/['"]/g, '').toLowerCase());
         const nameIdx = headers.findIndex(h => h.includes('name'));
-        
+
         let validCount = 0;
-        
+
         for (let i = 1; i < lines.length; i++) {
           const cols = lines[i].split(delimiter).map(cell => cell.trim().replace(/['"]/g, ''));
           const name = (cols[nameIdx] || '').trim();
-          
+
           if (name.length > 0) {
             validCount++;
           }
         }
-        
+
         setPreHireRecordCount(validCount);
       }
     } catch (error) {
@@ -193,7 +207,7 @@ const [preHireResult, setPreHireResult] = useState([]);
       setPreHireError('Error reading the file. Please ensure it is a valid file.');
       return;
     }
-  
+
     setPreHireFile(selectedFile);
   };
 
@@ -220,7 +234,7 @@ const [preHireResult, setPreHireResult] = useState([]);
     setPreHireLoading(true);
     setPreHireError('');
     setPreHireResult([]); // Clear previous results
-  
+
     try {
       const token = localStorage.getItem('token');
       const formData = new FormData();
@@ -228,21 +242,21 @@ const [preHireResult, setPreHireResult] = useState([]);
       formData.append('recordCount', preHireRecordCount);
       formData.append('creditsUsed', '0');
       formData.append('isPreHire', 'true');
-  
+
       const res = await fetch(`${BASE_URL}/enrich`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
-  
+
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || 'Upload failed. Please try again.');
       }
-  
+
       const data = await res.json();
       console.log('Pre-hire results received:', data.results);
-      
+
       // Only set results if we actually got data back
       if (data.results && data.results.length > 0) {
         setPreHireResult(data.results);
@@ -352,23 +366,25 @@ const [preHireResult, setPreHireResult] = useState([]);
   const LoadingOverlay = () => {
     const displayCount = activeTab === 'prehire' ? preHireRecordCount : recordCount;
     const displayType = activeTab === 'prehire' ? 'candidate' : 'employee';
-    
+
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
           <div className="flex flex-col items-center">
             <div className="relative w-20 h-20 mb-6">
-              <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
-              <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+              <div className="absolute inset-0 rounded-full" style={{ border: `4px solid ${BRAND.primary}33` }}></div>
+              <div className="absolute inset-0 border-4 rounded-full border-t-transparent animate-spin" style={{ borderColor: BRAND.primary, borderTopColor: 'transparent' }}></div>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Processing Your File</h3>
-            <p className="text-gray-600 text-center mb-4">
+            <h3 className="text-xl font-bold mb-2" style={{ fontFamily: "'Anton', sans-serif", color: BRAND.black, letterSpacing: '0.01em' }}>
+              PROCESSING YOUR FILE
+            </h3>
+            <p className="text-gray-600 text-center mb-4" style={{ fontFamily: "'Poppins', sans-serif" }}>
               Analyzing {displayCount} {displayType} record{displayCount !== 1 ? 's' : ''}...
             </p>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+              <div className="h-2 rounded-full animate-pulse" style={{ width: '60%', backgroundColor: BRAND.primary }}></div>
             </div>
-            <p className="text-sm text-gray-500 mt-4">This may take a few moments</p>
+            <p className="text-sm text-gray-500 mt-4" style={{ fontFamily: "'Poppins', sans-serif" }}>This may take a few moments</p>
           </div>
         </div>
       </div>
@@ -641,11 +657,12 @@ const [preHireResult, setPreHireResult] = useState([]);
       cursor: 'pointer',
       textAlign: 'left',
       transition: 'border-color 0.18s, box-shadow 0.18s',
+      fontFamily: "'Poppins', sans-serif",
     };
 
     const handleCardHoverIn = (e) => {
-      e.currentTarget.style.borderColor = '#3B82F6';
-      e.currentTarget.style.boxShadow = '0 4px 12px rgba(59,130,246,0.12)';
+      e.currentTarget.style.borderColor = BRAND.primary;
+      e.currentTarget.style.boxShadow = `0 4px 12px ${BRAND.primary}1f`;
     };
     const handleCardHoverOut = (e) => {
       e.currentTarget.style.borderColor = '#e5e7eb';
@@ -653,22 +670,27 @@ const [preHireResult, setPreHireResult] = useState([]);
     };
 
     return (
-      <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-10 mb-6 flex flex-col items-center">
+      <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-10 mb-6 flex flex-col items-center" style={{ fontFamily: "'Poppins', sans-serif" }}>
 
         {/* Logo */}
         <div className="mb-4">
           <img
-            src="/logo.jpg"
-            alt="PrognostiCare"
-            className="w-24 h-24 rounded-full object-cover shadow-md ring-4 ring-white"
+            src="https://res.cloudinary.com/dbjwbveqn/image/upload/v1782471932/Apax_Group_Logo_1_qcrz5c.png"
+            alt="The Apax Group"
+            className="w-20 h-20 object-contain"
           />
         </div>
 
         {/* Brand name */}
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">PrognostiCare</h1>
+        <h1
+          className="text-2xl mb-1 text-center"
+          style={{ fontFamily: "'Anton', sans-serif", color: BRAND.black, letterSpacing: '0.01em' }}
+        >
+          THE APAX GROUP
+        </h1>
 
         {/* Tagline */}
-        <p className="text-blue-500 text-sm mb-1">Turning Data Into Direction.</p>
+        <p className="text-sm mb-1" style={{ color: BRAND.primary, fontWeight: 500 }}>Empowering Healthcare Workforce Intelligence</p>
 
         {/* Section label */}
         <p className="text-gray-400 text-sm tracking-wide mb-6">Staff Retention Application</p>
@@ -676,7 +698,7 @@ const [preHireResult, setPreHireResult] = useState([]);
         {/* Credits pill */}
         <div
           className="rounded-full px-6 py-2 shadow-sm mb-8"
-          style={{ background: 'linear-gradient(to right, #41d756, #2ebd47)' }}
+          style={{ background: `linear-gradient(to right, ${BRAND.primary}, ${BRAND.navy})` }}
         >
           <p className="text-white font-semibold text-sm">Available Credits: {credits.toFixed(2)}</p>
         </div>
@@ -688,8 +710,8 @@ const [preHireResult, setPreHireResult] = useState([]);
           onMouseEnter={handleCardHoverIn}
           onMouseLeave={handleCardHoverOut}
         >
-          <div className="w-11 h-11 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${BRAND.primary}14` }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={BRAND.primary} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
               <circle cx="9" cy="7" r="4" />
               <line x1="19" y1="8" x2="19" y2="14" />
@@ -697,7 +719,7 @@ const [preHireResult, setPreHireResult] = useState([]);
             </svg>
           </div>
           <div style={{ flex: 1 }}>
-            <p className="text-gray-800 font-semibold text-sm">Pre-Hire</p>
+            <p className="font-semibold text-sm" style={{ color: BRAND.black }}>Pre-Hire</p>
             <p className="text-gray-400 text-xs mt-0.5">Analyze candidates before hiring</p>
           </div>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round">
@@ -712,8 +734,8 @@ const [preHireResult, setPreHireResult] = useState([]);
           onMouseEnter={handleCardHoverIn}
           onMouseLeave={handleCardHoverOut}
         >
-          <div className="w-11 h-11 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${BRAND.navy}14` }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={BRAND.navy} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
               <circle cx="9" cy="7" r="4" />
               <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -721,7 +743,7 @@ const [preHireResult, setPreHireResult] = useState([]);
             </svg>
           </div>
           <div style={{ flex: 1 }}>
-            <p className="text-gray-800 font-semibold text-sm">Current Staff</p>
+            <p className="font-semibold text-sm" style={{ color: BRAND.black }}>Current Staff</p>
             <p className="text-gray-400 text-xs mt-0.5">Retention risk for existing employees</p>
           </div>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round">
@@ -733,17 +755,20 @@ const [preHireResult, setPreHireResult] = useState([]);
   };
 
   const PreHireScreen = () => (
-    <div className="mt-2">
-      <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Upload pre-hire data</h3>
+    <div className="mt-2" style={{ fontFamily: "'Poppins', sans-serif" }}>
+      <h3 className="text-xl sm:text-2xl mb-2" style={{ fontFamily: "'Anton', sans-serif", color: BRAND.black, letterSpacing: '0.01em' }}>
+        UPLOAD PRE-HIRE DATA
+      </h3>
       <p className="text-sm sm:text-base text-gray-600 mb-6 leading-relaxed">
-        Please upload your pre-hire candidate file for processing. The file must include the required candidate information so PrognostiCare can begin the retention risk analysis.
+        Please upload your pre-hire candidate file for processing. The file must include the required candidate information so The Apax Group can begin the retention risk analysis.
       </p>
 
       {/* Drop zone */}
       <div
         className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center mb-5 transition-all duration-300 cursor-pointer ${
-          preHireDragging ? 'border-blue-500 bg-blue-50' : 'border-blue-300 bg-white hover:border-blue-400 hover:bg-blue-50'
+          preHireDragging ? 'bg-blue-50' : 'bg-white hover:bg-blue-50'
         }`}
+        style={{ borderColor: preHireDragging ? BRAND.primary : `${BRAND.primary}66` }}
         onDragOver={(e) => { e.preventDefault(); setPreHireDragging(true); }}
         onDragLeave={() => setPreHireDragging(false)}
         onDrop={handlePreHireDrop}
@@ -756,7 +781,7 @@ const [preHireResult, setPreHireResult] = useState([]);
           className="hidden"
           onChange={handlePreHireFileChange}
         />
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3B82F6" className="mx-auto mb-3 w-10 h-10 sm:w-12 sm:h-12">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={BRAND.primary} className="mx-auto mb-3 w-10 h-10 sm:w-12 sm:h-12">
           <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
         </svg>
         <p className="text-sm sm:text-base text-gray-700 mb-1">
@@ -764,7 +789,7 @@ const [preHireResult, setPreHireResult] = useState([]);
         </p>
         <p className="text-xs text-gray-500">Accepted formats: .CSV &nbsp;·&nbsp; .XLS &nbsp;·&nbsp; .XLSX</p>
         {preHireFile && (
-          <p className="text-blue-600 font-medium text-sm mt-2">Selected: {preHireFile.name}</p>
+          <p className="font-medium text-sm mt-2" style={{ color: BRAND.primary }}>Selected: {preHireFile.name}</p>
         )}
       </div>
 
@@ -788,7 +813,7 @@ const [preHireResult, setPreHireResult] = useState([]);
     <div key={label} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-700">
       <span>{label}</span>
       {required ? (
-        <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Required</span>
+        <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: `${BRAND.primary}1a`, color: BRAND.navy }}>Required</span>
       ) : (
         <span className="text-xs text-gray-400 border border-gray-200 px-2 py-0.5 rounded-full">If available</span>
       )}
@@ -811,8 +836,11 @@ const [preHireResult, setPreHireResult] = useState([]);
         className={`w-full sm:w-auto mx-auto block px-8 py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${
           !preHireFile || preHireLoading
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 active:scale-95'
+            : 'text-white hover:scale-105 active:scale-95'
         }`}
+        style={!preHireFile || preHireLoading ? {} : { backgroundColor: BRAND.primary }}
+        onMouseEnter={(e) => { if (preHireFile && !preHireLoading) e.currentTarget.style.backgroundColor = BRAND.primaryHover; }}
+        onMouseLeave={(e) => { if (preHireFile && !preHireLoading) e.currentTarget.style.backgroundColor = BRAND.primary; }}
       >
         {preHireLoading ? 'Processing...' : 'Upload & Analyze'}
       </button>
@@ -823,12 +851,14 @@ const [preHireResult, setPreHireResult] = useState([]);
   const FilterPopup = () => {
     if (!showFilterPopup) return null;
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" style={{ fontFamily: "'Poppins', sans-serif" }}>
         <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-fadeIn">
           <div className="p-6 border-b border-gray-200 flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Filter Data Before Processing</h2>
-              <p className="text-sm text-gray-600 mt-1">Select filters to apply to your {recordCount} employee records</p>
+              <h2 className="text-2xl mb-1" style={{ fontFamily: "'Anton', sans-serif", color: BRAND.black, letterSpacing: '0.01em' }}>
+                FILTER DATA BEFORE PROCESSING
+              </h2>
+              <p className="text-sm text-gray-600">Select filters to apply to your {recordCount} employee records</p>
             </div>
             <button onClick={() => setShowFilterPopup(false)} className="text-gray-400 hover:text-gray-600">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -849,7 +879,7 @@ const [preHireResult, setPreHireResult] = useState([]);
               ].map(({ label, value, setter, options, allLabel }) => (
                 <div key={label}>
                   <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
-                  <select value={value} onChange={e => setter(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                  <select value={value} onChange={e => setter(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2" style={{ '--tw-ring-color': BRAND.primary }}>
                     <option value="all">{allLabel}</option>
                     {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
@@ -859,7 +889,15 @@ const [preHireResult, setPreHireResult] = useState([]);
           </div>
           <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
             <button onClick={() => setShowFilterPopup(false)} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50">Cancel</button>
-            <button onClick={() => { setShowFilterPopup(false); handleUploadClick(); }} className="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600">Proceed to Upload</button>
+            <button
+              onClick={() => { setShowFilterPopup(false); handleUploadClick(); }}
+              className="px-6 py-2 text-white rounded-lg font-semibold"
+              style={{ backgroundColor: BRAND.primary }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = BRAND.primaryHover}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = BRAND.primary}
+            >
+              Proceed to Upload
+            </button>
           </div>
         </div>
       </div>
@@ -869,10 +907,10 @@ const [preHireResult, setPreHireResult] = useState([]);
   const SampleFormatModal = () => {
     if (!showSampleFormat) return null;
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" style={{ fontFamily: "'Poppins', sans-serif" }}>
         <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-fadeIn">
           <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900">Sample File Format</h2>
+            <h2 className="text-2xl" style={{ fontFamily: "'Anton', sans-serif", color: BRAND.black, letterSpacing: '0.01em' }}>SAMPLE FILE FORMAT</h2>
             <button onClick={() => setShowSampleFormat(false)} className="text-gray-400 hover:text-gray-600">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -880,13 +918,21 @@ const [preHireResult, setPreHireResult] = useState([]);
             </button>
           </div>
           <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 overflow-x-auto mb-4">
+            <div className="border rounded-lg p-4 overflow-x-auto mb-4" style={{ backgroundColor: `${BRAND.primary}0d`, borderColor: `${BRAND.primary}40` }}>
               <pre className="text-xs font-mono whitespace-pre">{`Employee Name,E-mail Address,Address Line 1,Date of Birth,Hire Date,Organization,Division,Department,Job Class,Finance Score,Schedule Score,Work Life Balance Score,Family Score
 Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2020,Healthcare Services,Clinical Ops,Emergency,Nurse,6,8,6,9`}</pre>
             </div>
           </div>
           <div className="p-6 border-t border-gray-200 flex justify-end">
-            <button onClick={() => setShowSampleFormat(false)} className="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600">Got it</button>
+            <button
+              onClick={() => setShowSampleFormat(false)}
+              className="px-6 py-2 text-white rounded-lg font-semibold"
+              style={{ backgroundColor: BRAND.primary }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = BRAND.primaryHover}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = BRAND.primary}
+            >
+              Got it
+            </button>
           </div>
         </div>
       </div>
@@ -920,7 +966,7 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
     : 0;
 
     return (
-      <div className="mt-8">
+      <div className="mt-8" style={{ fontFamily: "'Poppins', sans-serif" }}>
         <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6">
           <div className="flex flex-row items-center gap-4 mb-6">
             <div
@@ -930,7 +976,9 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
               {getRiskLevel(totalAverage)}
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">Employee Sentiment Dashboard</h1>
+              <h1 className="text-2xl mb-1" style={{ fontFamily: "'Anton', sans-serif", color: BRAND.black, letterSpacing: '0.01em' }}>
+                EMPLOYEE SENTIMENT DASHBOARD
+              </h1>
               <p className="text-lg text-gray-700 mb-1">Overall Sentiment Risk Score</p>
               <p className="text-sm text-gray-500">Showing {dataToDisplay.length} {overrideResult ? 'candidates' : `of ${result.length} employees`}</p>
             </div>
@@ -951,7 +999,7 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
               ].map(({ label, value, setter, options, allLabel }) => (
                 <div key={label}>
                   <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
-                  <select value={value} onChange={e => setter(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                  <select value={value} onChange={e => setter(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2" style={{ '--tw-ring-color': BRAND.primary }}>
                     <option value="all">{allLabel}</option>
                     {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
@@ -959,7 +1007,7 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
               ))}
             </div>
             {[selectedDepartment, selectedJobClass, selectedHireDate, selectedTermDate, selectedOrganization, selectedDivision, selectedSalaryRange].some(v => v !== 'all') && (
-              <button onClick={() => { setSelectedDepartment('all'); setSelectedJobClass('all'); setSelectedHireDate('all'); setSelectedTermDate('all'); setSelectedOrganization('all'); setSelectedDivision('all'); setSelectedSalaryRange('all'); }} className="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium">
+              <button onClick={() => { setSelectedDepartment('all'); setSelectedJobClass('all'); setSelectedHireDate('all'); setSelectedTermDate('all'); setSelectedOrganization('all'); setSelectedDivision('all'); setSelectedSalaryRange('all'); }} className="mt-3 text-sm font-medium" style={{ color: BRAND.primary }}>
                 Clear all filters
               </button>
             )}
@@ -999,7 +1047,7 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
                     >
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-white flex-shrink-0">👤</div>
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: BRAND.navy }}>👤</div>
                           <div>
                             <div className="font-semibold text-gray-900 text-sm">{employee?.name || 'Unknown'}</div>
                             <div className="text-xs text-gray-500">ID: {employee?.employeeNumber || 'N/A'}</div>
@@ -1140,7 +1188,11 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
   // ─── Main render ─────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6" style={{ fontFamily: "'Poppins', sans-serif" }}>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
         {(isLoading || preHireLoading) && <LoadingOverlay />}
 
       <div className="max-w-4xl mx-auto">
@@ -1170,12 +1222,16 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
 
             {/* Logo (compact inside tab view) */}
             <div className="flex justify-center items-center text-center mb-4">
-              <img src="/logo.jpg" alt="Company Logo" className="h-16 sm:h-20 w-auto object-contain" />
+              <img
+                src="https://res.cloudinary.com/dbjwbveqn/image/upload/v1782471932/Apax_Group_Logo_1_qcrz5c.png"
+                alt="The Apax Group"
+                className="h-14 sm:h-16 w-auto object-contain"
+              />
             </div>
 
             {/* Credits badge */}
             <div className="flex justify-center mb-6">
-              <div className="rounded-full px-6 py-2 shadow-lg" style={{ background: 'linear-gradient(to right, #41d756, #2ebd47)' }}>
+              <div className="rounded-full px-6 py-2 shadow-lg" style={{ background: `linear-gradient(to right, ${BRAND.primary}, ${BRAND.navy})` }}>
                 <p className="text-white font-semibold text-sm sm:text-base">
                   Available Credits: {credits.toFixed(2)}
                 </p>
@@ -1189,30 +1245,34 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
             {activeTab === 'current' && (
               <>
                 <div className="mb-3 flex justify-end">
-                  <button onClick={() => setShowSampleFormat(true)} className="text-sm text-blue-600 hover:text-blue-700 underline">
+                  <button onClick={() => setShowSampleFormat(true)} className="text-sm underline" style={{ color: BRAND.primary }}>
                     View sample file format
                   </button>
                 </div>
 
                 <div
-                  className={`border-2 border-dashed rounded-xl p-4 sm:p-6 lg:p-8 text-center mb-4 sm:mb-6 transition-all duration-300 ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-blue-300 bg-white hover:border-blue-400 hover:bg-blue-50'}`}
+                  className={`border-2 border-dashed rounded-xl p-4 sm:p-6 lg:p-8 text-center mb-4 sm:mb-6 transition-all duration-300 ${isDragging ? 'bg-blue-50' : 'bg-white hover:bg-blue-50'}`}
+                  style={{ borderColor: isDragging ? BRAND.primary : `${BRAND.primary}66` }}
                 >
                   <input type="file" id="fileInput" onChange={handleFileChange} accept=".csv, .xlsx" className="hidden" />
                   <label htmlFor="fileInput" className="cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#3B82F6" className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill={BRAND.primary} className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16">
                       <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
                     </svg>
                     <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-2">
                       Drag and drop your CSV/Excel file here or click to browse
                     </p>
-                    {file && <p className="text-blue-600 font-medium text-sm sm:text-base mt-2">Selected file: {file.name}</p>}
+                    {file && <p className="font-medium text-sm sm:text-base mt-2" style={{ color: BRAND.primary }}>Selected file: {file.name}</p>}
                   </label>
                 </div>
 
                 <button
                   onClick={() => setShowFilterPopup(true)}
                   disabled={!file || isLoading}
-                  className={`w-full sm:w-auto mx-auto block px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${!file || isLoading ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 active:scale-95'}`}
+                  className={`w-full sm:w-auto mx-auto block px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${!file || isLoading ? 'bg-gray-400 text-white cursor-not-allowed' : 'text-white hover:scale-105 active:scale-95'}`}
+                  style={!file || isLoading ? {} : { backgroundColor: BRAND.primary }}
+                  onMouseEnter={(e) => { if (file && !isLoading) e.currentTarget.style.backgroundColor = BRAND.primaryHover; }}
+                  onMouseLeave={(e) => { if (file && !isLoading) e.currentTarget.style.backgroundColor = BRAND.primary; }}
                 >
                   {isLoading ? 'Processing...' : 'Upload & Analyze'}
                 </button>
@@ -1220,7 +1280,10 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
                 {result.length > 0 && (
                   <button
                     onClick={exportToCSV}
-                    className={`w-full sm:w-auto mx-auto block mt-3 px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${isReportLocked ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-purple-500 text-white hover:bg-purple-600 hover:scale-105 active:scale-95'}`}
+                    className={`w-full sm:w-auto mx-auto block mt-3 px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${isReportLocked ? 'bg-gray-400 text-white cursor-not-allowed' : 'text-white hover:scale-105 active:scale-95'}`}
+                    style={isReportLocked ? {} : { backgroundColor: BRAND.navy }}
+                    onMouseEnter={(e) => { if (!isReportLocked) e.currentTarget.style.backgroundColor = '#0d1b80'; }}
+                    onMouseLeave={(e) => { if (!isReportLocked) e.currentTarget.style.backgroundColor = BRAND.navy; }}
                   >
                     {isReportLocked ? '🔒 Export Locked' : 'Export CSV'}
                   </button>

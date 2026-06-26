@@ -85,41 +85,51 @@ toast.error("Error occured while trying to login",{containerId:"adminLogin"})
 
 
    <ToastContainer containerId={"adminLogin"}/>
-   
 
+   {/* Brand fonts: Anton (display) + Poppins (body) */}
+   <link
+     href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600&display=swap"
+     rel="stylesheet"
+   />
 
+   <div
+     className="min-h-screen flex items-center justify-center p-4 relative"
+     style={{ background: '#000000', fontFamily: "'Poppins', sans-serif" }}
+   >
 
-   <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
-    
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full filter blur-3xl opacity-20" style={{ background: '#233dff' }}></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full filter blur-3xl opacity-20" style={{ background: '#12229d' }}></div>
       </div>
 
       <div className="relative w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-8 py-10 text-center">
+        <div className="rounded-2xl shadow-2xl overflow-hidden" style={{ background: '#ffffff' }}>
+          <div className="px-8 py-10 text-center" style={{ background: '#12229d' }}>
           <div className="flex justify-center mb-6">
       <img
-        src="./logo.jpg"
-        alt="Company Logo"
-        className="w-24 h-24 rounded-full shadow-md object-cover ring-4 ring-white bg-white"
+        src="https://res.cloudinary.com/dbjwbveqn/image/upload/v1782471932/Apax_Group_Logo_1_qcrz5c.png"
+        alt="The Apax Group"
+        className="w-20 h-20 object-contain"
       />
     </div>
-            <h1 className="text-2xl font-bold text-white mb-2">Super Admin</h1>
-            <p className="text-blue-100 text-sm">Access to Admin Control Panel</p>
+            <h1
+              className="text-2xl mb-2"
+              style={{ fontFamily: "'Anton', sans-serif", color: '#ffffff', letterSpacing: '0.5px' }}
+            >
+              SUPER ADMIN
+            </h1>
+            <p className="text-sm" style={{ color: '#c7cdf5' }}>Access to admin control panel</p>
           </div>
 
           <div className="px-8 py-10">
             <div className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium mb-2" style={{ color: '#000000' }}>
                   Email Address
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
+                    <Mail className="h-5 w-5" style={{ color: '#9ca3af' }} />
                   </div>
                   <input
                     id="email"
@@ -127,24 +137,28 @@ toast.error("Error occured while trying to login",{containerId:"adminLogin"})
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`block w-full pl-10 pr-3 py-3 border ${
-                      errors.email ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
+                    className="block w-full pl-10 pr-3 py-3 rounded-lg focus:outline-none transition-colors"
+                    style={{
+                      border: `1px solid ${errors.email ? '#e24b4a' : '#d1d5db'}`,
+                      boxShadow: 'none',
+                    }}
+                    onFocus={(e) => { if (!errors.email) { e.target.style.borderColor = '#233dff'; e.target.style.boxShadow = '0 0 0 2px rgba(35,61,255,0.2)'; } }}
+                    onBlur={(e) => { e.target.style.boxShadow = 'none'; if (!errors.email) e.target.style.borderColor = '#d1d5db'; }}
                     placeholder="admin@example.com"
                   />
                 </div>
                 {errors.email && (
-                  <p className="mt-2 text-sm text-red-600">{errors.email}</p>
+                  <p className="mt-2 text-sm" style={{ color: '#a13333' }}>{errors.email}</p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="password" className="block text-sm font-medium mb-2" style={{ color: '#000000' }}>
                   Password
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
+                    <Lock className="h-5 w-5" style={{ color: '#9ca3af' }} />
                   </div>
                   <input
                     id="password"
@@ -153,9 +167,13 @@ toast.error("Error occured while trying to login",{containerId:"adminLogin"})
                     value={formData.password}
                     onChange={handleChange}
                     onKeyPress={(e) => e.key === 'Enter' && handleSubmit(e)}
-                    className={`block w-full pl-10 pr-10 py-3 border ${
-                      errors.password ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
+                    className="block w-full pl-10 pr-10 py-3 rounded-lg focus:outline-none transition-colors"
+                    style={{
+                      border: `1px solid ${errors.password ? '#e24b4a' : '#d1d5db'}`,
+                      boxShadow: 'none',
+                    }}
+                    onFocus={(e) => { if (!errors.password) { e.target.style.borderColor = '#233dff'; e.target.style.boxShadow = '0 0 0 2px rgba(35,61,255,0.2)'; } }}
+                    onBlur={(e) => { e.target.style.boxShadow = 'none'; if (!errors.password) e.target.style.borderColor = '#d1d5db'; }}
                     placeholder="Enter your password"
                   />
                   <button
@@ -164,14 +182,14 @@ toast.error("Error occured while trying to login",{containerId:"adminLogin"})
                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      <EyeOff className="h-5 w-5" style={{ color: '#9ca3af' }} />
                     ) : (
-                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      <Eye className="h-5 w-5" style={{ color: '#9ca3af' }} />
                     )}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+                  <p className="mt-2 text-sm" style={{ color: '#a13333' }}>{errors.password}</p>
                 )}
               </div>
 
@@ -179,11 +197,12 @@ toast.error("Error occured while trying to login",{containerId:"adminLogin"})
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 rounded"
+                    style={{ accentColor: '#233dff' }}
                   />
-                  <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                  <span className="ml-2 text-sm" style={{ color: '#5a5f6b' }}>Remember me</span>
                 </label>
-                <a href="/adminreset" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/adminreset" className="text-sm font-medium" style={{ color: '#233dff' }}>
                   Forgot password?
                 </a>
               </div>
@@ -191,15 +210,18 @@ toast.error("Error occured while trying to login",{containerId:"adminLogin"})
               <button
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className={`w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white py-3 rounded-lg font-semibold transition-all duration-200 ${
-                  isLoading
-                    ? 'opacity-70 cursor-not-allowed'
-                    : 'hover:from-blue-700 hover:to-blue-900 transform hover:scale-[1.02]'
-                }`}
+                className="w-full py-3 rounded-lg font-semibold transition-colors"
+                style={{
+                  background: isLoading ? '#7c8cf7' : '#233dff',
+                  color: '#ffffff',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                }}
+                onMouseEnter={(e) => { if (!isLoading) e.currentTarget.style.background = '#12229d'; }}
+                onMouseLeave={(e) => { if (!isLoading) e.currentTarget.style.background = '#233dff'; }}
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5" style={{ color: '#ffffff' }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -213,22 +235,23 @@ toast.error("Error occured while trying to login",{containerId:"adminLogin"})
 
             
 
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-600 text-center mb-4">
+            <div className="mt-6 pt-6" style={{ borderTop: '1px solid #e5e7eb' }}>
+              <p className="text-sm text-center mb-4" style={{ color: '#5a5f6b' }}>
                 Don't have an account?{' '}
-                <a href="/adminregister" className="text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/adminregister" className="font-medium" style={{ color: '#233dff' }}>
                   Register here
                 </a>
               </p>
-              <p className="text-xs text-gray-500 text-center">
-                🔒 This is a secure admin area. All activities are logged and monitored.
+              <p className="text-xs text-center flex items-center justify-center gap-1.5" style={{ color: '#9ca3af' }}>
+                <Shield className="w-3.5 h-3.5" />
+                This is a secure admin area. All activities are logged and monitored.
               </p>
             </div>
           </div>
         </div>
 
-        <p className="text-center text-white text-sm mt-6 opacity-75">
-          © 2025 Admin Panel. All rights reserved.
+        <p className="text-center text-sm mt-6 opacity-75" style={{ color: '#ffffff' }}>
+          © 2026 The Apax Group. All rights reserved.
         </p>
       </div>
     </div>

@@ -7,47 +7,69 @@ function PaymentPopup({ isOpen, onClose, onDownload }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
+      <div
+        className="rounded-2xl max-w-md w-full p-8 relative"
+        style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}
+      >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute top-4 right-4 transition-colors"
+          style={{ color: '#9ca3af' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#5a5f6b'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = '#9ca3af'; }}
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-8 h-8 text-blue-600" />
+          <div
+            className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ background: '#e6ebff' }}
+          >
+            <Lock className="w-7 h-7" style={{ color: '#233dff' }} />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Report Locked</h2>
-          <p className="text-gray-600 text-sm">
-            Your report has been processed successfully! To download it, please complete the payment. You will receive a passcode to unlock your report.
+          <h2
+            className="text-2xl mb-2"
+            style={{ fontFamily: "'Anton', sans-serif", color: '#000000', letterSpacing: '0.5px' }}
+          >
+            REPORT LOCKED
+          </h2>
+          <p className="text-sm" style={{ color: '#5a5f6b' }}>
+            Your report has been processed successfully! To download it, please complete the payment.
+            You will receive a passcode to unlock your report.
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 mb-6">
-          <div className="flex items-center justify-center mb-2">
-            <FileText className="w-6 h-6 text-blue-600 mr-2" />
-            <span className="text-lg font-semibold text-gray-700">Report Ready!</span>
+        <div
+          className="rounded-xl p-5 mb-6 text-center"
+          style={{ background: '#f5f6fa', border: '1px solid #e5e7eb' }}
+        >
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <FileText className="w-5 h-5" style={{ color: '#233dff' }} />
+            <span className="text-sm font-semibold" style={{ color: '#000000' }}>Report Ready</span>
           </div>
-          <p className="text-center text-sm text-gray-600">
-            Complete payment to receive your unlock passcode
-          </p>
+          <p className="text-xs" style={{ color: '#5a5f6b' }}>Complete payment to receive your unlock passcode</p>
         </div>
 
         <div className="space-y-3">
           <button
             onClick={onDownload}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
+            className="w-full py-3 rounded-xl text-sm font-semibold transition-all"
+            style={{ background: '#233dff', color: '#ffffff' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#12229d'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#233dff'; }}
           >
             Proceed to Payment
           </button>
           <button
             onClick={onClose}
-            className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+            className="w-full py-3 rounded-xl text-sm font-semibold transition-all"
+            style={{ background: '#f5f6fa', color: '#5a5f6b', border: '1px solid #e5e7eb' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#e5e7eb'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#f5f6fa'; }}
           >
             Close
           </button>
@@ -60,73 +82,97 @@ function PaymentPopup({ isOpen, onClose, onDownload }) {
 function PasscodePopup({ isOpen, onClose, onSubmit, error }) {
   const [passcode, setPasscode] = useState('');
 
-  const handleSubmit = () => {
-    onSubmit(passcode);
-  };
+  const handleSubmit = () => onSubmit(passcode);
+  const handleKeyPress = (e) => { if (e.key === 'Enter') handleSubmit(); };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSubmit();
-    }
+  const inputFocusStyle = (e) => {
+    e.target.style.borderColor = '#233dff';
+    e.target.style.boxShadow = '0 0 0 2px rgba(35,61,255,0.2)';
+  };
+  const inputBlurStyle = (e) => {
+    e.target.style.borderColor = '#d1d5db';
+    e.target.style.boxShadow = 'none';
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
+      <div
+        className="rounded-2xl max-w-md w-full p-8 relative"
+        style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}
+      >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute top-4 right-4 transition-colors"
+          style={{ color: '#9ca3af' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#5a5f6b'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = '#9ca3af'; }}
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-8 h-8 text-green-600" />
+          <div
+            className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ background: '#e3f3e9' }}
+          >
+            <Lock className="w-7 h-7" style={{ color: '#22c55e' }} />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Enter Passcode</h2>
-          <p className="text-gray-600 text-sm">
-            Please enter the passcode you received after payment to unlock and download your report.
+          <h2
+            className="text-2xl mb-2"
+            style={{ fontFamily: "'Anton', sans-serif", color: '#000000', letterSpacing: '0.5px' }}
+          >
+            ENTER PASSCODE
+          </h2>
+          <p className="text-sm" style={{ color: '#5a5f6b' }}>
+            Enter the passcode you received after payment to unlock and download your report.
           </p>
         </div>
 
-        <div>
-          <input
-            type="text"
-            value={passcode}
-            onChange={(e) => setPasscode(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Enter your passcode"
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-center text-lg font-mono mb-4"
-            autoFocus
-          />
+        <input
+          type="text"
+          value={passcode}
+          onChange={(e) => setPasscode(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Enter your passcode"
+          className="w-full px-4 py-3 rounded-lg text-center text-lg font-mono focus:outline-none mb-3"
+          style={{ border: '2px solid #d1d5db', fontFamily: 'monospace' }}
+          onFocus={inputFocusStyle}
+          onBlur={inputBlurStyle}
+          autoFocus
+        />
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
-              {error}
-            </div>
-          )}
-
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg"
-            >
-              Unlock Report
-            </button>
+        {error && (
+          <div
+            className="px-4 py-3 rounded-lg mb-4 text-sm"
+            style={{ background: '#fdeeee', border: '1px solid #f3c9c9', color: '#a13333' }}
+          >
+            {error}
           </div>
+        )}
+
+        <div className="space-y-3">
+          <button
+            onClick={handleSubmit}
+            className="w-full py-3 rounded-xl text-sm font-semibold transition-all"
+            style={{ background: '#233dff', color: '#ffffff' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#12229d'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#233dff'; }}
+          >
+            Unlock Report
+          </button>
+          <button
+            onClick={onClose}
+            className="w-full py-3 rounded-xl text-sm font-semibold transition-all"
+            style={{ background: '#f5f6fa', color: '#5a5f6b', border: '1px solid #e5e7eb' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#e5e7eb'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#f5f6fa'; }}
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </div>
@@ -150,18 +196,9 @@ function FilesPage() {
       setLoading(true);
       let token = localStorage.getItem('token');
       let response = await axios.get(`${BASE_URL}/get-files`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      
-      console.log("FETCH");
-      console.log(response.data);
-      
-      // Fix: response.data is an object with a 'files' property
       const filesArray = response.data.files || [];
-      
-      // Transform the API response to match the component's expected structure
       const transformedFiles = filesArray.map(file => ({
         id: file._id,
         fileName: file.file,
@@ -169,12 +206,10 @@ function FilesPage() {
         uploadDate: file.createdAt,
         passcode: file.passcode,
         paid: file.paid,
-        outputUrl: file.output
+        outputUrl: file.output,
       }));
-      
       setFiles(transformedFiles.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate)));
     } catch (e) {
-      console.error('Error fetching files:', e);
       setFiles([]);
     } finally {
       setLoading(false);
@@ -182,7 +217,6 @@ function FilesPage() {
   };
 
   const handleDownloadClick = async (file) => {
-    // Download the file directly from the output URL
     try {
       const link = document.createElement('a');
       link.href = file.outputUrl;
@@ -191,11 +225,8 @@ function FilesPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
-      alert(`Download started for ${file.fileName}`);
     } catch (error) {
       console.error('Download error:', error);
-      alert('Failed to download file. Please try again.');
     }
   };
 
@@ -206,12 +237,9 @@ function FilesPage() {
 
   const handlePasscodeSubmit = async (enteredPasscode) => {
     if (!selectedFile) return;
-
     if (enteredPasscode === selectedFile.passcode) {
       setPasscodeError('');
       setShowPasscodePopup(false);
-      
-      // Download the file from the output URL
       try {
         const link = document.createElement('a');
         link.href = selectedFile.outputUrl;
@@ -220,19 +248,9 @@ function FilesPage() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
-        alert(`Download started for ${selectedFile.fileName}`);
-        
-        // Optionally update the paid status on the backend
-        // await axios.post(`${BASE_URL}/mark-as-paid/${selectedFile.id}`, {}, {
-        //   headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        // });
-        
       } catch (error) {
         console.error('Download error:', error);
-        alert('Failed to download file. Please try again.');
       }
-      
       setSelectedFile(null);
     } else {
       setPasscodeError('Invalid passcode. Please try again.');
@@ -240,120 +258,168 @@ function FilesPage() {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric',
     });
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading files...</p>
+      <>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
+        <div
+          className="min-h-screen flex items-center justify-center"
+          style={{ background: '#f5f6fa', fontFamily: "'Poppins', sans-serif" }}
+        >
+          <div className="text-center">
+            <div
+              className="w-12 h-12 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-4"
+              style={{ borderColor: '#233dff', borderTopColor: 'transparent' }}
+            />
+            <p className="text-sm" style={{ color: '#5a5f6b' }}>Loading files...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className='flex justify-center items-center text-center'>
-  <img 
-    src="/logo.jpg" 
-    alt="Company Logo" 
-    className="h-20 sm:h-24 lg:h-32 w-auto object-contain"
-  />
-</div>
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Files</h1>
-          <p className="text-gray-600">Manage and download your uploaded files</p>
+    <>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600&display=swap"
+        rel="stylesheet"
+      />
+
+      <div
+        className="min-h-screen"
+        style={{ background: '#f5f6fa', fontFamily: "'Poppins', sans-serif" }}
+      >
+        {/* Top bar */}
+        <div style={{ background: '#ffffff', borderBottom: '1px solid #e5e7eb' }}>
+          <div className="max-w-5xl mx-auto px-6 py-4 flex items-center">
+            <img
+              src="https://res.cloudinary.com/dbjwbveqn/image/upload/v1782471932/Apax_Group_Logo_1_qcrz5c.png"
+              alt="The Apax Group"
+              style={{ height: '48px', width: 'auto', objectFit: 'contain' }}
+            />
+          </div>
         </div>
 
-        {files.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-            <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No files yet</h3>
-            <p className="text-gray-500">Upload your first file to get started</p>
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {files.map((file) => (
-              <div
-                key={file.id}
-                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-100"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-start space-x-4 flex-1">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <FileText className="w-6 h-6 text-blue-600" />
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2 truncate">
-                        {file.fileName}
-                      </h3>
-                      
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                        <div className="flex items-center">
-                          <User className="w-4 h-4 mr-1.5 text-gray-400" />
-                          <span className="truncate">{file.userEmail}</span>
-                        </div>
-                        
-                        <div className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-1.5 text-gray-400" />
-                          <span>{formatDate(file.uploadDate)}</span>
-                        </div>
+        <div className="max-w-5xl mx-auto px-6 py-10">
 
-                        {file.paid && (
-                          <div className="flex items-center">
-                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+          {/* Page heading */}
+          <div className="mb-8">
+            <h1
+              className="text-3xl mb-1"
+              style={{ fontFamily: "'Anton', sans-serif", color: '#000000', letterSpacing: '0.5px' }}
+            >
+              YOUR FILES
+            </h1>
+            <p style={{ color: '#5a5f6b', fontSize: '14px' }}>
+              Manage and download your processed reports
+            </p>
+          </div>
+
+          {/* Empty state */}
+          {files.length === 0 ? (
+            <div
+              className="rounded-xl p-16 text-center"
+              style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}
+            >
+              <FileText className="w-14 h-14 mx-auto mb-4" style={{ color: '#d1d5db' }} />
+              <p className="text-lg font-medium mb-1" style={{ color: '#5a5f6b' }}>No files yet</p>
+              <p className="text-sm" style={{ color: '#9ca3af' }}>Upload your first file to get started</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {files.map((file) => (
+                <div
+                  key={file.id}
+                  className="rounded-xl p-5 transition-all"
+                  style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#c7d0ff'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    {/* Icon + info */}
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div
+                        className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: '#e6ebff' }}
+                      >
+                        <FileText className="w-5 h-5" style={{ color: '#233dff' }} />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p
+                          className="text-sm font-semibold truncate mb-1.5"
+                          style={{ color: '#000000' }}
+                        >
+                          {file.fileName}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                          <span className="flex items-center gap-1 text-xs" style={{ color: '#5a5f6b' }}>
+                            <User className="w-3.5 h-3.5" style={{ color: '#9ca3af' }} />
+                            {file.userEmail}
+                          </span>
+                          <span className="flex items-center gap-1 text-xs" style={{ color: '#5a5f6b' }}>
+                            <Calendar className="w-3.5 h-3.5" style={{ color: '#9ca3af' }} />
+                            {formatDate(file.uploadDate)}
+                          </span>
+                          {file.paid && (
+                            <span
+                              className="text-xs font-medium px-2 py-0.5 rounded-full"
+                              style={{ background: '#e3f3e9', color: '#1e7a44' }}
+                            >
                               Paid
                             </span>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
+
+                    {/* Download button */}
+                    <button
+                      onClick={() => handleDownloadClick(file)}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex-shrink-0"
+                      style={{ background: '#233dff', color: '#ffffff' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#12229d'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = '#233dff'; }}
+                    >
+                      <Download className="w-4 h-4" />
+                      Download
+                    </button>
                   </div>
-                  
-                  <button
-                    onClick={() => handleDownloadClick(file)}
-                    className="ml-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm hover:shadow-md flex items-center space-x-2 flex-shrink-0"
-                  >
-                    <Download className="w-5 h-5" />
-                    <span>Download</span>
-                  </button>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+
+          {/* File count footer */}
+          {files.length > 0 && (
+            <p className="text-xs mt-4 text-right" style={{ color: '#9ca3af' }}>
+              {files.length} file{files.length !== 1 ? 's' : ''} total
+            </p>
+          )}
+        </div>
       </div>
 
       <PaymentPopup
         isOpen={showPaymentPopup}
-        onClose={() => {
-          setShowPaymentPopup(false);
-          setSelectedFile(null);
-        }}
+        onClose={() => { setShowPaymentPopup(false); setSelectedFile(null); }}
         onDownload={handlePaymentComplete}
       />
 
       <PasscodePopup
         isOpen={showPasscodePopup}
-        onClose={() => {
-          setShowPasscodePopup(false);
-          setSelectedFile(null);
-          setPasscodeError('');
-        }}
+        onClose={() => { setShowPasscodePopup(false); setSelectedFile(null); setPasscodeError(''); }}
         onSubmit={handlePasscodeSubmit}
         error={passcodeError}
       />
-    </div>
+    </>
   );
 }
 
