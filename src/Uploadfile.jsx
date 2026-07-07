@@ -605,6 +605,36 @@ function UploadFile() {
     }
   };
 
+
+  const exportPreHireToCSV = () => {
+    if (!preHireResult || preHireResult.length === 0) { alert('No data to export'); return; }
+
+    const headers = [
+      'Candidate Number', 'Candidate Name', 'Email', 'Phone', 'Department',
+      'Job Class', ...RISK_CATEGORIES.map(c => c.displayName),
+      'Final Score', 'Improvement Areas'
+    ];
+
+    const csvRows = preHireResult.map((emp, index) => [
+      emp.employeeNumber || (index + 1), emp.name || 'Unknown', emp.email || '',
+      emp.phone || '', emp.department || '', emp.jobClass || '',
+      ...RISK_CATEGORIES.map(({ apiKey }) => emp.categoryScores?.[apiKey] || 0),
+      emp.overallScore || emp.totalScore || 0,
+      emp.improvementArea || getImprovementArea(emp) || 'N/A',
+    ]);
+
+    const csvContent = [headers, ...csvRows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `prehire_candidate_report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  
   const exportToCSV = () => {
     if (isReportLocked) { setShowPasscodePopup(true); return; }
     if (!filteredResult || filteredResult.length === 0) { alert('No data to export'); return; }
@@ -835,7 +865,19 @@ function UploadFile() {
       >
         {preHireLoading ? 'Processing...' : 'Upload & Analyze'}
       </button>
+      {preHireResult.length > 0 && (
+        <button
+          onClick={exportPreHireToCSV}
+          className="w-full sm:w-auto mx-auto block mt-3 px-8 py-3 rounded-full font-semibold text-sm sm:text-base text-white hover:scale-105 active:scale-95 transition-all duration-300"
+          style={{ backgroundColor: BRAND.navy }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0d1b80'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = BRAND.navy}
+        >
+          Export CSV
+        </button>
+      )}
 
+  
     </div>
   );
 
