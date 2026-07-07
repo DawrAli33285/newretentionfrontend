@@ -14,8 +14,8 @@ function Sidebar() {
 
   const menuItems = [
     { id: 'upload', label: 'Upload', icon: Upload, path: '/upload' },
-    { id: 'files', label: 'Files', icon: FileText, path: '/files' },
-    { id: 'prehire files', label: 'Prehire files', icon: FileText, path: '/prehirefiles' },
+    { id: 'files', label: 'Results', icon: FileText, path: '/files' },
+    // { id: 'prehire files', label: 'Prehire files', icon: FileText, path: '/prehirefiles' },
   ];
 
   const handleNavigate = (path) => {

@@ -19,6 +19,17 @@ const BRAND = {
   primaryHover: '#1c30d6',
 };
 
+
+const RISK_CATEGORIES = [
+  { apiKey: 'finances', displayName: 'Finances' },
+  { apiKey: 'work life', displayName: 'Work Life' },
+  { apiKey: 'schedule', displayName: 'Schedule' },
+  { apiKey: 'family', displayName: 'Family' },
+  { apiKey: 'job satisfaction', displayName: 'Job Satisfaction' },
+  { apiKey: 'general', displayName: 'General' },
+];
+
+
 function UploadFile() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState([]);
@@ -394,23 +405,17 @@ function UploadFile() {
 
   const calculateCategoryAverages = () => {
     if (!filteredResult || filteredResult.length === 0) return [];
-    const categories = [
-      { apiKey: 'finances', displayName: 'Finances' },
-      { apiKey: 'work life', displayName: 'Work Life' },
-      { apiKey: 'schedule', displayName: 'Schedule' },
-      { apiKey: 'family', displayName: 'Family' },
-    ];
     const totals = {}; const counts = {};
-    categories.forEach(({ displayName }) => { totals[displayName] = 0; counts[displayName] = 0; });
+    RISK_CATEGORIES.forEach(({ displayName }) => { totals[displayName] = 0; counts[displayName] = 0; });
     filteredResult.forEach(employee => {
       if (employee.categoryScores) {
-        categories.forEach(({ apiKey, displayName }) => {
+        RISK_CATEGORIES.forEach(({ apiKey, displayName }) => {
           totals[displayName] += employee.categoryScores[apiKey] || 0;
           counts[displayName] += 1;
         });
       }
     });
-    return categories.map(({ displayName }) => ({
+    return RISK_CATEGORIES.map(({ displayName }) => ({
       name: displayName,
       score: parseFloat((counts[displayName] > 0 ? totals[displayName] / counts[displayName] : 0).toFixed(1)),
     }));
@@ -558,14 +563,8 @@ function UploadFile() {
 
   const getTopCategory = (employee) => {
     if (!employee || !employee.categoryScores) return 'No categories';
-    const categories = [
-      { apiKey: 'finances', displayName: 'Finances' },
-      { apiKey: 'work life', displayName: 'Work Life' },
-      { apiKey: 'schedule', displayName: 'Schedule' },
-      { apiKey: 'family', displayName: 'Family' },
-    ];
     let minScore = Infinity; let topCategory = 'No categories';
-    categories.forEach(({ apiKey, displayName }) => {
+    RISK_CATEGORIES.forEach(({ apiKey, displayName }) => {
       const score = employee.categoryScores[apiKey] || 0;
       if (score < minScore) { minScore = score; topCategory = displayName; }
     });
@@ -592,16 +591,9 @@ function UploadFile() {
 
   const getImprovementArea = (employee) => {
     if (!employee || !employee.categoryScores) return 'N/A';
-    const categories = [
-      { apiKey: 'finances', displayName: 'Finances' },
-      { apiKey: 'work life', displayName: 'Work Life' },
-      { apiKey: 'schedule', displayName: 'Schedule' },
-      { apiKey: 'family', displayName: 'Family' },
-    ];
-    const areas = categories.filter(({ apiKey }) => (employee.categoryScores[apiKey] || 0) >= 5).map(({ displayName }) => displayName);
+    const areas = RISK_CATEGORIES.filter(({ apiKey }) => (employee.categoryScores[apiKey] || 0) >= 5).map(({ displayName }) => displayName);
     return areas.length > 0 ? areas.join(', ') : 'None';
   };
-
   const handlePasscodeSubmit = (passcode) => {
     if (passcode === correctPasscode) {
       setPasscodeError('');
@@ -617,13 +609,12 @@ function UploadFile() {
     if (isReportLocked) { setShowPasscodePopup(true); return; }
     if (!filteredResult || filteredResult.length === 0) { alert('No data to export'); return; }
 
-    const headers = ['Employee Number','Employee Name (Last Suffix, First MI)','Address Line 1 + Address Line 2','City, State Zip Code (Formatted)','E-mail Address','Alternate Email','Home Phone (Formatted)','Organization','Division','Department','Job Class','Hire Date','Term Date','Salary Range','Finances','Work Life','Schedule','Family','Final Score','Improvement Areas'];
+    const headers = ['Employee Number','Employee Name (Last Suffix, First MI)','Address Line 1 + Address Line 2','City, State Zip Code (Formatted)','E-mail Address','Alternate Email','Home Phone (Formatted)','Organization','Division','Department','Job Class','Hire Date','Term Date','Salary Range', ...RISK_CATEGORIES.map(c => c.displayName),'Final Score','Improvement Areas'];
     const csvRows = filteredResult.map((emp, index) => [
       emp.employeeNumber || (3321 + index), emp.name || 'Unknown', emp.address || '', emp.cityStateZip || '',
       emp.email || '', emp.alternateEmail || '', emp.phone || '', emp.organization || '', emp.division || '',
       emp.department || '', emp.jobClass || '', emp.hireDate || '', emp.termDate || '', emp.salaryRange || '',
-      emp.categoryScores?.['finances'] || 0, emp.categoryScores?.['work life'] || 0,
-      emp.categoryScores?.['schedule'] || 0, emp.categoryScores?.['family'] || 0,
+      ...RISK_CATEGORIES.map(({ apiKey }) => emp.categoryScores?.[apiKey] || 0),
       emp.overallScore || emp.totalScore || 0, emp.improvementArea || getImprovementArea(emp) || 'N/A',
     ]);
 
@@ -1116,12 +1107,12 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
                           <div className="border-t border-gray-200 pt-4 mt-4">
                             <p className="text-sm font-semibold text-gray-700 mb-3">Category Scores</p>
                             <div className="space-y-3">
-                              {['finances', 'work life', 'schedule', 'family'].map(cat => {
-                                const score = employee?.categoryScores?.[cat] || 0;
+                              {RISK_CATEGORIES.map(({ apiKey, displayName }) => {
+                                const score = employee?.categoryScores?.[apiKey] || 0;
                                 return (
-                                  <div key={cat}>
+                                  <div key={apiKey}>
                                     <div className="flex justify-between text-xs mb-1">
-                                      <span className="text-gray-600">{cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+                                      <span className="text-gray-600">{displayName}</span>
                                       <span className={`font-bold ${getCategoryRiskColor(score)}`}>{getCategoryRiskLevel(score)}</span>
                                     </div>
                                     <div className="w-full bg-gray-200 rounded-full h-2">
