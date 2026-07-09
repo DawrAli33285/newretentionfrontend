@@ -20,6 +20,43 @@ const BRAND = {
 };
 
 
+
+const ResultsLegend = () => (
+  <div className="mb-6 bg-blue-50 border border-blue-100 rounded-xl p-4 sm:p-5" style={{ fontFamily: "'Poppins', sans-serif" }}>
+    <h3 className="text-sm font-semibold text-gray-800 mb-3">Understanding This Report</h3>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <div>
+        <p className="font-semibold text-gray-700 mb-1">Retention Likelihood</p>
+        <p className="text-gray-600 text-xs leading-relaxed">
+          Predicts whether this person is likely to stay or leave based on their score.
+          <span className="block mt-1"><span className="font-medium">Promoter</span> = likely to stay · <span className="font-medium">Neutral</span> = uncertain · <span className="font-medium">Detractor</span> = at risk of leaving</span>
+        </p>
+      </div>
+      <div>
+        <p className="font-semibold text-gray-700 mb-1">Retention Delta</p>
+        <p className="text-gray-600 text-xs leading-relaxed">
+          The estimated percentage change in retention likelihood compared to baseline. A positive number (e.g. +20%) means improved retention odds; negative means increased flight risk.
+        </p>
+      </div>
+      <div>
+        <p className="font-semibold text-gray-700 mb-1">Right Fit</p>
+        <p className="text-gray-600 text-xs leading-relaxed">
+          Indicates whether the candidate/employee's profile aligns well with the role.
+          <span className="block mt-1"><span className="font-medium" style={{color:'#41d756'}}>✓ Yes</span> = good fit · <span className="font-medium" style={{color:'#fb0000'}}>✗ No</span> = potential mismatch</span>
+        </p>
+      </div>
+      <div>
+        <p className="font-semibold text-gray-700 mb-1">Domains</p>
+        <p className="text-gray-600 text-xs leading-relaxed">
+          Risk category tags (Finances, Work Life, Schedule, Family, Job Satisfaction, General). Color shows severity: <span style={{color:'#41d756', fontWeight:600}}>green</span> = low risk, <span style={{color:'#fdc002', fontWeight:600}}>gold</span> = medium risk, <span style={{color:'#fb0000', fontWeight:600}}>red</span> = high risk.
+        </p>
+      </div>
+    </div>
+    <p className="text-xs text-gray-500 mt-3">Click any row to see the full scoring breakdown, including Age, Distance, Tenure, and category-level detail.</p>
+  </div>
+);
+
+
 const RISK_CATEGORIES = [
   { apiKey: 'finances', displayName: 'Finances' },
   { apiKey: 'work life', displayName: 'Work Life' },
@@ -1046,6 +1083,8 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
             )}
           </div>
 
+          <ResultsLegend />
+          
           {isReportLocked && (
             <div className="mb-6 rounded-lg p-4 flex items-center gap-3" style={{ backgroundColor: '#fef3e2', border: '2px solid #fdc002' }}>
               <svg className="w-6 h-6 flex-shrink-0" style={{ color: '#fdc002' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1168,7 +1207,11 @@ Abernathy, Rita K.,rabernathy@company.org,9790 North 100 West,01/15/1985,03/20/2
 
                           <div className="border-t border-gray-200 pt-4 mt-4">
                             <p className="text-sm font-semibold text-gray-700 mb-3">Scoring Breakdown</p>
+                            <p className="text-xs text-gray-500 mb-3">
+                              Points contributed by each factor toward the total risk score. Positive (green) points reduce risk; negative (red) points increase it.
+                            </p>
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+
   {[
     { label: 'Age', value: employee?.agePoints ?? 0 },
     { label: 'Distance', value: employee?.distancePoints ?? 0 },
